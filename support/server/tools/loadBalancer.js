@@ -13,7 +13,7 @@ var ServerFeatures = require("./serverFeatures.js");
 
 global.configuration = {
     "port": 3001,            
-    "loadBalancerKey" : "$cormR0ck$"
+    "loadBalancerKey" : "***REMOVED***"
 }
 
 app.use(express.methodOverride());
