@@ -90,6 +90,14 @@ define(function() {
                             );
                             (function(i1, j1) {
 
+                                $("#asset" + ToSafeID(i1) + ToSafeID(j1)).on('click',function(evt)
+                                {
+
+                                    
+                                    EntityLibrary.create(libs[i1].library[j1]);
+
+                                });
+
                                 $("#asset" + ToSafeID(i1) + ToSafeID(j1)).on('dragstart', function(evt) {
 
 
@@ -327,7 +335,7 @@ define(function() {
         this.create = function(data, evt) {
             //if its a 3d file or a node prototype
             if (data.type == 'asset') {
-                var pos = _Editor.GetInsertPoint(evt.originalEvent);
+                var pos = _Editor.GetInsertPoint(evt ? evt.originalEvent : null);
                 if(data.snap)
                 {
                    pos[0] = _Editor.SnapTo(pos[0],data.snap); 
