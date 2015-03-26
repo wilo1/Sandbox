@@ -1418,8 +1418,8 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
 
                     t = $('#toolbar').offset().top + $('#toolbar').height() + 10;
                     l = 10;
-                    w = ww / 3;
-                    h = wh / 3;
+                    w = parseInt($('#index-vwf').attr('width') / 3);
+                    h = parseInt($('#index-vwf').attr('height') / 3);
 
 
                     renderer.setViewport(0, 0, w, w);
@@ -1445,8 +1445,8 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
 
                     self.cameraID = camback;
                     _Editor.showMoveGizmo();
-                    _dRenderer.setViewport(0, 0, $('#index-vwf').attr('width'), $('#index-vwf').attr('height'));
-                    _dRenderer.setScissor(0, 0, $('#index-vwf').attr('width'), $('#index-vwf').attr('height'));
+                    _dRenderer.setViewport(0, 0, parseInt($('#index-vwf').attr('width')), parseInt($('#index-vwf').attr('height')));
+                    _dRenderer.setScissor(0, 0, parseInt($('#index-vwf').attr('width')), parseInt($('#index-vwf').attr('height')));
                     renderer.enableScissorTest(false);
                     selcam.aspect = oldaspect;
                     selcam.updateProjectionMatrix();

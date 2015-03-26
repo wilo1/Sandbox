@@ -1935,3 +1935,8 @@ margin: 2px;
 ul li a .glyphicon {
   margin-right: 1em;
 }
+
+.ui-slider
+{
+  clear:both;
+}

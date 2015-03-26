@@ -128,7 +128,7 @@ function LaunchAvatar(username_in,password_in,server_in,port_in,session_in)
 		setTimeout(startMouseTest,20);
 	}
     function startBandwidthTest() {
-    	return;
+    	
         async.forever(function(cb) {
 
             http.request('http://' + server + ':' + port + '/adl/sandbox/vwf.js', function(response) {
