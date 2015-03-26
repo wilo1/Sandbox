@@ -223,7 +223,8 @@ async.series([
         //   var proxyServers = {};
         //   for (var i = 1; i < count + 1; i++) {
         var proxy = httpProxy.createProxyServer({
-            ws: true
+            ws: true,
+            agent: new http.Agent()
         });
         proxy.on('error', function(e,req,res) {
             console.log(JSON.stringify(e));
