@@ -469,7 +469,7 @@ face.prototype.intersect1 = function(p, d, opts) {
         if (MATH.dotVec3(d, norm) > 0)
             norm = Vec3.scale(norm, -1, []);
 
-        var ret = allocate_FaceIntersect(point, norm, face);
+        var ret = allocate_FaceIntersect(point, norm, this);
 
 
 
