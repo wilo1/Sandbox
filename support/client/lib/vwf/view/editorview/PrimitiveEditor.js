@@ -606,7 +606,7 @@ define(function() {
                     var val = vwf.getProperty(node.id, editordata[i].property);
                     if (val == undefined) val = 0;
                     $('#' + nodeid + i).slider({
-                        step: parseFloat(editordata[i].step),
+                        step: parseFloat(editordata[i].step) || 1,
                         min: parseFloat(editordata[i].min),
                         max: parseFloat(editordata[i].max),
                         slide: this.primPropertySlide,
@@ -689,7 +689,7 @@ define(function() {
                     var val = [minval || editordata[i].min, maxval || editordata[i].max]
                     $('#' + nodeid + i).slider({
                         range: true,
-                        step: parseFloat(editordata[i].step),
+                        step: parseFloat(editordata[i].step || 1),
                         min: parseFloat(editordata[i].min),
                         max: parseFloat(editordata[i].max),
                         values: val,
@@ -710,6 +710,7 @@ define(function() {
                     });
                 }
                 if (editordata[i].type == 'rangevector') {
+                    if(!editordata[i].step) editordata[i].step = 1;
                     var vecvalchanged = function(e) {
                         var propname = $(this).attr('propname');
                         var component = $(this).attr('component');
