@@ -182,6 +182,29 @@ define(function ()
 			if (typeof id === "string") return this.DeleteIDs(this.fixExtendsAndArrays(this.GetNode(id)),true);
 			else return this.DeleteIDs(this.fixExtendsAndArrays(id),true);
 		}
+		this.getSaveStateData = function()
+		{
+			var scene = _Editor.getNode(vwf.application());
+			var nodes = [];
+			for (var i in scene.children)
+			{
+				var node = this.getSaveNodePrototype(scene.children[i].id);
+				if (node.extends != "character.vwf" && node.extends != 'http://vwf.example.com/camera.vwf') nodes.push(node);
+				if (node.extends == "character.vwf" && node.properties.ownerClientID == null) nodes.push(node);
+			}
+			
+			//note: we only save the scene properteis, so that users cannot overwrite parts of the 
+			//application that  control the enviornment or camera
+			var sceneprops = vwf.getProperties('index-vwf');
+			//also just a design choice here, so that wehn we update the scene properties, old states will show the updates
+			delete sceneprops.EditorData;
+			delete sceneprops.playBackup;
+			delete sceneprops.clients;
+			nodes.push(sceneprops);
+			return nodes;
+			
+
+		}
 		this.saveToServer = function (sync)
 		{
 
@@ -199,7 +222,7 @@ define(function ()
 				return;
 			}
 			
-			var scene = _Editor.getNode('index-vwf');
+			
 
 			//if the editor is playing the scene, save the backup from before play was hit
 			if(vwf.getProperty(vwf.application(),'playMode') == 'play')
@@ -208,27 +231,8 @@ define(function ()
 				return;
 			}
 			
-			var nodes = [];
-			for (var i in scene.children)
-			{
-				var node = this.getSaveNodePrototype(scene.children[i].id);
-				if (node.extends != "character.vwf" && node.extends != 'http://vwf.example.com/camera.vwf') nodes.push(node);
-				if (node.extends == "character.vwf" && node.properties.ownerClientID == null) nodes.push(node);
-			}
 			
-			//note: we only save the scene properteis, so that users cannot overwrite parts of the 
-			//application that  control the enviornment or camera
-			var sceneprops = vwf.getProperties('index-vwf');
-			//also just a design choice here, so that wehn we update the scene properties, old states will show the updates
-			delete sceneprops.EditorData;
-			delete sceneprops.playBackup;
-			delete sceneprops.clients;
-			nodes.push(sceneprops);
-			var SID = this.getCurrentSession();
-			var UID = _UserManager.GetCurrentUserName();
-			if (!UID) return;
-
-			var data = JSON.stringify(nodes);
+			var data = JSON.stringify(this.getSaveStateData());
 			vwf.saveState(data);
 			$('#SceneSaved').text(new Date());
 		}

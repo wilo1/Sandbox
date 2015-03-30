@@ -827,6 +827,15 @@ define({
                 p.prompt(data);
             }
         })
+        $('#ToolsShowVWFSaveData').click(function()
+        {
+            p = require("vwf/view/editorview/JSONPrompt");
+            var data = _DataManager.getSaveStateData();
+            p.prompt(data);
+            
+        });
+
+        
 
 
 
