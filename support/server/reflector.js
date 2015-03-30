@@ -514,6 +514,7 @@ function runningInstance(id)
         var self = this;
         if(self.timerID) return; //already started
         self.accum = 0;
+       
         var timer = function()
         {
             var now = process.hrtime();
@@ -522,6 +523,7 @@ function runningInstance(id)
             if (!self.lasttime) self.lasttime = now;
             var timedelta = (now - self.lasttime) || 0;
             self.accum += timedelta;
+
             while (self.accum > .05)
             {
                 self.resyncCounter++;
@@ -541,13 +543,16 @@ function runningInstance(id)
                 }
                 self.accum -= .05;
                 self.time += .05;
+                self.ticknum ++;
                 var tickmessage = 
                 {
                     "action": "tick",
                     "parameters": [],
                     "time": self.time,
                     "origin": "reflector",
+                    
                 };
+
                 self.messageClients(tickmessage);
             }
             self.lasttime = now;
@@ -781,7 +786,7 @@ function ClientConnected(socket, namespace, instancedata)
         {
             logger.info('load from client', 2);
             var firstclient = loadClient;
-            socket.pending = true;
+          //  socket.pending = true;
             thisInstance.getStateTime = thisInstance.time;
             loadClient.emit('message', messageCompress.pack(JSON.stringify(
             {
@@ -796,8 +801,10 @@ function ClientConnected(socket, namespace, instancedata)
             {
                 "action": "getState",
                 "respond": true,
-                "time": thisInstance.time
+                "time": thisInstance.time,
+                "origin":"reflector"
             })));
+            loadClient.pending = true;
             socket.emit('message', messageCompress.pack(JSON.stringify(
             {
                 "action": "status",
@@ -1101,7 +1108,7 @@ function ClientConnected(socket, namespace, instancedata)
                 {
                     var client = thisInstance.clients[i];
                     //if the message was get state, then fire all the pending messages after firing the setState
-                    if (message.action == "getState")
+                    if (message.action == "getState" &&  client.pending == true)
                     {
                         thisInstance.Log('Got State', 2);
                         if (thisInstance.requestTimer)
