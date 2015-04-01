@@ -1142,7 +1142,7 @@ function ClientConnected(socket, namespace, instancedata)
                     {
                         //here we deal with continual resycn messages
                         var node = message.result.node;
-                        if (!global.configuration.disableResync && node)
+                        if (false && !global.configuration.disableResync && node)
                         {
                             if (message.time >= thisInstance.time)
                             {

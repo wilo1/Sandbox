@@ -1568,9 +1568,7 @@ define(["module", "vwf/model", "vwf/configuration"], function(module, model, con
             {
                     if(this.isJoined(nodeID) || this.allNodes[nodeID] instanceof phyJoint)
                     {
-                        var props = args;
-                        delete props.transform;
-                        return props;
+                        return [];
                     }
                     return args;
             }
