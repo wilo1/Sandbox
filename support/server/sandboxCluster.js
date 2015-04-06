@@ -297,7 +297,7 @@ async.series([
                 requrl = url.parse(requrl);
 
                 delete requrl.host;
-                requrl.port = sslPort;
+                requrl.port = global.configuration.sslPort;
                 requrl.protocol = "https:";
                 requrl = url.format(requrl);
                 res.writeHead(302, {
