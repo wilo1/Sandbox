@@ -32,7 +32,7 @@ function MaterialCache() {
             var newmat = this.getMaterialbyDef(oldmat && oldmat.refCount == 1 ? oldmat : null, def);
 
             //test for shader compile fail, and set in simple mode if failed
-            {
+            if(newmat){
                 _dRenderer.initMaterial( newmat, _dScene.__lights, _dScene.fog, mesh );
                 var status = _dRenderer.context.getProgramParameter( newmat.program.program, _dRenderer.context.LINK_STATUS );
 
