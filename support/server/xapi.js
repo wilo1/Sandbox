@@ -47,41 +47,44 @@ function sendStatement(userId, verb, worldId, worldName, worldDescription, other
 			else
 				stmt.object = new XAPIStatement.Activity('http://vwf.adlnet.gov/xapi/virtual_world_sandbox', 'Virtual World Sandbox');
 			stmt.addParentActivity('http://vwf.adlnet.gov/xapi/virtual_world_sandbox');
-			if (otherContext)
+			require('./DAL').DAL.getInstance(otherContext, function(otherContextdata)
 			{
-				stmt.addOtherContextActivity(new World(otherContext));
-				stmt.addGroupingActivity(
+				if (otherContext,otherContextdata)
 				{
-					"id": "http://vwf.adlnet.gov/xapi/profile",
-					"objectType": "Activity"
-				});
-			}
-			stmt.context.platform = 'virtual world';
-			request.post(
-				{
-					'url': liburl.resolve(global.configuration.lrsEndpoint, 'statements'),
-					'headers':
+					stmt.addOtherContextActivity(new World(otherContext,otherContextdata.title,otherContextdata.description));
+					stmt.addGroupingActivity(
 					{
-						'X-Experience-API-Version': '1.0.1',
-						'Authorization': auth
+						"id": "http://vwf.adlnet.gov/xapi/profile",
+						"objectType": "Activity"
+					});
+				}
+				stmt.context.platform = 'virtual world';
+				request.post(
+					{
+						'url': liburl.resolve(global.configuration.lrsEndpoint, 'statements'),
+						'headers':
+						{
+							'X-Experience-API-Version': '1.0.1',
+							'Authorization': auth
+						},
+						'json': stmt
 					},
-					'json': stmt
-				},
-				function(err, res, body)
-				{
-					if (err)
+					function(err, res, body)
 					{
-						global.error(err);
-					}
-					else if (res.statusCode === 200)
-					{
-						logger.warn('Action posted:', stmt.toString());
-					}
-					else
-					{
-						logger.warn('Statement problem:', body);
-					}
-				});
+						if (err)
+						{
+							global.error(err);
+						}
+						else if (res.statusCode === 200)
+						{
+							logger.warn('Action posted:', stmt.toString());
+						}
+						else
+						{
+							logger.warn('Statement problem:', body);
+						}
+					});
+			})
 		}
 		catch (e)
 		{

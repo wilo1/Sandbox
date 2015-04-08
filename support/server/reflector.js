@@ -340,7 +340,7 @@ function WebSocketConnection(socket, _namespace)
         })
         DAL.getInstance(namespace, function(instancedata)
         {
-            xapi.sendStatement(socket.loginData.UID, xapi.verbs.joined, namespace,null,null,namespace);
+            xapi.sendStatement(socket.loginData.UID, xapi.verbs.joined, namespace,instancedata.title,instancedata.description,namespace);
             if (!instancedata)
             {
                 require('./examples.js')
@@ -1234,8 +1234,11 @@ function ClientConnected(socket, namespace, instancedata)
             logger.info(Object.keys(thisInstance.clients));
             thisInstance.removeClient(socket);
             logger.info(thisInstance.clientCount());
-
-            xapi.sendStatement(socket.loginData.UID, xapi.verbs.left, thisInstance.id,null,null,thisInstance.id);
+            DAL.getInstance(thisInstance.id,function(instancedata)
+            {
+                xapi.sendStatement(socket.loginData.UID, xapi.verbs.left, thisInstance.id,instancedata.title,instancedata.description,thisInstance.id);    
+            });
+            
 
             if (thisInstance.clientCount() == 0)
                 {
