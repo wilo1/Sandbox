@@ -115,12 +115,12 @@ function World(id, name, description)
 	{
 		this.definition.type = 'http://vwf.adlnet.gov/xapi/world';
 		this.definition.name = {
-			"en-US": "Sandbox World"
+			"en-US": name
 		};
 		this.definition.description = {
-			"en-US": "A world in the VWF Sandbox"
+			"en-US": description
 		};
-		this.definition.moreInfo = 'http://vwf.adlnet.gov' + global.appPath + 'world/' + id;
+		this.definition.moreInfo = 'http://sandbox.adlnet.gov' + global.appPath + '/world/' + id;
 	}
 }
 World.prototype = new XAPIStatement.Activity;
