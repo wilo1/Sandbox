@@ -340,7 +340,7 @@ function WebSocketConnection(socket, _namespace)
         })
         DAL.getInstance(namespace, function(instancedata)
         {
-            xapi.sendStatement(socket.loginData.UID, xapi.verbs.joined, namespace);
+            xapi.sendStatement(socket.loginData.UID, xapi.verbs.joined, namespace,null,null,namespace);
             if (!instancedata)
             {
                 require('./examples.js')
@@ -1087,7 +1087,7 @@ function ClientConnected(socket, namespace, instancedata)
                         //we do need to keep some state data, and note that the node is gone
                         thisInstance.state.deleteNode(message.node)
                         thisInstance.Log("deleted " + node.id, 2);
-                        xapi.sendStatement(socket.loginData.UID, xapi.verbs.derezzed, message.node, node.properties ? node.properties.DisplayName : "");
+                        xapi.sendStatement(socket.loginData.UID, xapi.verbs.derezzed, message.node, node.properties ? node.properties.DisplayName : "",null,thisInstance.id);
                     }
                     else
                     {
@@ -1124,7 +1124,7 @@ function ClientConnected(socket, namespace, instancedata)
                             childComponent.properties = {};
                         fixIDs(node.children[childID]);
                         thisInstance.Log("created " + childID, 2);
-                        xapi.sendStatement(socket.loginData.UID, xapi.verbs.rezzed, childID,childComponent.properties.DisplayName);
+                        xapi.sendStatement(socket.loginData.UID, xapi.verbs.rezzed, childID,childComponent.properties.DisplayName,null,thisInstance.id);
                     }
                     else
                     {
@@ -1235,7 +1235,7 @@ function ClientConnected(socket, namespace, instancedata)
             thisInstance.removeClient(socket);
             logger.info(thisInstance.clientCount());
 
-            xapi.sendStatement(socket.loginData.UID, xapi.verbs.left, thisInstance.id);
+            xapi.sendStatement(socket.loginData.UID, xapi.verbs.left, thisInstance.id,null,null,thisInstance.id);
 
             if (thisInstance.clientCount() == 0)
                 {

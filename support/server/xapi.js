@@ -48,7 +48,14 @@ function sendStatement(userId, verb, worldId, worldName, worldDescription, other
 				stmt.object = new XAPIStatement.Activity('http://vwf.adlnet.gov/xapi/virtual_world_sandbox', 'Virtual World Sandbox');
 			stmt.addParentActivity('http://vwf.adlnet.gov/xapi/virtual_world_sandbox');
 			if (otherContext)
+			{
 				stmt.addOtherContextActivity(new World(otherContext));
+				stmt.addGroupingActivity(
+				{
+					"id": "http://vwf.adlnet.gov/xapi/profile",
+					"objectType": "Activity"
+				});
+			}
 			stmt.context.platform = 'virtual world';
 			request.post(
 				{
@@ -103,9 +110,16 @@ function World(id, name, description)
 	id = match[1];
 	var worldActivityId = 'http://vwf.adlnet.gov/xapi/' + id;
 	XAPIStatement.Activity.call(this, worldActivityId, name, description);
+	this.definition = {};
 	if (this.definition)
 	{
 		this.definition.type = 'http://vwf.adlnet.gov/xapi/world';
+		this.definition.name = {
+			"en-US": "Sandbox World"
+		};
+		this.definition.description = {
+			"en-US": "A world in the VWF Sandbox"
+		};
 		this.definition.moreInfo = 'http://vwf.adlnet.gov' + global.appPath + 'world/' + id;
 	}
 }
