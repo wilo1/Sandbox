@@ -34,8 +34,13 @@ function sendStatement(userId, verb, worldId, worldName, worldDescription, other
 						//how are we getting here? This seems to be crashing occasionally
 						require('./DAL').DAL.getInstance(dalId, function(state)
 						{
-							if (!state)
-								return;
+							if(!state)
+							{
+								state = {};
+								state.title = worldId;
+								state.description = '';
+
+							}
 							sendStatement(userId, verb, worldId, state.title, state.description);
 						});
 						return;
@@ -49,6 +54,13 @@ function sendStatement(userId, verb, worldId, worldName, worldDescription, other
 			stmt.addParentActivity('http://vwf.adlnet.gov/xapi/virtual_world_sandbox');
 			require('./DAL').DAL.getInstance(otherContext, function(otherContextdata)
 			{
+				if(!otherContextdata)
+				{
+					otherContextdata = {};
+					otherContextdata.title = otherContext;
+					otherContextdata.description = '';
+
+				}
 				if (otherContext,otherContextdata)
 				{
 					stmt.addOtherContextActivity(new World(otherContext,otherContextdata.title,otherContextdata.description));
