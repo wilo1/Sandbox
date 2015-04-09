@@ -1501,6 +1501,7 @@ function serve(request, response)
 					{
 						_3DR_proxy.proxyTexture(URL, response);
 					}
+					break;
 				case "apppath":
 					{
 						respond(response, 200, global.appPath);
