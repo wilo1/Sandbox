@@ -1447,7 +1447,10 @@ function serve(request, response)
 
 		//rewrite the SID so the phycial path is always /adl/sandbox, even if clientside code computes a different instanceiID
 		if(URL.query.SID)
+		{
 			 URL.query.SID = URL.query.SID.replace(global.appPath,'/adl/sandbox')
+			 URL.query.SID = URL.query.SID.replace(global.appPath.replace(/\//g,'_'),'/adl/sandbox')
+		}
 		var SID = URL.query.SID;
 		if (SID)
 		{
