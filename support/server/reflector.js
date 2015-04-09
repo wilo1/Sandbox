@@ -340,6 +340,12 @@ function WebSocketConnection(socket, _namespace)
         })
         DAL.getInstance(namespace, function(instancedata)
         {
+            if(!instancedata)
+            {
+                instancedata = {};
+                instancedata.title = namespace;
+                instancedata.description = '';
+            }
             xapi.sendStatement(socket.loginData.UID, xapi.verbs.joined, namespace,instancedata.title,instancedata.description,namespace);
             if (!instancedata)
             {
@@ -1236,6 +1242,12 @@ function ClientConnected(socket, namespace, instancedata)
             logger.info(thisInstance.clientCount());
             DAL.getInstance(thisInstance.id,function(instancedata)
             {
+                if(!instancedata)
+                {
+                    instancedata = {};
+                    instancedata.title = namespace;
+                    instancedata.description = '';
+                }
                 xapi.sendStatement(socket.loginData.UID, xapi.verbs.left, thisInstance.id,instancedata.title,instancedata.description,thisInstance.id);    
             });
             
