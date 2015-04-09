@@ -122,7 +122,8 @@ function World(id, name, description)
 {
 	logger.debug('WORLD');
 	var match = /[_\/]adl[_\/]sandbox[_\/]([A-Za-z0-9]{16})[_\/]/.exec(id);
-	id = match[1];
+	if(match)
+		id = match[1];
 	var worldActivityId = 'http://vwf.adlnet.gov/xapi/' + id;
 	XAPIStatement.Activity.call(this, worldActivityId, name, description);
 	this.definition = {};

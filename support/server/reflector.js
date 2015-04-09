@@ -340,13 +340,8 @@ function WebSocketConnection(socket, _namespace)
         })
         DAL.getInstance(namespace, function(instancedata)
         {
-            if(!instancedata)
-            {
-                instancedata = {};
-                instancedata.title = namespace;
-                instancedata.description = '';
-            }
-            xapi.sendStatement(socket.loginData.UID, xapi.verbs.joined, namespace,instancedata.title,instancedata.description,namespace);
+           
+            
             if (!instancedata)
             {
                 require('./examples.js')
@@ -354,6 +349,7 @@ function WebSocketConnection(socket, _namespace)
                     {
                         if (instancedata)
                         {
+                            xapi.sendStatement(socket.loginData.UID, xapi.verbs.joined, namespace,instancedata.title,instancedata.description,namespace);
                             //if this is a single player published world, there is no need for the server to get involved. Server the world state and tell the client to disconnect
                             if (instancedata && instancedata.publishSettings && instancedata.publishSettings.singlePlayer)
                             {
@@ -370,6 +366,12 @@ function WebSocketConnection(socket, _namespace)
                     });
                 return;
             }
+
+            if(instancedata)
+            {
+                xapi.sendStatement(socket.loginData.UID, xapi.verbs.joined, namespace,instancedata.title,instancedata.description,namespace);   
+            }
+            
             //if this is a single player published world, there is no need for the server to get involved. Server the world state and tell the client to disconnect
             if (instancedata && instancedata.publishSettings && instancedata.publishSettings.singlePlayer)
             {
