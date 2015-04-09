@@ -571,6 +571,7 @@ scripts:
         var skyCubeTexture = loader.load( source, loaded);
         skyCubeTexture.magFilter = THREE.LinearFilter;
         skyCubeTexture.minFilter = THREE.LinearFilter;
+        
         skyCubeTexture.mapping = THREE.CubeReflectionMapping;
 
        if(!this.skymaterial)
