@@ -448,6 +448,12 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
        this.mouseDownSelectFilter = function(pickID)
         {
             //not sure this logic makes sense when more than one thing selected
+
+            if (this.getSelectionCount() > 1)
+            {
+                return vwf.ancestors(pickID)[vwf.ancestors(pickID).length-2] || pickID;
+            }
+
             if(this.getSelectionCount() > 1) return pickID;
             var ancestors = vwf.ancestors(pickID);
             // this is a 2nd level object, so just return it
@@ -455,6 +461,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
                 return pickID;
             var sceneroot = ancestors[ancestors.length-2];
             var decendants = vwf.decendants(sceneroot);
+
             if(decendants.indexOf(this.GetSelectedVWFID()) > -1)
             {
                 //the currently selected object is in the decendants
