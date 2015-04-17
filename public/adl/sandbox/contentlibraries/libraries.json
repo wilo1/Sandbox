@@ -2,6 +2,12 @@
     "Demo Entities": {
         "url": "./contentlibraries/entities.json"
     },
+    "Rovers": {
+        "url": "./contentlibraries/marsgame/Rovers.json"
+    },
+    "SCripts": {
+        "url": "./contentlibraries/marsgame/Scripts.json"
+    },
     "Materials": {
         "url": "./contentlibraries/materials.json"
     },
