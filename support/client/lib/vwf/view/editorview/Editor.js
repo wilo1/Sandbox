@@ -449,7 +449,8 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
         {
             //not sure this logic makes sense when more than one thing selected
 
-            if (this.getSelectionCount() > 1)
+            if (this.getSelectionCount() > 1 && 
+            vwf.decendants(vwf.ancestors(_Editor.GetSelectedVWFID())[vwf.ancestors(_Editor.GetSelectedVWFID()).length-2] || _Editor.GetSelectedVWFID()).indexOf(pickID) == -1)
             {
                 return vwf.ancestors(pickID)[vwf.ancestors(pickID).length-2] || pickID;
             }
