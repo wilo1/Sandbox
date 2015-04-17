@@ -500,8 +500,8 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
                             //implement some logic on the pick - select top level node, unless the current selection is 
                             // in the hierarchy of the new selection
                             var newselection = vwf.views[0].lastPickId;
-                            if(this.PickMod == NewSelect)
-                                newselection = this.mouseDownSelectFilter(newselection);
+                           
+                            newselection = this.mouseDownSelectFilter(newselection);
                             this.SelectObject(_Editor.getNode(newselection), this.PickMod);
                         } else {
                             this.SelectObject(null);
