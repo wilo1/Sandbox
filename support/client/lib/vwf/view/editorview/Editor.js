@@ -569,6 +569,9 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
                             var vwfnode;
                             while (hits[i] && hits[i].object && !hits[i].object.vwfID) hits[i].object = hits[i].object.parent;
                             if (hits[i] && hits[i].object) vwfnode = hits[i].object.vwfID;
+
+                            vwfnode = this.mouseDownSelectFilter(vwfnode);
+
                             if (vwfhits.indexOf(vwfnode) == -1 && vwfnode) vwfhits.push(vwfnode);
 
                             hits[i].release();
