@@ -110,7 +110,7 @@
                 this.animationFPS = propertyValue;
             }
             if (propertyName == 'morphTargetInfluences') {
-
+               
                 var skins = getSkin(this.getRoot());
                 for (var i = 0; i < skins.length; i++) {
                     if (skins[i].geometry.morphTargets && skins[i].geometry.morphTargets.length > 0) {

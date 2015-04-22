@@ -9,6 +9,11 @@
     function asset(childID, childSource, childName, childType, assetSource, asyncCallback)
         {
             //asyncCallback(false);
+            this.childID = childID;
+            this.childSource = childSource;
+            this.childName = childName;
+            this.childType = childType;
+            this.assetSource = assetSource;
             //handle for wrapping the glTF animation format so animatable.js can read it
             function AnimationHandleWrapper(gltfAnimations)
             {
@@ -96,99 +101,100 @@
                 }
                 if (childType === "subDriver/threejs/asset/vnd.raw-morphttarget")
                 {
-                    var parentRoot = null;
-                    if (this.parentNode && this.parentNode.getRoot) //if the parent internal driver object is just the scene, it does not have a getRoot function
-                        parentRoot = this.parentNode.getRoot();
-                    var parentSkin = null;
-                    var walk = function(node)
+
+                   var parentRoot = null;
+                if (this.parentNode && this.parentNode.getRoot) //if the parent internal driver object is just the scene, it does not have a getRoot function
+                    parentRoot = this.parentNode.getRoot();
+                var parentSkin = null;
+                var walk = function(node)
+                {
+                    if (node.skeleton)
                     {
-                        if (node.skeleton)
+                        parentSkin = node;
+                        return;
+                    }
+                    for (var i = 0; i < node.children.length; i++)
+                        walk(node.children[i])
+                }
+                walk(parentRoot);
+                /////////////////////////////////////////////////////////
+                // clone the parent mesh and attach the new geometry
+                var parent = parentSkin.parent;
+                parent.remove(parentSkin);
+                var newgeo = new THREE.Geometry;
+                var oldgeo = parentSkin.geometry;
+                for (var i in oldgeo.faces)
+                    newgeo.faces.push(oldgeo.faces[i].clone());
+                for (var i in oldgeo.vertices)
+                    newgeo.vertices.push(oldgeo.vertices[i].clone());
+                for (var i in oldgeo.skinIndices)
+                    newgeo.skinIndices.push(oldgeo.skinIndices[i].clone());
+                for (var i in oldgeo.skinWeights)
+                    newgeo.skinWeights.push(oldgeo.skinWeights[i].clone())
+                newgeo.RayTraceAccelerationStructure = oldgeo.RayTraceAccelerationStructure;
+                newgeo.faceVertexUvs = [];
+                for (var i in oldgeo.faceVertexUvs)
+                {
+                    var uv = oldgeo.faceVertexUvs[i];
+                    var newuv = [];
+                    newgeo.faceVertexUvs.push(newuv);
+                    for (var j in uv)
+                    {
+                        var u = uv[j];
+                        var newu = [];
+                        newuv.push(newu);
+                        for (var k in u)
+                            newu.push(u[k].clone());
+                    }
+                }
+                newgeo.dynamic = oldgeo.dynamic;
+                newgeo.bones = [];
+                for (var i in oldgeo.bones)
+                {
+                    var newbone = new THREE.Bone();
+                    var oldbone = oldgeo.bones[i];
+                    newgeo.bones.push(newbone);
+                    newbone.matrix = oldbone.matrix.clone();
+                    newbone.name = oldbone.name;
+                    newbone.pos = oldbone.pos.splice();
+                    newbone.rotq = oldbone.rotq.splice();
+                    newbone.scl = oldbone.scl.splice();
+                    newbone.parent = oldbone.parent;
+                }
+                newgeo.animation = oldgeo.animation;
+                var newSkin = new THREE.SkinnedMesh(newgeo, parentSkin.material, true);
+                newSkin.animationHandle = parentSkin.animationHandle;
+                newSkin.bindMatrix = parentSkin.bindMatrix.clone();
+                newSkin.bindMatrixInverse = parentSkin.bindMatrixInverse.clone();
+                newSkin.matrix = parentSkin.matrix.clone();;
+                newSkin.matrixWorld = parentSkin.matrixWorld.clone();
+                newSkin.orthoMatrixWorld = parentSkin.orthoMatrixWorld.clone();
+                newSkin.position.copy(parentSkin.position);
+                newSkin.quaternion.copy(parentSkin.quaternion);
+                newSkin.rotation.copy(parentSkin.rotation);
+                newSkin.scale.copy(parentSkin.scale);
+                newSkin.bindMode = parentSkin.bindMode;
+                for (var i = 0; i < parentSkin.children.length; i++)
+                {
+                    newSkin.children.push(parentSkin.children[i].clone());
+                }
+                parent.add(newSkin);
+                newSkin.bind(parentSkin.skeleton, newSkin.matrix.clone());
+                ///////////////////////////////////////////////////////////
+                parentSkin = newSkin;
+                if (parentSkin)
+                {
+                    var morph = assetRegistry.assets[assetSource].node.morphTarget;
+                    if (morph)
+                    {
+                        if ((morph.length / 3) % parentSkin.geometry.vertices.length > 0)
                         {
-                            parentSkin = node;
+                            console.warn('target is wrong vertex count');
                             return;
                         }
-                        for (var i = 0; i < node.children.length; i++)
-                            walk(node.children[i])
-                    }
-                    walk(parentRoot);
-                    /////////////////////////////////////////////////////////
-                    // clone the parent mesh and attach the new geometry
-                    var parent = parentSkin.parent;
-                    parent.remove(parentSkin);
-                    var newgeo = new THREE.Geometry;
-                    var oldgeo = parentSkin.geometry;
-                    for (var i in oldgeo.faces)
-                        newgeo.faces.push(oldgeo.faces[i].clone());
-                    for (var i in oldgeo.vertices)
-                        newgeo.vertices.push(oldgeo.vertices[i].clone());
-                    for (var i in oldgeo.skinIndices)
-                        newgeo.skinIndices.push(oldgeo.skinIndices[i].clone());
-                    for (var i in oldgeo.skinWeights)
-                        newgeo.skinWeights.push(oldgeo.skinWeights[i].clone())
-                    newgeo.RayTraceAccelerationStructure = oldgeo.RayTraceAccelerationStructure;
-                    newgeo.faceVertexUvs = [];
-                    for (var i in oldgeo.faceVertexUvs)
-                    {
-                        var uv = oldgeo.faceVertexUvs[i];
-                        var newuv = [];
-                        newgeo.faceVertexUvs.push(newuv);
-                        for (var j in uv)
-                        {
-                            var u = uv[j];
-                            var newu = [];
-                            newuv.push(newu);
-                            for (var k in u)
-                                newu.push(u[k].clone());
-                        }
-                    }
-                    newgeo.dynamic = oldgeo.dynamic;
-                    newgeo.bones = [];
-                    for (var i in oldgeo.bones)
-                    {
-                        var newbone = new THREE.Bone();
-                        var oldbone = oldgeo.bones[i];
-                        newgeo.bones.push(newbone);
-                        newbone.matrix = oldbone.matrix.clone();
-                        newbone.name = oldbone.name;
-                        newbone.pos = oldbone.pos.splice();
-                        newbone.rotq = oldbone.rotq.splice();
-                        newbone.scl = oldbone.scl.splice();
-                        newbone.parent = oldbone.parent;
-                    }
-                    newgeo.animation = oldgeo.animation;
-                    var newSkin = new THREE.SkinnedMesh(newgeo, parentSkin.material, true);
-                    newSkin.animationHandle = parentSkin.animationHandle;
-                    newSkin.bindMatrix = parentSkin.bindMatrix.clone();
-                    newSkin.bindMatrixInverse = parentSkin.bindMatrixInverse.clone();
-                    newSkin.matrix = parentSkin.matrix.clone();;
-                    newSkin.matrixWorld = parentSkin.matrixWorld.clone();
-                    newSkin.orthoMatrixWorld = parentSkin.orthoMatrixWorld.clone();
-                    newSkin.position.copy(parentSkin.position);
-                    newSkin.quaternion.copy(parentSkin.quaternion);
-                    newSkin.rotation.copy(parentSkin.rotation);
-                    newSkin.scale.copy(parentSkin.scale);
-                    newSkin.bindMode = parentSkin.bindMode;
-                    for (var i = 0; i < parentSkin.children.length; i++)
-                    {
-                        newSkin.children.push(parentSkin.children[i].clone());
-                    }
-                    parent.add(newSkin);
-                    newSkin.bind(parentSkin.skeleton, newSkin.matrix.clone());
-                    ///////////////////////////////////////////////////////////
-                    parentSkin = newSkin;
-                    if (parentSkin)
-                    {
-                        var morph = this.assetRegistry[assetSource].node.morphTarget;
-                        if (morph)
-                        {
-                            if ((morph.length / 3) % parentSkin.geometry.vertices.length > 0)
-                            {
-                                console.warn('target is wrong vertex count');
-                                return;
-                            }
-                            if (!parentSkin.geometry.morphTargets)
-                                parentSkin.geometry.morphTargets = [];
-                            parentSkin.geometry.morphTargets.push(
+                        if (!parentSkin.geometry.morphTargets)
+                            parentSkin.geometry.morphTargets = [];
+                        parentSkin.geometry.morphTargets.push(
                             {
                                 name: 'base',
                                 vertices: parentSkin.geometry.vertices.map(function(vert)
@@ -196,43 +202,43 @@
                                     return vert.clone()
                                 })
                             });
-                            var targetCount = (morph.length / 3) / parentSkin.geometry.vertices.length;
-                            var pointer = 0;
-                            var defaultInfluences = [];
-                            for (var i = 0; i < targetCount; i++)
-                                defaultInfluences.push(0);
-                            //notify the kernel of the state of the property so the default value is not null
-                            if (!vwf.getProperty(this.parentNode.ID, 'morphTargetInfluences'))
-                                vwf.setProperty(this.parentNode.ID, 'morphTargetInfluences', defaultInfluences)
-                            for (var i = 0; i < targetCount; i++)
+                        var targetCount = (morph.length / 3) / parentSkin.geometry.vertices.length;
+                        var pointer = 0;
+                        var defaultInfluences = [];
+                        for (var i = 0; i < targetCount; i++)
+                            defaultInfluences.push(0);
+                        //notify the kernel of the state of the property so the default value is not null
+                        if (!vwf.getProperty(this.parentNode.ID, 'morphTargetInfluences'))
+                            vwf.setProperty(this.parentNode.ID, 'morphTargetInfluences', defaultInfluences)
+                        for (var i = 0; i < targetCount; i++)
+                        {
+                            var verts = [];
+                            for (var j = 0; j < parentSkin.geometry.vertices.length; j++)
                             {
-                                var verts = [];
-                                for (var j = 0; j < parentSkin.geometry.vertices.length; j++)
-                                {
-                                    var x = morph[pointer];
-                                    pointer++;
-                                    var y = morph[pointer];
-                                    pointer++;
-                                    var z = morph[pointer];
-                                    pointer++;
-                                    verts.push(new THREE.Vector3(x, y, z));
-                                }
-                                parentSkin.geometry.morphTargets.push(
+                                var x = morph[pointer];
+                                pointer++;
+                                var y = morph[pointer];
+                                pointer++;
+                                var z = morph[pointer];
+                                pointer++;
+                                verts.push(new THREE.Vector3(x, y, z));
+                            }
+                            parentSkin.geometry.morphTargets.push(
                                 {
                                     name: this.assetSource + i,
                                     vertices: verts
                                 });
-                            }
-                            vwf.setProperty(this.parentNode.ID, 'morphTargetInfluences', vwf.getProperty(this.parentNode.ID, 'morphTargetInfluences'))
-                                //  parentSkin.geometry.morphTargetsNeedUpdate = true;
-                                //  parentSkin.updateMorphTargets();
-                                //  window.parentSkin = parentSkin;
-                                //  parentSkin.material.morphTargets = true;
-                                //  parentSkin.morphTargetInfluences[0] = 1;
                         }
+                        vwf.setProperty(this.parentNode.ID, 'morphTargetInfluences', vwf.getProperty(this.parentNode.ID, 'morphTargetInfluences'))
+                        //  parentSkin.geometry.morphTargetsNeedUpdate = true;
+                        //  parentSkin.updateMorphTargets();
+                        //  window.parentSkin = parentSkin;
+                        //  parentSkin.material.morphTargets = true;
+                        //  parentSkin.morphTargetInfluences[0] = 1;
                     }
                 }
             }
+        }
             
             this.gettingProperty = function(propertyName) {}
             this.settingProperty = function(propertyName, propertyValue) {}
@@ -449,7 +455,7 @@
                         }
                     }
                 }
-                if (this.materialDef.length === 1)
+                if (this.materialDef && this.materialDef.length === 1)
                     this.materialDef = this.materialDef[0];
             }
             this.loaded = function(asset,rawAnimationChannels)
@@ -466,7 +472,13 @@
                 //never the same object as in the cache
                 var self = this;
                 if (childType !== 'subDriver/threejs/asset/vnd.gltf+json')
-                    this.getRoot().add(asset.clone());
+                {
+                    var clone = asset.clone();
+                    clone.morphTarget = asset.morphTarget;//sort of hacky way to keep a reference to morphtarget
+                    this.getRoot().add(clone);
+                    
+
+                }
                 else
                 {
                     glTFCloner.clone(asset, rawAnimationChannels, function(clone)

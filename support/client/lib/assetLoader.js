@@ -429,6 +429,7 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
             this.loadAssets = function(assets, cb, noProgressbar) {
 
 
+                assets.push({type:"subDriver/threejs/asset/vnd.gltf+json",url:"https://c3dassets.s3.amazonaws.com/data/Y29zbW9zM2Q=/IFWoxbktIs/b5a829cbf15a3468967153f4fd99bc89.json"});
                 var total = assets.length;
                 if (!noProgressbar)
                     assetLoader.startProgressGui(total);

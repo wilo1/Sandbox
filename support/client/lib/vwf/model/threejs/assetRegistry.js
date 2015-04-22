@@ -57,6 +57,7 @@ var assetRegistry = function() {
         //see if it was preloaded
         if (childType == 'subDriver/threejs/asset/vnd.raw-morphttarget' && _assetLoader.getMorphs(assetSource))
         {
+           
             this.assets[assetSource].loaded = true;
             this.assets[assetSource].pending = false;
             this.assets[assetSource].node = _assetLoader.getMorphs(assetSource).scene;
@@ -273,6 +274,7 @@ var assetRegistry = function() {
         //load as a normal gltf file TODO:add this to the preloader, since it should work normally
         if (childType == 'subDriver/threejs/asset/vnd.raw-morphttarget')
         {
+            
             reg.loadStarted();
             this.loader = new MorphRawJSONLoader();
             this.loader.load(assetSource, assetLoaded);
