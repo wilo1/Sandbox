@@ -239,7 +239,7 @@ var assetRegistry = function() {
                 //nexttask is supplied by async to trigger the next in the queue;
 
                 //note the timeout does not account for the fact that the load has not really started because of the queue
-                reg.loadStarted();
+                
 
                 THREE.glTFLoader.queue = new async.queue(function(task, nextTask)
                 {
@@ -249,13 +249,15 @@ var assetRegistry = function() {
                     //signature of callback dictated by loader
                     node.loader.load(node.source, function(geometry, materials)
                     {
-                        //ok, this model loaded, we can start the next load
-                        nextTask();
+                        
                         //do whatever it was (asset loaded) that this load was going to do when complete
                         cb(geometry, materials);
+                        //ok, this model loaded, we can start the next load
+                        nextTask();
                     }, animOnly);
                 }, 1);
             }
+            reg.loadStarted();
             //we need to queue up our entry to this module, since it cannot handle re-entry. This means that while it 
             //is an async function, it cannot be entered again before it completes
             THREE.glTFLoader.queue.push(
