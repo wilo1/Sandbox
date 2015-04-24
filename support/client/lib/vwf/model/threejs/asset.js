@@ -158,7 +158,11 @@
                         newbone.parent = oldbone.parent;
                     }
                     newgeo.animation = oldgeo.animation;
-                    var newSkin = new THREE.SkinnedMesh(newgeo, parentSkin.material, true);
+
+                    parentSkin.material = parentSkin.material.clone();
+                    var newSkin = new THREE.SkinnedMesh(newgeo, parentSkin.material.clone(), true);
+                    if(parentSkin.material.def)
+                        _MaterialCache.setMaterial(newSkin,JSON.parse(parentSkin.material.def));
                     newSkin.animationHandle = parentSkin.animationHandle;
                     newSkin.bindMatrix = parentSkin.bindMatrix.clone();
                     newSkin.bindMatrixInverse = parentSkin.bindMatrixInverse.clone();

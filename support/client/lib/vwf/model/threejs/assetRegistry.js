@@ -145,12 +145,11 @@ var assetRegistry = function() {
             reg.loaded = true;
             //actually, is this necessary? can we just store the raw loaded asset in the cache? 
             if (childType !== 'subDriver/threejs/asset/vnd.gltf+json' && childType !== 'subDriver/threejs/asset/vnd.raw-animation')
-                reg.node = asset.scene; //dont clone into the cache, since we clone on the way out
+                reg.node = asset.scene; 
             else
             {
                 glTFCloner.clone(asset.scene, asset.rawAnimationChannels, function(clone)
                 {
-
                     reg.node = clone;
                     reg.rawAnimationChannels = asset.rawAnimationChannels
                 });
