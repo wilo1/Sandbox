@@ -43,6 +43,7 @@
                 //the parent is an asset object
                 if (true)
                 {
+                    
                     var parentRoot = null;
                     if (this.parentNode && this.parentNode.getRoot) //if the parent internal driver object is just the scene, it does not have a getRoot function
                         parentRoot = this.parentNode.getRoot();
@@ -233,10 +234,12 @@
                         }
                     }
                 }
-                //set the initially
+                //set this initially
                 //we do this twice to defeat the check in animatable.js that skips the setup if values are the same
-                this.settingProperty('animationFrame', .001);
-                this.settingProperty('animationFrame', vwf.getProperty(this.ID, 'animationFrame') || 0);
+                
+                var frame = this.animationFrame;
+                this.setAnimationFrameInternal(frame + .001,false);
+                this.setAnimationFrameInternal(frame  || 0,false);
             }
             this.gettingProperty = function(propertyName) {}
             this.settingProperty = function(propertyName, propertyValue) {}
@@ -272,7 +275,7 @@
                     this.initializedFromAsset = true;
                     this.backupmats = [];
                     this.backupMatrix = asset.matrix;
-                    //asset.matrix = asset.matrix.clone();
+                    asset.matrix = asset.matrix.clone();
                     this.rootnode = asset;
                     this.rootnode = asset;
                     asset.initializedFromAsset = true;
@@ -285,10 +288,10 @@
                             this.backupmats.push([list[i], list[i].material.clone()]);
                         }
                     }
-                    asset.matrixAutoUpdate = false;
+                   
                     asset.updateMatrixWorld(true);
                     _SceneManager.setDirty(asset);
-                    this.settingProperty('transform', this.gettingProperty('transform'));
+                   // this.settingProperty('transform', this.gettingProperty('transform'));
                     if (asset instanceof THREE.Bone)
                     {
                         for (var i in asset.children)
@@ -456,6 +459,7 @@
             }
             this.loaded = function(asset, rawAnimationChannels)
             {
+
                 if (!asset)
                 {
                     this.loadFailed();

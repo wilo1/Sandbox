@@ -54,6 +54,7 @@ var assetRegistry = function() {
         this.assets[assetSource].pending = false;
         this.assets[assetSource].callbacks = [];
         this.assets[assetSource].failcallbacks = [];
+       
         //see if it was preloaded
         if (childType == 'subDriver/threejs/asset/vnd.raw-morphttarget' && _assetLoader.getMorphs(assetSource))
         {
@@ -149,12 +150,13 @@ var assetRegistry = function() {
             {
                 glTFCloner.clone(asset.scene, asset.rawAnimationChannels, function(clone)
                 {
+
                     reg.node = clone;
                     reg.rawAnimationChannels = asset.rawAnimationChannels
                 });
             }
             for (var i = 0; i < reg.callbacks.length; i++)
-                reg.callbacks[i](asset.scene, asset.rawAnimationChannels);
+                reg.callbacks[i](reg.node, reg.rawAnimationChannels);
             //nothing should be waiting on callbacks now.
             reg.callbacks = [];
             reg.failcallbacks = [];
