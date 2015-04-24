@@ -434,7 +434,15 @@ scripts:
 
 
         var standing = this.standing;
-        if (this.activeCycle[this.activeCycle.length - 1]) {
+        var _cycles = this.activeCycle;
+        if(! _cycles)
+        {
+          debugger;
+          _cycles = this.activeCycle;
+        }
+        var _length = _cycles.length;
+        
+        if (_cycles[_length -1]) {
 
 
           var newframe = this.increment(this.cycles[this.activeCycle[this.activeCycle.length - 1]], updateFreqDivisor);
