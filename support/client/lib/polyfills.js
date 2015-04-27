@@ -41,6 +41,14 @@ var fills = {
     GUID: function()
     {
         window.GUID = function(){
+
+            //override randomness for testing. NEVER USE THIS
+            if(window.GUID.nextGUID)
+            {
+                var guid = window.GUID.nextGUID;
+                delete window.GUID.nextGUID;
+                return guid;
+            }
             var S4 = function() {
                 return Math.floor(Math.SecureRandom() * 0x10000 /* 65536 */ ).toString(16);
             };
