@@ -161,8 +161,9 @@
 
                     parentSkin.material = parentSkin.material.clone();
                     var newSkin = new THREE.SkinnedMesh(newgeo, parentSkin.material.clone(), true);
-                    if(parentSkin.material.def)
-                        _MaterialCache.setMaterial(newSkin,JSON.parse(parentSkin.material.def));
+                    
+
+
                     newSkin.animationHandle = parentSkin.animationHandle;
                     newSkin.bindMatrix = parentSkin.bindMatrix.clone();
                     newSkin.bindMatrixInverse = parentSkin.bindMatrixInverse.clone();
@@ -180,6 +181,19 @@
                     }
                     parent.add(newSkin);
                     newSkin.bind(parentSkin.skeleton, newSkin.matrix.clone());
+
+                    //get array of submats or regualr mat
+                    
+                    var mats = newSkin.material.materials || [newSkin.material]
+                    window.setTimeout(function(){
+
+                    //for some reason, this must happen after a render, or before load.... 
+                    //this is a hack...
+                    for(var i in mats)
+                        mats[i].needsUpdate = true;    
+                    },200)
+                    
+
                     ///////////////////////////////////////////////////////////
                     parentSkin = newSkin;
                     if (parentSkin)
