@@ -2266,6 +2266,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             MoveGizmo.parent.updateMatrixWorld(true);
         }
         this.updateBounds = function() {
+            return; /// disable all drawing of bounding boxes
             for (var i = 0; i < SelectionBounds.length; i++) {
                 SelectionBounds[i].parent.remove(SelectionBounds[i], true);
                 SelectionBounds[i].children[0].geometry.dispose()
