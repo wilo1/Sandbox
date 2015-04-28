@@ -202,7 +202,8 @@ exports.statsHandler = function(req, res, next) {
                 sessionData: sessionData,
                 url: req.url,
                 root: getRoot(),
-                federal_analytics: global.configuration.federal_analytics
+                federal_analytics: global.configuration.federal_analytics,
+                    branding: global.configuration.branding
             };
             res.render('stats', {
                 layout: 'plain'
@@ -261,7 +262,8 @@ exports.redirectPasswordEmail = function(req, res, next) {
                     blog: true,
                     doc: true,
                     translate: translate(req),
-                    federal_analytics: global.configuration.federal_analytics
+                    federal_analytics: global.configuration.federal_analytics,
+                    branding: global.configuration.branding
                 };
                 if (user && !user.Email) {
                     res.locals.message = "We've updated our database, and now require email address for users. Please update your email address below.";
@@ -341,7 +343,8 @@ exports.generalHandler = function(req, res, next) {
                     doc: doc,
                     user: user,
                     translate: translate(req),
-                    federal_analytics: global.configuration.federal_analytics
+                    federal_analytics: global.configuration.federal_analytics,
+                    branding: global.configuration.branding
                 };
 
                 //hook up the buttons to show the social media logins
@@ -384,7 +387,8 @@ exports._404 = function(req, res, next) {
             sessionData: sessionData,
             url: req.url,
             root: getRoot(),
-            federal_analytics: global.configuration.federal_analytics
+            federal_analytics: global.configuration.federal_analytics,
+            branding: global.configuration.branding
         };
         res.status(404).render('_404');
         next();
@@ -401,7 +405,8 @@ exports.help = function(req, res) {
         sid: root + '/' + (req.query.id ? req.query.id : '') + '/',
         root: getRoot(req),
         script: displayPage + ".js",
-        federal_analytics: global.configuration.federal_analytics
+        federal_analytics: global.configuration.federal_analytics,
+         branding: global.configuration.branding
     };
     res.render('help/template');
 
@@ -444,7 +449,8 @@ exports.world = function(req, res, next) {
                     sessionData: sessionData,
                     url: req.url,
                     root: getRoot(),
-                    federal_analytics: global.configuration.federal_analytics
+                    federal_analytics: global.configuration.federal_analytics,
+                    branding: global.configuration.branding
                 };
                 //res.status(404).render('_404');
                 res.redirect(global.appPath);
@@ -479,7 +485,8 @@ exports.world = function(req, res, next) {
                 users: users,
                 anonymous: anonymous,
                 owner: owner,
-                federal_analytics: global.configuration.federal_analytics
+                federal_analytics: global.configuration.federal_analytics,
+                    branding: global.configuration.branding
             };
             res.render('worldTemplate', {
                 layout: 'plain'
@@ -619,7 +626,8 @@ function ShowSearchPage(mode, req, res, next) {
                 previous: previous,
                 hadprev: (previous >= 0),
                 translate: translate(req),
-                federal_analytics: global.configuration.federal_analytics
+                federal_analytics: global.configuration.federal_analytics,
+                    branding: global.configuration.branding
             };
             res.locals[mode] = true;
             res.render('searchResults', {
@@ -687,7 +695,8 @@ exports.createNew2 = function(req, res, next) {
                     template: (template == 'noTemplate' ? false : template),
                     root: getRoot(),
                     translate: translate(req),
-                    federal_analytics: global.configuration.federal_analytics
+                    federal_analytics: global.configuration.federal_analytics,
+                    branding: global.configuration.branding
                 };
                 res.render('createNew2', {
                     layout: 'plain'
@@ -803,7 +812,8 @@ exports.createNew = function(req, res, next) {
                 previous: previous,
                 hadprev: (previous >= 0),
                 translate: translate(req),
-                federal_analytics: global.configuration.federal_analytics
+                federal_analytics: global.configuration.federal_analytics,
+                    branding: global.configuration.branding
             };
 
             res.render('createNew', {
