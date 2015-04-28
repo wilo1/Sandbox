@@ -156,6 +156,7 @@ scripts:
             if (o instanceof THREE.Line) return false;
             if (o instanceof THREE.SkinnedMesh) return false;
             if (o instanceof THREE.Bone) return false;
+            if (o.name == 'BoneSelectionHandle') return false;
             return !(o.isAvatar === true || o.passable === true)
           },
           maxDist: 2,
@@ -940,3 +941,4 @@ scripts:
         return false;
       }
     
+       //@ sourceURL=character.vwf.yaml
