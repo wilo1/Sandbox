@@ -124,8 +124,10 @@ var assetRegistry = function() {
         }
 
         reg.pending = true;
-        reg.callbacks.push(success);
-        reg.failcallbacks.push(failure);
+        if(success)
+            reg.callbacks.push(success);
+        if(failure)
+            reg.failcallbacks.push(failure);
         var assetLoaded = function(asset)
         {
 
@@ -311,8 +313,10 @@ var assetRegistry = function() {
         {
             reg.refcount++;
             _ProgressBar.show();
-            reg.callbacks.push(success)
-            reg.failcallbacks.push(failure);
+            if(success)
+                reg.callbacks.push(success)
+            if(failure)
+                reg.failcallbacks.push(failure);
         }
     }
     this.cancel = function(assetSource, success, failure)
