@@ -605,12 +605,14 @@ SceneManager.prototype.getTexture = function(src, noclone) {
             if (tex.clones) {
               
                 for (var i = 0; i < tex.clones.length; i++) {
+                  
+                    tex.clones[i].__webglTexture  = tex.__webglTexture;
                     tex.clones[i].image = texture.image;
                     tex.clones[i].format = texture.format;
                     tex.clones[i].needsUpdate = true;
                     tex.clones[i].isActuallyCompressed = texture.isActuallyCompressed;
 
-                }
+                }   
 
 
             }
