@@ -47,10 +47,12 @@ events:
 scripts:
 - |
       this.attached = function() {
+        if (this.id == 'character-vwf') return;
         //called when added to the scene, after initialize is called and parent is set.
         //this.parent.avatarCreated(this.PlayerNumber);
       }
       this.ready = function() {
+        if (this.id == 'character-vwf') return;
         var self = this;
         this.kd = function(e, d) {
           return self.keyDown(e, d)
@@ -167,6 +169,7 @@ scripts:
 
       }
       this.increment = function(cycle, steps) {
+        if (this.id == 'character-vwf') return;
         cycle.current += cycle.speed * steps;
         if (cycle.current >= cycle.length && cycle.loop == true)
           cycle.current = 0;
@@ -182,7 +185,7 @@ scripts:
         this.cycleInit = true;
       }
       this.createNameTag = function(PlayerNumber) {
-
+        if (this.id == 'character-vwf') return;
         $(document.body).append('<div class="nametag" id="' + "Player_" + ToSafeID(PlayerNumber) + 'label' + '"><div class="nametagname ignoreMouseLeave">' + PlayerNumber + '</div></div>')
         var newdiv = $("#Player_" + ToSafeID(PlayerNumber) + 'label')[0];
         var self = this;
@@ -210,7 +213,7 @@ scripts:
 
       }
       this.placeNameTag = function(e, viewprojection, wh, ww) {
-
+        if (this.id == 'character-vwf') return;
         if (!this.ownerClientID)
           return;
 
@@ -366,7 +369,7 @@ scripts:
         }
       }
       this.satProperty = function(nodeID, prop, val) {
-
+        if (this.id == 'character-vwf') return;
         if (nodeID == this.standingOnID && prop == 'transform' && this.standingOnOffset) {
           this.standingUpdate();
         }
@@ -417,7 +420,7 @@ scripts:
       }
       this.update = function(moniker) {
 
-
+        if (this.id == 'character-vwf') return;
         if (!this.cycleInit)
           this.initCycles();
         this.updatecounter++;
