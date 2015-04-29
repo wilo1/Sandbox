@@ -151,6 +151,24 @@ define(function() {
             }
             $('#MenuObjectPropertiesicon').removeClass('iconselected');
         }
+        this.disable = function()
+        {
+            if(this.isDisabled()) return;
+            $("#PrimitiveEditor").append("<div id='PrimitiveEditorDisable' class='editorPanelDisableOverlay'></div>")
+            $('#PrimitiveEditor').addClass('editorPanelDisable');
+            $("#PrimitiveEditor").find('*').addClass('editorPanelDisable');
+        }
+        this.isDisabled = function()
+        {
+            return $("#PrimitiveEditorDisable").length === 1;
+        }
+        this.enable = function()
+        {
+            if(!this.isDisabled()) return;
+            $("#PrimitiveEditorDisable").remove();
+            $('#PrimitiveEditor').removeClass('editorPanelDisable');
+            $("#PrimitiveEditor").find('*').removeClass('editorPanelDisable');
+        }
         this.isOpen = function() {
             //return $("#PrimitiveEditor").dialog( "isOpen" )
             return $('#PrimitiveEditor').is(':visible')
@@ -210,6 +228,7 @@ define(function() {
             try {
                 this.currentWidgets = {};
                 if (node) {
+                    this.enable();
                     this.inSetup = true;
                     this.clearPropertyEditorDialogs();
                     var lastTab = $("#accordion").accordion('option', 'active');
@@ -297,7 +316,7 @@ define(function() {
                         'active': lastTab
                     });
                 } else {
-                    this.hide();
+                    this.disable();
                 }
             } catch (e) {
                 console.log(e);
@@ -1178,5 +1197,6 @@ define(function() {
         $('#ScaleZ').on( "keyup",this.scaleChanged.bind(this));
 
         $('#RotationW').hide();
+        this.hide();
     }
 });

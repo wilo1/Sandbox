@@ -61,6 +61,24 @@ define(["vwf/view/editorview/mapbrowser","vwf/view/editorview/colorpicker.js"], 
 			//$("#materialeditor").dialog( "isOpen" )
 			return $('#materialeditor').is(':visible');
 		}
+		this.disable = function()
+        {
+            if(this.isDisabled()) return;
+            $("#materialeditor").append("<div id='materialeditorDisable' class='editorPanelDisableOverlay'></div>")
+            $('#materialeditor').addClass('editorPanelDisable');
+            $("#materialeditor").find('*').addClass('editorPanelDisable');
+        }
+        this.isDisabled = function()
+        {
+            return $("#materialeditorDisable").length === 1;
+        }
+        this.enable = function()
+        {
+            if(!this.isDisabled()) return;
+            $("#materialeditorDisable").remove();
+            $('#materialeditor').removeClass('editorPanelDisable');
+            $("#materialeditor").find('*').removeClass('editorPanelDisable');
+        }
 		this.RootPropTypein = function ()
 		{
 			var prop = $(this).attr('prop');
@@ -854,6 +872,7 @@ define(["vwf/view/editorview/mapbrowser","vwf/view/editorview/colorpicker.js"], 
 			{
 				if (node)
 				{
+					this.enable();
 					var mat = vwf.getProperty(node.id, 'materialDef');
 					if(!mat)
 						return;
@@ -870,7 +889,7 @@ define(["vwf/view/editorview/mapbrowser","vwf/view/editorview/colorpicker.js"], 
 				else
 				{
 					this.currentMaterial = null;
-					this.hide();
+					this.disable();
 				}
 			}
 			catch (e)
@@ -879,5 +898,6 @@ define(["vwf/view/editorview/mapbrowser","vwf/view/editorview/colorpicker.js"], 
 			}
 		}
 		$(document).bind('selectionChanged', this.SelectionChanged.bind(this));
+		this.hide();
 	}
 });

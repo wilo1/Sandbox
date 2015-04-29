@@ -112,6 +112,24 @@ define([], function() {
                 $('#MenuPhysicsEditoricon').removeClass('iconselected');
             }
         }
+        this.disable = function()
+        {
+            if(this.isDisabled()) return;
+            $("#PhysicsEditor").append("<div id='PhysicsEditorDisable' class='editorPanelDisableOverlay'></div>")
+            $('#PhysicsEditor').addClass('editorPanelDisable');
+            $("#PhysicsEditor").find('*').addClass('editorPanelDisable');
+        }
+        this.isDisabled = function()
+        {
+            return $("#PhysicsEditorDisable").length === 1;
+        }
+        this.enable = function()
+        {
+            if(!this.isDisabled()) return;
+            $("#PhysicsEditorDisable").remove();
+            $('#PhysicsEditor').removeClass('editorPanelDisable');
+            $("#PhysicsEditor").find('*').removeClass('editorPanelDisable');
+        }
         this.isOpen = function() {
             //$("#PhysicsEditor").dialog( "isOpen" )
             return $('#PhysicsEditor').is(':visible');
@@ -737,13 +755,14 @@ define([], function() {
             try {
                 if (this.isOpen()) {
                     if (node) {
+                        this.enable();
                         this.propertyEditorDialogs = [];
                         this.selectedID = _Editor.getSelectionCount() == 1 ? node.id : "selection";
                         this.BuildGUI();
                     } else {
                         this.propertyEditorDialogs = [];
                         this.selectedID = null;
-                        this.hide();
+                        this.disable();
                     }
                 } else {
                     this.clearPreview();
@@ -753,5 +772,6 @@ define([], function() {
             }
         }
         $(document).bind('selectionChanged', this.SelectionChanged.bind(this));
+        this.hide();
     }
 });
