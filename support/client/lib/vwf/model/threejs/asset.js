@@ -270,12 +270,12 @@
                             var list = [];
                             this.GetAllLeafMeshes(this.rootnode, list);
                             if (list[0])
-                                return JSON.parse(JSON.stringify(_MaterialCache.getDefForMaterial(list[0].material)));
+                                return _MaterialCache.getDefForMaterial(list[0].material);
                             else return undefined;
                         }
                         else
                         {
-                            return  JSON.parse(JSON.stringify(this.materialDef || this.defaultmaterialDef));
+                            return this.materialDef;
                         }
                     }
                 }
