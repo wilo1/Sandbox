@@ -63,19 +63,20 @@
             }
             this.settingProperty = function(propname, propval)
                 {
+
                     //if it's a prim, this.build will be true. Prims must be able to reset the material, and won't pass this check
                     if (propname == 'materialDef' && propval)
-                        if (!Object.deepEquals(propval, this.materialDef) || this.Build)
+                        if (!Object.deepEquals(propval, this.materialDef_) || this.Build)
                         {
                             console.log("materialDef on " + this.ID, propval )
-                            propval = JSON.parse(JSON.stringify(propval));
+                            
                             var needRebuild = false;
                             if (!this.compareLayers(this.materialDef, propval))
                             {
                                 needRebuild = true;
                             }
                             //the copy here is necesary because we tack some properties onto this should not be send back when requesting the value
-                            this.materialDef = JSON.parse(JSON.stringify(propval));
+                            this.materialDef_ = JSON.parse(JSON.stringify(propval));
                             var list = [];
                             for (var i = 0; i < this.getRoot().children.length; i++)
                             {
@@ -131,7 +132,12 @@
             {
                 if (propname == 'materialDef')
                 {
-                    return this.materialDef || this.defaultmaterialDef;
+                    //because we check if the set value is the same as the current value
+                    //if we don't clone, we return the exact object
+                    //then other code changes, but comparing old to new is always true, becaseu they are hte same
+                    //so we must clone the object before returning
+
+                    return JSON.parse(JSON.stringify(this.materialDef || this.defaultmaterialDef));
                 }
             }
         }

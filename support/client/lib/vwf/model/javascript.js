@@ -811,7 +811,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             var masteriddot = dotNotation.substring(0, dotNotation.indexOf('.'))
             var masteridbrac = dotNotation.substring(0, dotNotation.indexOf('['))
             var masterid = masteriddot;
-            if(masteridbrac.length < masteriddot.length && masteridbrac.length > 0)
+            if(masterid.length ==0  || masteridbrac.length < masteriddot.length && masteridbrac.length > 0)
                 masterid = masteridbrac;
 
           
