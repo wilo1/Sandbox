@@ -26,7 +26,7 @@ define(function() {
 	    }
 
 
-        $('#sidepanel').append("<div id='PrimitiveEditor'>" + "<div id='primeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span id='primeditortitletext' class='ui-dialog-title' id='ui-dialog-title-Players'>Object Properties</span></div>" +
+        $('#sidepanel').append("<div id='PrimitiveEditor'>" + "<div id='primeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='sidetab-editor-title ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span id='primeditortitletext' class='ui-dialog-title' id='ui-dialog-title-Players'>Object Properties</span></div>" +
             '<div id="accordion" style="height:100%;overflow:hidden">' +
             '<h3><a href="#">Flags</a></h3>' +
             '<div>' +
@@ -66,11 +66,18 @@ define(function() {
             "</div>" +
             '</div>' +
             '</div>');
-        $('#primeditortitle').append('<a id="primitiveeditorclose" href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button" style="display: inline-block;float: right;"><span class="ui-icon ui-icon-closethick">close</span></a>');
+        
         $('#primeditortitle').prepend('<div class="headericon properties" />');
-        $('#primitiveeditorclose').click(function() {
-            _PrimitiveEditor.hide();
-        });
+        
+        var self = this;
+        $('#primeditortitle').click(function()
+        {
+            
+            if(self.isOpen())
+                self.hide()
+            else
+                self.show();
+        })
         $('.TransformEditorInput').spinner();
         $('#isStatic').change(function(e) {
             _PrimitiveEditor.setProperty('selection', 'isStatic', this.checked)
@@ -129,10 +136,11 @@ define(function() {
         $(".ui-accordion-content").css('height', 'auto');
         this.show = function() {
             $('#MenuObjectPropertiesicon').addClass('iconselected');
+            $('#primeditortitle').addClass('sidetab-editor-title-active')
             //$('#PrimitiveEditor').dialog('open');
             //$('#PrimitiveEditor').dialog('option','position',[1282,40]);
-            $('#PrimitiveEditor').prependTo($('#PrimitiveEditor').parent());
-            $('#PrimitiveEditor').show('blind', function() {
+            
+            $('#PrimitiveEditor #accordion').show('blind', function() {
                 if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
             });
             showSidePanel();
@@ -143,7 +151,8 @@ define(function() {
         this.hide = function() {
             //$('#PrimitiveEditor').dialog('close');
             if (this.isOpen()) {
-                $('#PrimitiveEditor').hide('blind', function() {
+                 $('#primeditortitle').removeClass('sidetab-editor-title-active')
+                $('#PrimitiveEditor  #accordion').hide('blind', function() {
                     if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
                     if (!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible')) hideSidePanel();
                 });
@@ -171,7 +180,7 @@ define(function() {
         }
         this.isOpen = function() {
             //return $("#PrimitiveEditor").dialog( "isOpen" )
-            return $('#PrimitiveEditor').is(':visible')
+            return $('#PrimitiveEditor #accordion').is(':visible')
         }
         this.setProperty = function(id, prop, val, skipUndo) {
             //prevent the handlers from firing setproperties when the GUI is first setup;

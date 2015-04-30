@@ -1977,3 +1977,25 @@ ul li a .glyphicon {
   	  pointer-events: none;
   	  opacity: 0.85;
 }
+
+.sidetab-editor-title
+{
+	background:#222 url(images/ui-bg_glass_15_222222_1x400.png) 50% 50% repeat-x;
+	cursor: pointer
+
+}
+
+.sidetab-editor-title:hover
+{
+background:#3a8fff url(images/ui-bg_glass_20_3a8fff_1x400.png) 50% 50% repeat-x
+}
+
+.sidetab-editor-title-active
+{
+background:#3a8fff url(images/ui-bg_glass_20_3a8fff_1x400.png) 50% 50% repeat-x
+}
+
+.sidetab-editor-title-active:hover
+{
+background:#222 url(images/ui-bg_glass_15_222222_1x400.png) 50% 50% repeat-x;
+}
