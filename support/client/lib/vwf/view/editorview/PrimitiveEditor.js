@@ -26,7 +26,7 @@ define(function() {
 	    }
 
 
-        $('#sidepanel').append("<div id='PrimitiveEditor'>" + "<div id='primeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='sidetab-editor-title ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span id='primeditortitletext' class='ui-dialog-title' id='ui-dialog-title-Players'>Object Properties</span></div>" +
+        $('#sidepanel').append("<div id='PrimitiveEditor'>" + "<div id='primeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='sidetab-editor-title ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span id='primeditortitletext' class='ui-dialog-title' id='ui-dialog-title-Players'>Properties</span></div>" +
             '<div id="accordion" style="height:100%;overflow:hidden">' +
             '<h3><a href="#">Flags</a></h3>' +
             '<div>' +
@@ -255,7 +255,7 @@ define(function() {
 
                     this.addPropertyEditorDialog(node.id, 'DisplayName', $('#dispName'), 'text');
 
-                    $('#primeditortitletext').text($('#dispName').val() + ' Properties')
+                    
 
                     if ($('#dispName').val() == "") {
                         $('#dispName').val(node.name);
@@ -1110,10 +1110,7 @@ define(function() {
             {
             	_PrimitiveEditor.SelectionChanged(null, _Editor.GetSelectedVWFNode());
             }
-            if(_Editor.GetSelectedVWFID() == nodeID && propName == "DisplayName" && this.isOpen())
-            {
-                $('#primeditortitletext').text(propVal);
-            }
+            
 
             
             //if the editordata of a child behavior changes while selected, redraw

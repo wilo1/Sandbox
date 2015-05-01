@@ -330,7 +330,7 @@ define(function() {
 
 			$('#hierarchyManagerMakeNode').hide();
 			_RenderManager.removeHilightObject(HierarchyManager.previewNode);
-			$('#hierarchyManagertitletext').text((vwf.getProperty(this.selectedID, 'DisplayName') || "") + ' Hierarchy');
+			
 			$('#hierarchyDisplay').empty();
 			$('#InventoryRename').hide();
 			$('#InventoryRename').keypress(HierarchyManager.rename)

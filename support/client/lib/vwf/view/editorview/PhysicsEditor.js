@@ -59,9 +59,9 @@ define([], function() {
 
     function initialize() {
 
-        $('#sidepanel').append("<div id='PhysicsEditor'>" + "<div id='PhysicsEditortitle' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' >Physics Editor</div>" + "</div>");
+        $('#sidepanel').append("<div id='PhysicsEditor'>" + "<div id='PhysicsEditortitle' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' >Physics</div>" + "</div>");
         $("#PhysicsEditor").empty();
-        $("#PhysicsEditor").append("<div id='PhysicsEditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='sidetab-editor-title ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Physics Editor</span></div>");
+        $("#PhysicsEditor").append("<div id='PhysicsEditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='sidetab-editor-title ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Physics</span></div>");
 
         $('#PhysicsEditortitle').prepend('<div class="headericon material" />');
         $("#PhysicsEditor").append('<div id="physicsaccordion" style="height:100%;overflow:hidden"><h3><a href="#">Physics Basics</a>   </h3>   <div id="PhysicsBasicSettings"> </div></div>');
@@ -104,13 +104,15 @@ define([], function() {
         })
         this.show = function() {
 
-            $('#physicsaccordion').show('blind', function() {
-                if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
-            });
+           
             $('#PhysicsEditortitle').addClass('sidetab-editor-title-active')
             this.selectedID = _Editor.GetSelectedVWFID();
             showSidePanel();
             this.BuildGUI();
+            $('#physicsaccordion').hide();
+             $('#physicsaccordion').show('blind', function() {
+                if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
+            });
             $('#MenuPhysicsEditoricon').addClass('iconselected');
         }
         this.setProperty = function(id, propertyName, propertyValue) {
@@ -669,7 +671,7 @@ define([], function() {
                 lastTab = $("#physicsaccordion").accordion('option', 'active');
             } catch (e) {}
             $("#PhysicsEditor").empty();
-            $("#PhysicsEditor").append("<div id='PhysicsEditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='sidetab-editor-title-active sidetab-editor-title ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Physics Editor</span></div>");
+            $("#PhysicsEditor").append("<div id='PhysicsEditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='sidetab-editor-title-active sidetab-editor-title ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Physics</span></div>");
 
             $('#PhysicsEditortitle').prepend('<div class="headericon material" />');
             $("#PhysicsEditor").append('<div id="physicsaccordion" style="height:100%;overflow:hidden"><h3><a href="#">Physics Basics</a>   </h3>   <div id="PhysicsBasicSettings"> </div></div>');

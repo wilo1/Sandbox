@@ -13,10 +13,10 @@ define(["vwf/view/editorview/mapbrowser", "vwf/view/editorview/colorpicker.js"],
 
     function initialize() {
         window._MapBrowser = require("vwf/view/editorview/mapbrowser").getSingleton();
-        $('#sidepanel').append("<div id='materialeditor'>" + "<div id='materialeditortitle' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' >Material Editor</div>" + "</div>");
+        $('#sidepanel').append("<div id='materialeditor'>" + "<div id='materialeditortitle' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' >Material</div>" + "</div>");
         //$('#materialeditor').dialog({title:'Material Editor',autoOpen:false});
         $("#materialeditor").empty();
-        $("#materialeditor").append("<div id='materialeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='sidetab-editor-title ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Material Editor</span></div>");
+        $("#materialeditor").append("<div id='materialeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='sidetab-editor-title ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Material</span></div>");
 
         $('#materialeditortitle').prepend('<div class="headericon material" />');
         $("#materialeditor").append('<div id="materialaccordion" style="height:100%;overflow:hidden">' + '	<h3>' + '		<a href="#">Material Base</a>' + '	</h3>' + '	<div id="MaterialBasicSettings">' + '	</div>' + '</div>');
@@ -40,11 +40,13 @@ define(["vwf/view/editorview/mapbrowser", "vwf/view/editorview/colorpicker.js"],
             }
 
             $('#materialeditortitle').addClass('sidetab-editor-title-active')
+            
+            showSidePanel();
+            this.BuildGUI();
+            $('#materialaccordion').hide();
             $('#materialaccordion').show('blind', function() {
                 if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
             });
-            showSidePanel();
-            this.BuildGUI();
             $('#MenuMaterialEditoricon').addClass('iconselected');
 
         }
@@ -238,7 +240,7 @@ define(["vwf/view/editorview/mapbrowser", "vwf/view/editorview/colorpicker.js"],
 
             $("#materialeditor").empty();
             $("#materialeditor").empty();
-            $("#materialeditor").append("<div id='materialeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='sidetab-editor-title-active sidetab-editor-title ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Material Editor</span></div>");
+            $("#materialeditor").append("<div id='materialeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='sidetab-editor-title-active sidetab-editor-title ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Material</span></div>");
 
             $('#materialeditortitle').prepend('<div class="headericon material" />');
             $("#materialeditor").append('<div id="materialaccordion" style="height:100%;overflow:hidden">' + '	<h3>' + '		<a href="#">Material Base</a>' + '	</h3>' + '	<div id="MaterialBasicSettings">' + '	</div>' + '</div>');
