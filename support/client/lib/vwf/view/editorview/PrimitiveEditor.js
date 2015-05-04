@@ -4,7 +4,14 @@ define(function() {
     return {
         getSingleton: function() {
             if (!isInitialized) {
+                
+                var baseclass = require("vwf/view/editorview/panelEditor");
+                var base = new baseclass('PrimEditor','Properties','properties',false,true,'#sidepanel')
+                base.init();
+                $.extend(PrimEditor,base);
                 initialize.call(PrimEditor);
+                PrimEditor.bind();
+
                 isInitialized = true;
             }
             return PrimEditor;
@@ -26,7 +33,7 @@ define(function() {
 	    }
 
 
-        $('#sidepanel').append("<div id='PrimitiveEditor'>" + "<div id='primeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='sidetab-editor-title ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span id='primeditortitletext' class='ui-dialog-title' id='ui-dialog-title-Players'>Properties</span></div>" +
+        $('#' + this.contentID).append(
             '<div id="accordion" style="height:100%;overflow:hidden">' +
             '<h3><a href="#">Flags</a></h3>' +
             '<div>' +
@@ -67,17 +74,9 @@ define(function() {
             '</div>' +
             '</div>');
         
-        $('#primeditortitle').prepend('<div class="headericon properties" />');
         
-        var self = this;
-        $('#primeditortitle').click(function()
-        {
-            
-            if(self.isOpen())
-                self.hide()
-            else
-                self.show();
-        })
+        
+       
         $('.TransformEditorInput').spinner();
         $('#isStatic').change(function(e) {
             _PrimitiveEditor.setProperty('selection', 'isStatic', this.checked)
@@ -109,23 +108,7 @@ define(function() {
             }
             _PrimitiveEditor.setProperty(_Editor.GetSelectedVWFNode().id, 'DisplayName', $(this).val());
         });
-        $('#PrimitiveEditor').css('border-bottom', '5px solid #444444')
-        $('#PrimitiveEditor').css('border-left', '2px solid #444444')
-        //$('#PrimitiveEditor').resizable({
-        //    maxHeight: 550,
-        //    maxWidth: 320,
-        //    minHeight: 150,
-        //    minWidth: 320
-        //});
-        //$('#PrimitiveEditor').dialog({title:'Primitive Editor',autoOpen:false, 
-        //	resize:function(){
-        //		$( "#accordion" ).accordion( "resize" );
-        //		this.updateOtherWindows();
-        //	}.bind(this),
-        //	close:function(){
-        //		this.updateOtherWindows();
-        //	}.bind(this)
-        //});
+        debugger;
         $("#accordion").accordion({
             fillSpace: true,
             heightStyle: "content",
@@ -134,54 +117,7 @@ define(function() {
             }
         });
         $(".ui-accordion-content").css('height', 'auto');
-        this.show = function() {
-            $('#MenuObjectPropertiesicon').addClass('iconselected');
-            $('#primeditortitle').addClass('sidetab-editor-title-active')
-            //$('#PrimitiveEditor').dialog('open');
-            //$('#PrimitiveEditor').dialog('option','position',[1282,40]);
-            
-            $('#PrimitiveEditor #accordion').show('blind', function() {
-                if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
-            });
-            showSidePanel();
-            this.SelectionChanged(null, _Editor.GetSelectedVWFNode());
-            this.open = true;
-
-        }
-        this.hide = function() {
-            //$('#PrimitiveEditor').dialog('close');
-            if (this.isOpen()) {
-                 $('#primeditortitle').removeClass('sidetab-editor-title-active')
-                $('#PrimitiveEditor  #accordion').hide('blind', function() {
-                    if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
-                    if (!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible')) hideSidePanel();
-                });
-
-            }
-            $('#MenuObjectPropertiesicon').removeClass('iconselected');
-        }
-        this.disable = function()
-        {
-            if(this.isDisabled()) return;
-            $("#PrimitiveEditor").append("<div id='PrimitiveEditorDisable' class='editorPanelDisableOverlay'></div>")
-            $('#PrimitiveEditor').addClass('editorPanelDisable');
-            $("#PrimitiveEditor").find('*').addClass('editorPanelDisable');
-        }
-        this.isDisabled = function()
-        {
-            return $("#PrimitiveEditorDisable").length === 1;
-        }
-        this.enable = function()
-        {
-            if(!this.isDisabled()) return;
-            $("#PrimitiveEditorDisable").remove();
-            $('#PrimitiveEditor').removeClass('editorPanelDisable');
-            $("#PrimitiveEditor").find('*').removeClass('editorPanelDisable');
-        }
-        this.isOpen = function() {
-            //return $("#PrimitiveEditor").dialog( "isOpen" )
-            return $('#PrimitiveEditor #accordion').is(':visible')
-        }
+       
         this.setProperty = function(id, prop, val, skipUndo) {
             //prevent the handlers from firing setproperties when the GUI is first setup;
             if (this.inSetup) return;
@@ -232,19 +168,17 @@ define(function() {
                 alertify.alert('calling methods on multiple selections is not supported');
             }
         }
-
-        this.SelectionChanged = function(e, node) {
-            try {
-                this.currentWidgets = {};
-                if (node) {
-                    this.enable();
+        this.BuildGUI = function()
+        {
+                    this.currentWidgets = {};
                     this.inSetup = true;
                     this.clearPropertyEditorDialogs();
                     var lastTab = $("#accordion").accordion('option', 'active');
                     $("#accordion").accordion('destroy');
                     $("#accordion").children('.modifiersection').remove();
                     //update to ensure freshness
-                    node = _Editor.getNode(node.id);
+                    var node = _Editor.getNode(this.selectedID);
+                    if(!node) return;
                     node.properties = vwf.getProperties(node.id);
                     if (!node.properties) return;
 
@@ -324,13 +258,8 @@ define(function() {
                     $("#accordion").accordion({
                         'active': lastTab
                     });
-                } else {
-                    this.disable();
-                }
-            } catch (e) {
-                console.log(e);
-            }
         }
+        
 
         this.recursevlyAddPrototypes = function(node) {
             
@@ -1165,7 +1094,7 @@ define(function() {
                 //console.log(e);
             }
         }
-        $(document).bind('selectionChanged', this.SelectionChanged.bind(this));
+        
         $(document).bind('modifierCreated', this.SelectionChanged.bind(this));
         $(document).bind('selectionTransformedLocal', this.SelectionTransformed.bind(this));
        
