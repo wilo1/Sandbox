@@ -5,14 +5,19 @@ define(function() {
         getSingleton: function() {
             if (!isInitialized) {
                 
+               
                 var baseclass = require("vwf/view/editorview/panelEditor");
-                var base = new baseclass('PrimEditor','Properties','properties',false,true,'#sidepanel')
-                base.init();
-                $.extend(PrimEditor,base);
+                //var base = new baseclass('hierarchyManager','Hierarchy','hierarchy',false,true,'#sidepanel')
+                //base.init();
+                //$.extend(HierarchyManager,base);
+                baseclass(PrimEditor,'PrimitiveEditor','Properties','properties',true,true,'#sidepanel')
+                
+                PrimEditor.init()
                 initialize.call(PrimEditor);
-                PrimEditor.bind();
-
+                PrimEditor.bind()
                 isInitialized = true;
+
+               
             }
             return PrimEditor;
         }
@@ -108,7 +113,7 @@ define(function() {
             }
             _PrimitiveEditor.setProperty(_Editor.GetSelectedVWFNode().id, 'DisplayName', $(this).val());
         });
-        debugger;
+        
         $("#accordion").accordion({
             fillSpace: true,
             heightStyle: "content",
@@ -170,97 +175,102 @@ define(function() {
         }
         this.BuildGUI = function()
         {
-                    this.currentWidgets = {};
-                    this.inSetup = true;
-                    this.clearPropertyEditorDialogs();
-                    var lastTab = $("#accordion").accordion('option', 'active');
-                    $("#accordion").accordion('destroy');
-                    $("#accordion").children('.modifiersection').remove();
-                    //update to ensure freshness
-                    var node = _Editor.getNode(this.selectedID);
-                    if(!node) return;
-                    node.properties = vwf.getProperties(node.id);
-                    if (!node.properties) return;
+            this.currentWidgets = {};
+            this.inSetup = true;
+            this.clearPropertyEditorDialogs();
+            var lastTab = 0;
+            try{
+                lastTab = $("#accordion").accordion('option', 'active');
+                $("#accordion").accordion('destroy');
+            }catch(e)
+            {
+                //accordion was not init yet
+            }
+            
+            $("#accordion").children('.modifiersection').remove();
+            //update to ensure freshness
+            var node = _Editor.getNode(this.selectedID);
+            if(!node) return;
+            node.properties = vwf.getProperties(node.id);
+            if (!node.properties) return;
 
 
 
-                    $('#ui-dialog-title-ObjectProperties').text(vwf.getProperty(node.id, 'DisplayName') + " Properties");
-                    $('#dispName').val(vwf.getProperty(node.id, 'DisplayName') || node.id);
+            $('#ui-dialog-title-ObjectProperties').text(vwf.getProperty(node.id, 'DisplayName') + " Properties");
+            $('#dispName').val(vwf.getProperty(node.id, 'DisplayName') || node.id);
 
-                    this.addPropertyEditorDialog(node.id, 'DisplayName', $('#dispName'), 'text');
+            this.addPropertyEditorDialog(node.id, 'DisplayName', $('#dispName'), 'text');
 
-                    
+            
 
-                    if ($('#dispName').val() == "") {
-                        $('#dispName').val(node.name);
-                    }
-                    $('#dispOwner').val(vwf.getProperty(node.id, 'owner'));
+            if ($('#dispName').val() == "") {
+                $('#dispName').val(node.name);
+            }
+            $('#dispOwner').val(vwf.getProperty(node.id, 'owner'));
 
-                    if (vwf.getProperty(node.id, 'isStatic')) {
-                        $('#isStatic').prop('checked', 'checked');
-                    } else {
-                        $('#isStatic').prop('checked', '');
-                    }
+            if (vwf.getProperty(node.id, 'isStatic')) {
+                $('#isStatic').prop('checked', 'checked');
+            } else {
+                $('#isStatic').prop('checked', '');
+            }
 
-                    if (vwf.getProperty(node.id, 'visible')) {
-                        $('#isVisible').prop('checked', 'checked');
-                    } else {
-                        $('#isVisible').prop('checked', '');
-                    }
+            if (vwf.getProperty(node.id, 'visible')) {
+                $('#isVisible').prop('checked', 'checked');
+            } else {
+                $('#isVisible').prop('checked', '');
+            }
 
-                    if (vwf.getProperty(node.id, 'inheritScale')) {
-                        $('#inheritScale').prop('checked', 'checked');
-                    } else {
-                        $('#inheritScale').prop('checked', '');
-                    }
+            if (vwf.getProperty(node.id, 'inheritScale')) {
+                $('#inheritScale').prop('checked', 'checked');
+            } else {
+                $('#inheritScale').prop('checked', '');
+            }
 
-                    if (vwf.getProperty(node.id, 'isDynamic')) {
-                        $('#isDynamic').prop('checked', 'checked');
-                    } else {
-                        $('#isDynamic').prop('checked', '');
-                    }
-                    if (vwf.getProperty(node.id, 'castShadows')) {
-                        $('#castShadows').prop('checked', 'checked');
-                    } else {
-                        $('#castShadows').prop('checked', '');
-                    }
-                    if (vwf.getProperty(node.id, 'isSelectable')) {
-                        $('#isSelectable').prop('checked', 'checked');
-                    } else {
-                        $('#isSelectable').prop('checked', '');
-                    }
-                    if (vwf.getProperty(node.id, 'passable')) {
-                        $('#passable').prop('checked', 'checked');
-                    } else {
-                        $('#passable').prop('checked', '');
-                    }
-                    if (vwf.getProperty(node.id, 'receiveShadows')) {
-                        $('#receiveShadows').prop('checked', 'checked');
-                    } else {
-                        $('#receiveShadows').prop('checked', '');
-                    }
-                    $('#BaseSectionTitle').text(node.properties.type || "Type" + ": " + node.id);
-                    this.SelectionTransformed(null, node);
-                    this.setupAnimationGUI(node, true);
-                    this.setupEditorData(node, true);
-                    this.recursevlyAddPrototypes(node);
-                    this.recursevlyAddModifiers(node);
-                    this.addBehaviors(node);
-                    $("#accordion").accordion({
-                        heightStyle: 'fill',
-                        activate: function() {
-                            if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
-                        }
-                    });
-                    $(".ui-accordion-content").css('height', 'auto');
-                    this.inSetup = false;
+            if (vwf.getProperty(node.id, 'isDynamic')) {
+                $('#isDynamic').prop('checked', 'checked');
+            } else {
+                $('#isDynamic').prop('checked', '');
+            }
+            if (vwf.getProperty(node.id, 'castShadows')) {
+                $('#castShadows').prop('checked', 'checked');
+            } else {
+                $('#castShadows').prop('checked', '');
+            }
+            if (vwf.getProperty(node.id, 'isSelectable')) {
+                $('#isSelectable').prop('checked', 'checked');
+            } else {
+                $('#isSelectable').prop('checked', '');
+            }
+            if (vwf.getProperty(node.id, 'passable')) {
+                $('#passable').prop('checked', 'checked');
+            } else {
+                $('#passable').prop('checked', '');
+            }
+            if (vwf.getProperty(node.id, 'receiveShadows')) {
+                $('#receiveShadows').prop('checked', 'checked');
+            } else {
+                $('#receiveShadows').prop('checked', '');
+            }
+            $('#BaseSectionTitle').text(node.properties.type || "Type" + ": " + node.id);
+            this.SelectionTransformed(null, node);
+            this.setupAnimationGUI(node, true);
+            this.setupEditorData(node, true);
+            this.recursevlyAddPrototypes(node);
+            this.recursevlyAddModifiers(node);
+            this.addBehaviors(node);
+            $("#accordion").accordion({
+                heightStyle: 'fill',
+                activate: function() {
+                    if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
+                }
+            });
+            $(".ui-accordion-content").css('height', 'auto');
+            this.inSetup = false;
 
-                    $("#accordion").accordion({
-                        'active': lastTab
-                    });
+            $("#accordion").accordion({
+                'active': lastTab
+            });
         }
-        
-
         this.recursevlyAddPrototypes = function(node) {
             
             

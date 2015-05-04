@@ -7,11 +7,14 @@ define(function() {
 
 				
 				var baseclass = require("vwf/view/editorview/panelEditor");
-				var base = new baseclass('hierarchyManager','Hierarchy','hierarchy',false,true,'#sidepanel')
-				base.init();
-				$.extend(HierarchyManager,base);
+				//var base = new baseclass('hierarchyManager','Hierarchy','hierarchy',false,true,'#sidepanel')
+				//base.init();
+				//$.extend(HierarchyManager,base);
+				baseclass(HierarchyManager,'hierarchyManager','Hierarchy','hierarchy',false,true,'#sidepanel')
+				
+				HierarchyManager.init()
 				initialize.call(HierarchyManager);
-				HierarchyManager.bind();
+				HierarchyManager.bind()
 				isInitialized = true;
 			}
 			return HierarchyManager;
@@ -436,12 +439,21 @@ define(function() {
 		
 		this.createdNode = function(id) {
 
-			if (this.selectedID == id || vwf.decendants(this.selectedID).indexOf(id) != -1) {
+			
 				window.setTimeout(function() {
 					this.BuildGUI();
 				}.bind(this), 500)
 
-			}
+			
+		}
+		this.deletedNode = function(id) {
+
+			
+				window.setTimeout(function() {
+					this.BuildGUI();
+				}.bind(this), 500)
+
+			
 		}
 		this.satProperty = function(id,propname,val)
 		{
