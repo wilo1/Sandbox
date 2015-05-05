@@ -202,11 +202,13 @@ margin-bottom: -4px;
 		font-family: 'Open Sans',sans-serif;
 		background: black;
 		border: 1px solid gray;
-		box-shadow: 2px 2px 2px gray;
+		/* box-shadow: 2px 2px 2px gray; */
 		font-style: italic;
 		color:white;
 	
-	}
+	
+		margin: 0px;
+}
 	.AutoCompleteOption
 	{
 		font-size: 1.5em;
@@ -233,12 +235,14 @@ margin-bottom: -4px;
 		z-index: 10000000;
 		background: black;
 		border: 1px solid #888;
-		box-shadow: 5px 5px 10px #888;
-		border-radius: 5px;
+		/* box-shadow: 5px 5px 10px #888; */
+		/* border-radius: 5px; */
 		overflow-y: auto !important;
 		overflow-x: hidden !important;
 
-	}
+	
+		margin: 0px;
+}
 	input[type="text"]:focus, input[type="password"]:focus
 	{
 		box-shadow: 0px 0px 5px rgba(130, 184, 255,1);
@@ -1925,7 +1929,7 @@ div#Translation .ui-spinner, div#Rotation .ui-spinner, div#Scale .ui-spinner
 
 div#otherprops input[type=text] {
 color: black;
-border-radius: 5px;
+/* border-radius: 5px; */
 padding: 0px;
 margin: 2px;
 }

@@ -10,7 +10,7 @@ text-shadow: 0 -1px 0 rgba(0,0,0,.25);
 
 
 
-background: #3a8fff url(../../../css/images/ui-bg_glass_20_3a8fff_1x400.png) 50% 50% repeat-x;
+background: #3a8fff;
 border: 1px solid #040;
 color: #FFF;
 text-align: center;
@@ -47,7 +47,7 @@ border-radius: 5px
 /* border: 1px solid #26b3f7; */    
 
 
-background: #AEAEAE url(../../../css/images/ui-bg_glass_80_888888_1x400.png) 50% 50% repeat-x;    
+background: #FAFAFA  50% 50% repeat-x;    
 
 
 font-weight: 700;    

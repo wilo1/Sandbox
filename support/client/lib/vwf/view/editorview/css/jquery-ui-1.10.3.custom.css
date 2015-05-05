@@ -517,7 +517,8 @@ input.ui-button::-moz-focus-inner,button.ui-button::-moz-focus-inner {
     position:relative;
     cursor: move;
 border: 1px solid #26b3f7;
-background: #3a8fff url("images/ui-bg_glass_20_3a8fff_1x400.png") 50% 50% repeat-x;
+
+    background: #3a8fff  50% 50% repeat-x;
 font-weight: bold;
 color: #fff;
 }
