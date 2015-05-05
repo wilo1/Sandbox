@@ -308,7 +308,7 @@ define(["vwf/view/editorview/mapbrowser", "vwf/view/editorview/colorpicker.js"],
             $('#MaterialBasicSettings').append('<div style="clear:both" />');
 
 
-            var colorswatchstyle = "margin: 5px;float:right;clear:right;background-color: #FF19E9;width: 25px;height: 25px;border: 2px solid lightgray;border-radius: 3px;display: inline-block;margin-left: 20px;vertical-align: middle;box-shadow: 2px 2px 5px,1px 1px 3px gray inset;background-image: url(vwf/view/editorview/images/select3.png);background-position: center;";
+            var colorswatchstyle = "margin: 5px;float:right;clear:right;background-color: #FF19E9;width: 25px;height: 25px;border: 2px solid lightgray;display: inline-block;margin-left: 20px;vertical-align: middle;background-image: url(vwf/view/editorview/images/select3.png);background-position: center;";
             $('#MaterialBasicSettings').append('<div style="clear:both" />');
             $('#MaterialBasicSettings').append('<div style="margin-bottom:10px" id="colordiv" />');
             $('#colordiv').append('<div style="display:inline-block;margin-bottom: 3px;margin-top: 15px;">Diffuse Color: </div>');
