@@ -4,13 +4,13 @@ module.exports.test = function(cb)
 	require("../utils/testutils.js").loadBlank(function()
 	{
 		require("../utils/testutils.js").nextGUID("testSphere");
-		var e1 = driver.findElement(webdriver.By.id('MenuCreate'));
+		var e1 = driver.findElement(By.id('MenuCreate'));
 		e1.click();
-		driver.sleep(1000);
-		var e1 = driver.findElement(webdriver.By.id('MenuPrimitives'));
+		driver.sleep(100);
+		var e1 = driver.findElement(By.id('MenuPrimitives'));
 		e1.click();
-		driver.sleep(1000);
-		var e1 = driver.findElement(webdriver.By.id('MenuCreateSphere'));
+		driver.sleep(100);
+		var e1 = driver.findElement(By.id('MenuCreateSphere'));
 		e1.click().then(function()
 		{
 			require("../utils/testutils.js").waitForNode("sphere2-vwf-testSphere",500, function(node)

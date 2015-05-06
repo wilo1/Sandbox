@@ -26,6 +26,8 @@ function updateAndRunTests(cb2)
 	stderrLog = "";
 	var sandbox = null;
 	global.webdriver = require('selenium-webdriver');
+	global.By = webdriver.By;
+	global.until = webdriver.until;
 	global.driver = new webdriver.Builder().
 	withCapabilities(webdriver.Capabilities.chrome()).
 	build();
@@ -33,33 +35,6 @@ function updateAndRunTests(cb2)
 	report.gitLog = "";
 	async.series([
 			//do a get pull and update the dev branch
-			function gitPull(cb)
-			{
-				console.log("Git Pull");
-				var gitpull = childprocess.spawn("git", ["pull"],
-				{
-					cwd: "../../../",
-					//stdio:'inherit' 
-				});
-				//log errors
-				gitpull.stdout.on('data', function(data)
-				{
-					report.gitLog += data.toString();
-				});
-				gitpull.stderr.on('data', function(data)
-				{
-					report.gitLog += data.toString();
-				});
-				//wait for process to complete
-				gitpull.on('close', function(code)
-				{
-					if (code !== 0)
-					{
-						console.log('ps process exited with code ' + code);
-					}
-					cb();
-				});
-			},
 			function startSandbox(cb)
 			{
 				console.log("Sandbox start");
@@ -104,23 +79,29 @@ function updateAndRunTests(cb2)
 							if (status == CANCELING)
 							{
 								console.log("canceling run")
-								nextfile(true);
+								global.setTimeout(nextfile, 500)
 								return;
 							}
 							//each test can be a function that returns an array of tests, or a single test
 							delete require.cache["../client/" + filename] // remove so the results are not cached, and the above git pull can update tests
 							var test = require("../client/" + filename);
+							var newTests = null;
 							if (test instanceof Function)
-								tests = tests.concat(test())
-							else tests.push(test);
-							test.filename = filename;
-							var id = test.filename + ":" + test.title;
-							report.tests[id] = {
-								status: "not started",
-								result: null,
-								message: null,
-								title: test.title,
-								filename: test.filename
+								newTests = test();
+							else newTests = [test]
+							tests = tests.concat(newTests)
+							for (var i in newTests)
+							{
+								var test = newTests[i]
+								test.filename = filename;
+								var id = test.filename + ":" + test.title;
+								report.tests[id] = {
+									status: "not started",
+									result: null,
+									message: null,
+									title: test.title,
+									filename: test.filename
+								}
 							}
 							nextfile();
 						}, nextStep);
@@ -134,7 +115,7 @@ function updateAndRunTests(cb2)
 							if (status == CANCELING)
 							{
 								console.log("canceling run")
-								nextTest(true);
+								global.setTimeout(nextTest, 500)
 								return;
 							}
 							//setup reporting data
@@ -149,17 +130,20 @@ function updateAndRunTests(cb2)
 								//create an error context to catch exceptions and crashes in async code
 							var domain = require('domain').create();
 							domain.on('error', function(err)
-								{
-									//log error and go to next test on error
-									report.tests[this.id].status = "error";
-									report.tests[this.id].result = "error";
-									report.tests[this.id].message = err.toString();
-									console.log(this.id);
-									console.log(err.stack);
-									nextTest();
-								}.bind({id:id}))
+							{
+								//log error and go to next test on error
+								report.tests[this.id].status = "error";
+								report.tests[this.id].result = "error";
+								report.tests[this.id].message = err.toString();
+								console.log(this.id);
+								console.log(err.stack);
+								nextTest();
+							}.bind(
+							{
+								id: id
+							}))
 							console.log(id);
-								//run the test in the error handling context
+							//run the test in the error handling context
 							domain.run(function()
 							{
 								//the actual test
@@ -173,8 +157,7 @@ function updateAndRunTests(cb2)
 										report.tests[id].result = "failed";
 									report.tests[id].message = message;
 									domain.exit();
-									global.setTimeout(nextTest,500)
-									
+									global.setTimeout(nextTest, 500)
 								})
 							})
 						}, nextStep);
@@ -202,10 +185,88 @@ function updateAndRunTests(cb2)
 		function()
 		{
 			status = COMPLETE;
-			console.log(report);
 			if (cb2)
 				cb2();
 		})
+}
+
+function cancel_run(cancelComplete)
+{
+	if (status == CANCELING)
+	{
+		console.log('already canceling')
+		return;
+	}
+	console.log(status);
+	if (status == RUNNING)
+		status = CANCELING;
+	async.until(function()
+	{
+		return status == COMPLETE || status == NOTSTARTED;
+	}, function(cb)
+	{
+		console.log('waiting for cancel');
+		global.setTimeout(cb, 1000);
+	}, function()
+	{
+		cancelComplete();
+	})
+}
+
+function gitPull(pullComplete)
+{
+	console.log("Git Pull");
+	var gitpull = childprocess.spawn("git", ["pull"],
+	{
+		cwd: "../../../",
+		//stdio:'inherit' 
+	});
+	//log errors
+	gitpull.stdout.on('data', function(data)
+	{
+		report.gitLog += data.toString();
+	});
+	gitpull.stderr.on('data', function(data)
+	{
+		report.gitLog += data.toString();
+	});
+	//wait for process to complete
+	gitpull.on('close', function(code)
+	{
+		if (code !== 0)
+		{
+			console.log('ps process exited with code ' + code);
+		}
+		pullComplete();
+	});
+};
+
+function quit_and_restart()
+{
+	console.log("staring run")
+	server._connections = 0;
+	server.close(function()
+	{
+		gitPull(function()
+		{
+			console.log('restart');
+			global.setTimeout(function()
+			{
+				console.log('spawn');
+				var child = require('child_process').spawn('node', ['server.js'],
+				{
+					detached: true,
+					stdio: 'ignore'
+				});
+				child.unref();
+				console.log('close');
+				global.setTimeout(function()
+				{
+					process.exit();
+				}, 1000);
+			});
+		}, 500)
+	});
 }
 var server = http.createServer();
 server.on('request', function(request, response)
@@ -227,31 +288,18 @@ server.on('request', function(request, response)
 	}
 	if (request.url == "/runTests")
 	{
-		if (status == CANCELING)
-		{
-			console.log('already canceling')
-			response.end();
-			return;
-		}
-		console.log(status);
-		if (status == RUNNING)
-			status = CANCELING;
-		async.until(function()
-		{
-			return status == COMPLETE || status == NOTSTARTED;
-		}, function(cb)
-		{
-			console.log('waiting for cancel');
-			global.setTimeout(cb, 1000);
-		}, function()
-		{
-			console.log("staring run")
-			updateAndRunTests(function()
+		response.end();
+		request.connection.destroy();
+		cancel_run(quit_and_restart);
+	}
+	if (request.url == "/quit")
+	{
+		response.end();
+		request.connection.destroy();
+		cancel_run(function()
 			{
-				console.log(stdoutLog);
-				response.end();
+				process.exit();
 			});
-		})
 	}
 	if (request.url == "/status")
 	{
@@ -261,3 +309,4 @@ server.on('request', function(request, response)
 	}
 });
 server.listen(8181);
+updateAndRunTests(function() {})
