@@ -120,7 +120,7 @@ padding: 4px 4px 4px 4px;
 #playButton
 {
 
-	background-image: url(../images/icons/sprites.png) !important;
+	background-image: url(../images/icons/sprites.svg) !important;
 background-origin: content-box !important;
 background-position: -212px -56px;
 background-size: 646px;
@@ -128,18 +128,24 @@ background-size: 646px;
 #pauseButton
 {
 
-	background-image: url(../images/icons/sprites.png) !important;
+	background-image: url(../images/icons/sprites.svg) !important;
 background-origin: content-box !important;
-background-position: -261px -56px;
+
+
+	background-position: -262px -56px;
 background-size: 645px;
 }
 #stopButton
 {
 
-	background-image: url(../images/icons/sprites.png) !important;
+	background-image: url(../images/icons/sprites.svg) !important;
 background-origin: content-box !important;
-background-position: -309px  -56px;
-background-size: 646px;
+
+
+	background-position: -349px  -65px;
+
+
+	background-size: 718px;
 }
 .timeControl {
 
