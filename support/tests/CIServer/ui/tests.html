@@ -1,0 +1,55 @@
+<html>
+<head>
+<script src="jquery-2.0.3.min.js"> </script>
+<script src="jquery-ui-1.10.3.custom.min.js"> </script>
+<link rel="stylesheet" type="text/css"  href="jquery-ui-1.10.3.custom.css" > </link>
+<link rel="stylesheet" type="text/css"  href="testing.css" > </link>
+<script> 
+
+	$(document).ready(function()
+	{
+		$("#runTests").button();
+		$("#runTests").click(function()
+		{
+			$.get("../runTests");
+		});
+		window.setInterval(function()
+		{
+			$.getJSON("../status",function(status)
+				{
+					//$("#status").text(JSON.stringify(status));		
+					$("#tests").empty();
+					var tests = status.tests;
+					for(var i in tests)
+					{
+						var testID = i.replace(/[^a-zA-Z]/g,"_");
+						$("#tests").append("<div class='testrow' id = '"+testID+"' ></div>")
+						$("#" + testID).append("<div class='testtitle'>" + tests[i].title + "</div>");
+						$("#" + testID).append("<div class='testfile'>" + tests[i].filename + "</div>");
+						$("#" + testID).append("<div class='teststatus'>" + tests[i].status + "</div>");
+						$("#" + testID).append("<div class='testresult'>" + tests[i].result + "</div>");
+						$("#" + testID).append("<div class='testmessage'>" + tests[i].message + "</div>");
+					}
+				$(".testresult:contains('passed')").css("background-color","green");
+				$(".testresult:contains('failed')").css("background-color","red");
+				$(".testresult:contains('error')").css("background-color","orange");
+
+				$(".teststatus:contains('error')").css("background-color","orange");
+				$(".teststatus:contains('complete')").css("background-color","green");
+				$(".teststatus:contains('running')").css("background-color","lightgreen");
+				});
+			
+
+
+
+
+		},1000)
+	})
+
+</script>
+</head>
+<body>
+	<div id = "runTests">Run</div>
+	<div id = "status"> <div id="tests" ></div></div>
+</body>
+</html>
