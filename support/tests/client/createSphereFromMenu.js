@@ -6,10 +6,10 @@ module.exports.test = function(cb)
 		require("../utils/testutils.js").nextGUID("testSphere");
 		var e1 = driver.findElement(By.id('MenuCreate'));
 		e1.click();
-		driver.sleep(100);
+		driver.sleep(300);
 		var e1 = driver.findElement(By.id('MenuPrimitives'));
 		e1.click();
-		driver.sleep(100);
+		driver.sleep(300);
 		var e1 = driver.findElement(By.id('MenuCreateSphere'));
 		e1.click().then(function()
 		{

@@ -19,3 +19,4 @@ config.json
 /public/adl/sandbox/marsgame/*
 *.pem
 *.orig
+selenium-server-standalone-2.45.0.jar

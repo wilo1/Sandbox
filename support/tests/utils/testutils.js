@@ -2,8 +2,8 @@ var async = require("async");
 module.exports.loadBlank = function(cb)
 {
 	driver.get("http://localhost:3000/adl/sandbox/example_blank/");
-	driver.wait(until.elementLocated(By.id('preloadGUIBack')), 10000);
-	driver.wait(until.elementIsNotVisible(driver.findElement(By.id('preloadGUIBack'))), 10000);
+	driver.wait(until.elementLocated(By.id('preloadGUIBack')), 30000);
+	driver.wait(until.elementIsNotVisible(driver.findElement(By.id('preloadGUIBack'))), 30000);
 	driver.sleep(3000);
 	cb();
 }

@@ -5,10 +5,10 @@ function testcreateprim(createButton, nodeID, assert)
 		require("../utils/testutils.js").nextGUID("testSphere");
 		var e1 = driver.findElement(By.id('MenuCreate'));
 		e1.click();
-		driver.sleep(100);
+		driver.sleep(300);
 		var e1 = driver.findElement(By.id('MenuPrimitives'));
 		e1.click();
-		driver.sleep(100);
+		driver.sleep(300);
 		var e1 = driver.findElement(By.id(createButton));
 		e1.click().then(function()
 		{
