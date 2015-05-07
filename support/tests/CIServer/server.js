@@ -25,17 +25,13 @@ function updateAndRunTests(cb2) {
     var sandbox = null;
 
 
-    global.webdriver = require('selenium-webdriver');
-    global.chrome = require('selenium-webdriver/chrome');  
-    global.firefox = require('selenium-webdriver/firefox');
-    var path = require('chromedriver').path;
-    var service = new chrome.ServiceBuilder(path).build();
-    chrome.setDefaultService(service);
-    global.driver = new webdriver.Builder().usingServer().withCapabilities(webdriver.Capabilities.ie()).build();
-    //global.driver = new webdriver.Builder().forBrowser('ie').build();
-
-    global.By = webdriver.By;
-    global.until = webdriver.until;
+    var webdriverio = require('webdriverio');
+    var options = {
+        desiredCapabilities: {
+            browserName: 'chrome'
+        }
+    };
+    global.browser = webdriverio.remote(options);
 
 
     report = {};
@@ -185,7 +181,7 @@ function updateAndRunTests(cb2) {
                 global.setTimeout(cb, 3000);
             },
             function killSandbox(cb) {
-                driver.quit();
+              //  browser.quit();
                 console.log("Sandbox stop");
                 sandbox.kill();
                 sandbox.on('close', function(code) {
@@ -293,6 +289,9 @@ server.on('request', function(request, response) {
     }
 });
 
+require('child_process').exec("selenium-standalone", ['start'])
+setTimeout(function() {
+    server.listen(8181);
+    updateAndRunTests(function() {})
 
-server.listen(8181);
-updateAndRunTests(function() {})
+},5000)
