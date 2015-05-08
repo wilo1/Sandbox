@@ -2,7 +2,7 @@ var async = require("async");
 module.exports.loadBlank = function(cb)
 {
 	browser
-		.url('http://localhost:3000/adl/sandbox/example_blank/')
+		.url('http://localhost:3000/adl/sandbox/example_blank/?norender=true')
 		.waitForExist('#preloadGUIBack', 10000)
 		.waitForVisible('#preloadGUIBack', 10000,true)
 		.pause(3000);

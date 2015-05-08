@@ -1813,9 +1813,12 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
             window._dScene = scene;
             window._dbackgroundScene = backgroundScene;
             window._dRenderer = renderer;
-            
-            window._RenderManager = new (require("vwf/view/threejs/SandboxRenderer"))(_dRenderer,mycanvas);
-            glext_ft = _dRenderer.context.getExtension("GLI_frame_terminator");
+              window._RenderManager = new(require("vwf/view/threejs/SandboxRenderer"))(_dRenderer, mycanvas);
+            if (renderer)
+            {
+              
+                glext_ft = _dRenderer.context.getExtension("GLI_frame_terminator");
+            }
             window._dSceneNode = sceneNode;
             sceneNode.frameCount = 0; // needed for estimating when we're pick-safe
 
