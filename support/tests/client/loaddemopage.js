@@ -1,4 +1,4 @@
-module.exports.title = "load the homepage"
+module.exports.title = "load the demo page"
 module.exports.test = function(browser,cb)
 {
 	browser
