@@ -1,15 +1,16 @@
-module.exports.title = "Create a sphere from the menu"
-module.exports.test = function(cb)
+module.exports.title = "load the homepage"
+module.exports.test = function(browser,cb)
 {
 	browser
-		.init()
-        .url('http://www.google.com')
+		
+        .url('http://sandbox.adlnet.gov/adl/sandbox')
         .getTitle()
         .then(function(title) {
             console.log('Title was: ' + title);
+            cb(true,title);
         })
         .catch(function(error) {
             console.log('uups something went wrong', error);
         })
-        .end().then(cb(true));
+        
 }

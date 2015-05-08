@@ -26,6 +26,15 @@ $(document).ready(function()
 				{
 					//$("#status").text(JSON.stringify(status));		
 					$("#tests").empty();
+					$("#gitLog").text(status.gitLog);
+					if(status.status == 1)
+						$("#test_status").text('Running');
+					if(status.status == 0)
+						$("#test_status").text('Complete');
+					if(status.status == 2)
+						$("#test_status").text('Canceling');
+					if(status.status == 3)
+						$("#test_status").text('Not Started');
 					var tests = status.tests;
 					for (var i in tests)
 					{
@@ -45,6 +54,7 @@ $(document).ready(function()
 					$(".teststatus:contains('running')").css("background-color", "lightgreen");
 				});
 			}
+			display();
 			window.setInterval(function()
 			{
 				display();
@@ -52,13 +62,13 @@ $(document).ready(function()
 			window.setInterval(function()
 			{
 				window.location.reload();
-			}, 30000)
+			}, 30000) 
 })
 </script>
 </head>
 <body>
 	<div id = "runTests">Run</div>
 	<div id = "quitTests">Quit</div>
-	<div id = "status"> <div id="tests" ></div></div>
+	<div id = "status"> <div id="gitLog" ></div><div id="test_status" ></div> <div id="tests" ></div></div>
 </body>
 </html>

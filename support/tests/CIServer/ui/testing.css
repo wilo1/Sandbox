@@ -1,13 +1,13 @@
 
 body {
-	font-family: sans-serif;
+    font-family: sans-serif;
 }
 .testrow
 {
   background: rgb(250, 250, 250);
   width:100%;
 }
-.testrow:nth-child(2)
+.testrow:nth-child(odd)
 {
   background: rgb(230, 230, 230);
   width:100%;
@@ -21,25 +21,27 @@ body {
 .testfile
 {
     display: inline-block;
-	
+    
     width: 20%;
 }
 .teststatus
 {
     display: inline-block;
-	
+    
     width: 5%;
     background: gray;
     margin-right: 1em;
     text-align: center;
+    padding: 1em;
 }
 .testresult
 {
     display: inline-block;
-	
+    
     width: 5%;
     background: gray;
     text-align: center;
+    padding: 1em;
 }
 .testresult:content(passed)
 {
@@ -47,7 +49,10 @@ body {
 }
 .testmessage
 {
-    display: inline;
-	
+    display: inline-block;
+    
     padding-left: 1em;
+    width: 40%;
+    vertical-align: middle;
+    margin: 8px;
 }

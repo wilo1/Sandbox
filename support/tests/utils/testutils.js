@@ -1,44 +1,59 @@
 var async = require("async");
 module.exports.loadBlank = function(cb)
 {
-	driver.get("http://localhost:3000/adl/sandbox/example_blank/");
-	driver.wait(until.elementLocated(By.id('preloadGUIBack')), 30000);
-	driver.wait(until.elementIsNotVisible(driver.findElement(By.id('preloadGUIBack'))), 30000);
-	driver.sleep(3000);
+	browser
+		.url('http://localhost:3000/adl/sandbox/example_blank/')
+		.waitForExist('#preloadGUIBack', 10000)
+		.waitForVisible('#preloadGUIBack', 10000,true)
+		.pause(3000);
+		
 	cb();
 }
 module.exports.nextGUID = function(GUID)
 {
-	driver.executeScript("GUID.nextGUID = '" + GUID + "';")
+	browser.execute(function(id){
+		window.GUID.nextGUID = id;
+	}, [GUID]);
 }
-module.exports.waitForNode = function(ID, timeout, done)
+module.exports.waitForNode = function(name, timeout, done)
 {
 	timeout = timeout || 500;
-	timeout = timeout / 100;
-	var counter = 0;
-	var node = null;
-	var result = null;
-	async.until(function()
-	{
-		counter++
-		node = driver.executeScript("try{return vwf.getNode('" + ID + "')}catch(e){return null}");
-		return counter > timeout || result !== null;
-	}, function(cb)
-	{
-		node.then(function(returnval)
-		{
-			result = returnval;
-			global.setTimeout(cb, 100)
-		})
-	}, function()
-	{
-		done(result);
-	})
+	var t0 = Date.now();
+	var result 
+	
+	function loop(){
+		if(!result && Date.now() - t0 < timeout){
+			browser.execute(getNode, name,function(err,r)
+			{
+				result = r.value;
+			});
+			global.setTimeout(loop, 100);
+		}
+		else{
+
+			done(result);
+		}
+	};
+		
+	global.setTimeout(loop, 100);
 }
-module.exports.assertNodeExists = function(ID, assert)
+
+function getNode(name){
+	try{
+		//adding "" is just to ensure that id is a String
+		var id = vwf.find(vwf.application(),name)[0]
+		return vwf.getNode("" + id);
+	}
+	catch(e){
+		return null;
+	}
+}
+
+module.exports.assertNodeExists = function(name, assert)
 {
-	this.waitForNode(ID, 1500, function(node)
+	this.waitForNode(name, 6500, function(node)
 	{
+		console.log(JSON.stringify(node))
 		if (node)
 		{
 			assert(true, JSON.stringify(node.id));
