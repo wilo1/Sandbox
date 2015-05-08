@@ -3,7 +3,7 @@ module.exports.test = function(browser,cb)
 {
 	browser
 		
-        .url('http://sandbox.adlnet.gov/adl/sandbox')
+        .url('http://localhost:3000/adl/sandbox')
         .getTitle()
         .then(function(title) {
             console.log('Title was: ' + title);
