@@ -15,7 +15,7 @@ module.exports = {
 				.click('#MenuCreateSphere')
 				.pause(3000).then(function()
 				{
-					testUtils.assertNodeExists("testSphere2", finished)
+					testUtils.assertNodeExists("testSphere", finished)
 				})
 		});
 	}

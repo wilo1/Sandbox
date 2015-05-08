@@ -5,17 +5,17 @@ module.exports = {
 		var testUtils = require('../utils/testutils.js');
 		testUtils.loadBlank(function()
 		{
-			testUtils.nextGUID('testBox');
+			testUtils.nextGUID('testCone');
 			browser
 				.click('#MenuCreate')
 				//gets the ul that is the sibling of #MenuCreate
 				.waitForVisible('#MenuPrimitives', 1000)
 				.click('#MenuPrimitives')
-				.waitForVisible('#MenuCreateSphere', 1000)
+				.waitForVisible('#MenuCreateCone', 1000)
 				.click('#MenuCreateBox')
 				.pause(3000).then(function()
 				{
-					testUtils.assertNodeExists("testBox", finished)
+					testUtils.assertNodeExists("testCone", finished)
 				})
 		});
 	}
