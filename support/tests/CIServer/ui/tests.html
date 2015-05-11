@@ -11,13 +11,19 @@ $(document).ready(function()
 			$("#runTests").click(function()
 			{
 				$.get("../runTests");
-				window.location.reload();
+				
 			});
 			$("#quitTests").button();
 			$("#quitTests").click(function()
 			{
 				$.get("../quit");
-				window.location.reload();
+				
+			});
+			$("#stopTests").button();
+			$("#stopTests").click(function()
+			{
+				$.get("../stop");
+				
 			});
 
 			function display()
@@ -40,6 +46,14 @@ $(document).ready(function()
 					{
 						var testID = i.replace(/[^a-zA-Z]/g, "_");
 						$("#tests").append("<div class='testrow' id = '" + testID + "' ></div>")
+						$("#" + testID).append("<div  class='runtest' id='run"+testID+"'>Run</div>");
+						$("#run" + testID).attr('test',i)
+						$("#run" + testID).click(function()
+						{
+							var id = $(this).attr('test');
+							$.get("../runOne?" + encodeURIComponent(id));
+						})
+						$("#run" + testID).button();
 						$("#" + testID).append("<div class='testtitle'>" + tests[i].title + "</div>");
 						$("#" + testID).append("<div class='testfile'>" + tests[i].filename + "</div>");
 						$("#" + testID).append("<div class='teststatus'>" + tests[i].status + "</div>");
@@ -69,6 +83,7 @@ $(document).ready(function()
 <body>
 	<div id = "runTests">Run</div>
 	<div id = "quitTests">Quit</div>
+	<div id = "stopTests">Stop</div>
 	<div id = "status"> <div id="gitLog" ></div><div id="test_status" ></div> <div id="tests" ></div></div>
 </body>
 </html>

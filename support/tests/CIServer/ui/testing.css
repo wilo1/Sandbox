@@ -52,7 +52,12 @@ body {
     display: inline-block;
     
     padding-left: 1em;
-    width: 40%;
+    width: 34%;
     vertical-align: middle;
     margin: 8px;
+}
+
+.runtest
+{
+    zoom:50%;
 }
