@@ -7,7 +7,7 @@ module.exports.test = function(browser,cb)
         .getTitle()
         .then(function(title) {
             console.log('Title was: ' + title);
-            cb(true,title);
+            cb(!!title,title);
         })
         .catch(function(error) {
             console.log('uups something went wrong', error);
