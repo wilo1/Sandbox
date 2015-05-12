@@ -2,7 +2,6 @@ var async = require("async")
 var http = require("http");
 var path = require("path");
 var childprocess = require("child_process");
-var reload = require('require-reload')(require);
 var fs = require('fs');
 var stdoutLog = "";
 var stderrLog = "";
@@ -27,8 +26,6 @@ function findFiles(nextStep) {
 };
 
 function readFiles(nextStep) {
-
-tests = [];
     console.log("readFiles")
     //for each file
     async.eachSeries(files, function(filename, nextfile) {
@@ -41,9 +38,8 @@ tests = [];
         }
         try {
             //each test can be a function that returns an array of tests, or a single test
-           // remove so the results are not cached, and the above git pull can update tests
-            var test = reload("../client/" + filename);
-            console.log('reloading ' + "../client/" + filename)
+            delete require.cache["../client/" + filename] // remove so the results are not cached, and the above git pull can update tests
+            var test = require("../client/" + filename);
             var newTests = null;
             //the module is a function that returns an array of tests
             if (test instanceof Function)
@@ -138,7 +134,6 @@ function run_one_test(thistest, nextTest) {
             global.setTimeout(nextTest, 500)
         }
         var timeout = function(e) {
-        	console.log("TIMEOUT")
             //should return false or true
             report.tests[id].status = "error";
             report.tests[id].result = "error";
@@ -146,10 +141,10 @@ function run_one_test(thistest, nextTest) {
             domain.dispose();
             process.removeListener('uncaughtException', handler);
             global.clearTimeout(timeoutID);
-            
+            console.log("TIMEOUT")
             global.setTimeout(nextTest, 500)
         }
-        timeoutID = global.setTimeout(timeout, 10 * 1000)
+        timeoutID = global.setTimeout(timeout, 60 * 1000)
         process.on('uncaughtException', handler);
         //the actual test
         domain.bind(thistest.test)(global.browser, function(success, message) {
@@ -164,8 +159,7 @@ function run_one_test(thistest, nextTest) {
             global.clearTimeout(timeoutID);
             domain.dispose();
             process.removeListener('uncaughtException', handler);
-
-            nextTest();
+            global.setTimeout(nextTest, 500)
         })
     
 
@@ -209,15 +203,11 @@ function startBrowser(cb) {
 }
 
 function killSandbox(cb) {
-    console.log("Sandbox stop");  
+    console.log("Sandbox stop");
+    sandbox.kill();
     sandbox.on('close', function(code) {
-
-    	
-    console.log("sandbox killed")	
-    
         cb();
     });
-    sandbox.kill();
 }
 
 function updateAndRunTests(cb2) {
@@ -322,47 +312,15 @@ function gitPull(pullComplete) {
     });
 };
 
-function find_and_run_one(tid)
-{
-	 for (var i in tests) {
-                var tid2 = tests[i].filename + ":" + tests[i].title;
-                if (tid == tid2) {
-                    status = RUNNING;
-                    async.series([
-                        startup_tests,
-                        startSandbox,
-                        startBrowser,
-                        function(cb2) {
-                            run_one_test(tests[i], function(){
-                            	console.log('test finished')
-                            	cb2()
-                            })
-                        },
-                       
-                        function wait(cb) {
-                        	console.log('wait for browser to end')
-                            browser.end(cb)
-                        },
-                         killSandbox,
-                    ], function() {
-                        status = COMPLETE;
-                    });
-                    return;
-
-                }
-            }
-}
-
-function quit_and_restart_one(tid)
-{
-console.log("staring run")
+function quit_and_reload() {
+    console.log("staring run")
     server._connections = 0;
     server.close(function() {
         gitPull(function() {
             console.log('restart');
             global.setTimeout(function() {
-                console.log('spawn ' + '"' + tid + '"');
-                var child = require('child_process').spawn('node', ['server.js', 'startOne', '"' + tid + '"'], {
+                console.log('spawn');
+                var child = require('child_process').spawn('node', ['server.js'], {
                     detached: true,
                     stdio: 'ignore'
                 });
@@ -421,73 +379,61 @@ server.on('request', function(request, response) {
     }
     if (request.url == "/quit") {
 
-    	setTimeout(function()
-    	{
-    		console.log("force quit");
-    		process.exit();
-    	},5000)
         cancel_run(function() {
             process.exit();
         });
     }
-    if(request.url == "/reload")
-    {
-    	response.end();
-    	findFiles(function() {
-        readFiles(function() {})
-    		});
-    }
     if (request.url == "/stop") {
 
-		response.end();
         cancel_run(function() {
+
         });
+    }
+    if (request.url == "/reload") {
+
+        cancel_run(quit_and_reload);
     }
     if (request.url == "/status") {
         report.status = status;
         response.write(JSON.stringify(report));
         response.end();
     }
-
     if (request.url.indexOf("/runOne") == 0) {
-    	response.end();
-        request.connection.destroy();
-         var tid = request.url.substr(request.url.indexOf('?') + 1)
+        cancel_run(function() {
+            var tid = request.url.substr(request.url.indexOf('?') + 1)
             tid = decodeURIComponent(tid)
-           
-        cancel_run(function(){quit_and_restart_one(tid)});
-    	
+            console.log(tid);
+            response.end();
+            for (var i in tests) {
+                var tid2 = tests[i].filename + ":" + tests[i].title;
+                if (tid == tid2) {
+                    status = RUNNING;
+                    async.series([
+                        startup_tests,
+                        startSandbox,
+                        startBrowser,
+                        function(cb) {
+                            run_one_test(tests[i], cb)
+                        },
+                        killSandbox,
+                        function wait(cb) {
+                            browser.end().then(cb)
+                        },
+                    ], function() {
+                        status = COMPLETE;
+                    });
+                    return;
 
+                }
+            }
+
+        });
     }
 });
-
-
-global.GUID = function(){
-	var S4 = function()
-	{
-		return Math.floor(Math.random() * 0x10000 /* 65536 */ ).toString(16);
-	};
-	//can we generate nicer GUID? does it really have to be so long?
-	return 'N' + S4() + S4();
-},
 server.listen(8181);
 if (process.argv.indexOf('start') > -1)
     updateAndRunTests(function() {})
-else if (process.argv.indexOf('startOne') > -1)
-{
-     findFiles(function() {
-        readFiles(function() {
-        	
-        	var tid = process.argv[process.argv.indexOf('startOne')+1];
-        	tid = tid.substr(1,tid.length - 2);
-        	
-        	
-        	find_and_run_one(tid)
-        })
-    })
-}
 else
-	
     findFiles(function() {
         readFiles(function() {})
     })

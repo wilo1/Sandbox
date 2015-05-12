@@ -25,6 +25,12 @@ $(document).ready(function()
 				$.get("../stop");
 				
 			});
+			$("#reloadTests").button();
+			$("#reloadTests").click(function()
+			{
+				$.get("../reload");
+				
+			});
 
 			function display()
 			{
@@ -110,6 +116,7 @@ $(document).ready(function()
 	<div id = "runTests">Run</div>
 	<div id = "quitTests">Quit</div>
 	<div id = "stopTests">Stop</div>
+	<div id = "reloadTests">Reload</div>
 	<div id = "status"> <div id="gitLog" ></div><div id="test_status" ></div> <div id="tests" ></div></div>
 </body>
 </html>
