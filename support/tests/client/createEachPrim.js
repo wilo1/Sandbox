@@ -10,7 +10,9 @@ function createMenu(topMenu, button, _extends, finished) {
         .click(topMenu)
         .waitForVisible(button, 1000)
         .click(button)
-        .pause(3000).getNode("test", 6500, function(err,node) {
+        .pause(3000).getNode("test", function(err,node) {
+
+
             if (!node) {
                 finished(false, "Node not created");
                 return;
@@ -25,6 +27,7 @@ function createMenu(topMenu, button, _extends, finished) {
 
 }
 module.exports = function() {
+	
     return [{
         title: "Test Create Each Object:Sphere",
         test: function(browser, cb) {

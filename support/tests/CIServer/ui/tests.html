@@ -49,6 +49,7 @@ $(document).ready(function()
 						{
 							$("#tests").append("<div class='testrow' id = '" + testID + "' ></div>")
 							$("#" + testID).append("<div  class='runtest' id='run"+testID+"'>Run</div>");
+							$("#" + testID).attr('test',i)
 							$("#run" + testID).attr('test',i)
 							$("#run" + testID).click(function()
 							{
@@ -69,6 +70,14 @@ $(document).ready(function()
 							$("#" + testID +" .testmessage").text(tests[i].message)
 						}
 					}
+					
+					var rows = $("#tests .testrow")
+					for(var i =0 ; i <  rows.length; i ++)
+					{
+						var testID = $(rows[i]).attr('test');
+						if(!tests[testID])
+						$(rows[i]).remove();
+					}
 					$(".testresult:contains('passed')").css("background-color", "green");
 					$(".testresult:contains('failed')").css("background-color", "red");
 					$(".testresult:contains('error')").css("background-color", "orange");
@@ -76,8 +85,13 @@ $(document).ready(function()
 					$(".teststatus:contains('complete')").css("background-color", "green");
 					$(".teststatus:contains('running')").css("background-color", "lightgreen");
 
-					$(".teststatus:contains('not started')").css("background-color");
-					$(".teststatus:contains('not started')").css("background-color");
+					$(".teststatus:contains('not started')").css("background-color",'');
+					$(".testresult:contains('null')").css("background-color",'');
+
+					$("#test_status:contains('Running')").css("background-color",'lightgreen');
+					$("#test_status:contains('Complete')").css("background-color",'green');
+					$("#test_status:contains('Canceling')").css("background-color",'orange');
+
 				});
 			}
 			display();
@@ -88,7 +102,7 @@ $(document).ready(function()
 			window.setInterval(function()
 			{
 				window.location.reload();
-			}, 30000) 
+			}, 60000) 
 })
 </script>
 </head>

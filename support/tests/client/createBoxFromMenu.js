@@ -1,5 +1,5 @@
 module.exports = {
-    'Demo test Sandbox': function(browser, finished) {
+    'Create a box from the menu': function(browser, finished) {
         global.browser = browser;
         var testUtils = require('../utils/testutils.js');
         browser.loadBlankScene().

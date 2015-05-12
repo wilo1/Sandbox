@@ -1,8 +1,8 @@
-module.exports.title = "Create a sphere from the menu"
-module.exports.test = function(cb)
+module.exports.title = "Load the home page"
+module.exports.test = function(browser,cb)
 {
 	browser
-		.init()
+		
         .url('http://www.google.com')
         .getTitle()
         .then(function(title) {

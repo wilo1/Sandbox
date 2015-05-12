@@ -102,28 +102,31 @@ function run_one_test(thistest, nextTest) {
     var domain = require('domain').create();
     domain.on('error', function(err) {
         //log error and go to next test on error
-        report.tests[this.id].status = "error";
-        report.tests[this.id].result = "error";
-        report.tests[this.id].message = err.toString()
-        console.log(this.id);
+        var id = thistest.filename + ":" + thistest.title;
+        report.tests[id].status = "error";
+        report.tests[id].result = "error";
+        report.tests[id].message = err.toString()
+        console.log(id);
         console.log(err.stack);
         console.log("DOMAIN ERROR")
-        domain.exit();
+        
         process.removeListener('uncaughtException', handler);
         global.clearTimeout(timeoutID);
-        global.setTimeout(nextTest, 500)
-    }.bind({
-        id: id
-    }))
+        global.setTimeout(function()
+        	{
+        		domain.exit();
+        		nextTest();
+        	}, 500)
+    })
     console.log("starting test " + id);
     //run the test in the error handling context
-    domain.run(function() {
+    
         handler = function(e) {
             //should return false or true
             report.tests[id].status = "error";
             report.tests[id].result = "error";
             report.tests[id].message = e.toString();
-            domain.exit();
+            domain.dispose();
             console.log(e.stack);
             process.removeListener('uncaughtException', handler);
             global.clearTimeout(timeoutID);
@@ -135,7 +138,7 @@ function run_one_test(thistest, nextTest) {
             report.tests[id].status = "error";
             report.tests[id].result = "error";
             report.tests[id].message = "Total test timeout";
-            domain.exit();
+            domain.dispose();
             process.removeListener('uncaughtException', handler);
             global.clearTimeout(timeoutID);
             console.log("TIMEOUT")
@@ -144,7 +147,7 @@ function run_one_test(thistest, nextTest) {
         timeoutID = global.setTimeout(timeout, 60 * 1000)
         process.on('uncaughtException', handler);
         //the actual test
-        thistest.test(global.browser, function(success, message) {
+        domain.bind(thistest.test)(global.browser, function(success, message) {
             //should return false or true
             console.log("SUCCESS")
             report.tests[id].status = "complete";
@@ -154,11 +157,11 @@ function run_one_test(thistest, nextTest) {
                 report.tests[id].result = "failed";
             report.tests[id].message = message;
             global.clearTimeout(timeoutID);
-            domain.exit();
+            domain.dispose();
             process.removeListener('uncaughtException', handler);
             global.setTimeout(nextTest, 500)
         })
-    })
+    
 
 }
 
@@ -333,6 +336,10 @@ function quit_and_restart() {
 var server = http.createServer();
 server.on('request', function(request, response) {
     request.url = decodeURI(request.url);
+   
+    if (request.url ==="/ui/") {
+    	request.url += 'tests.html'
+    }   
     if (request.url.indexOf("/ui/") == 0) {
         try {
             var data = fs.readFileSync("." + request.url);
