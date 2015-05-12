@@ -1,15 +1,20 @@
 module.exports.title = "Load the home page"
-module.exports.test = function(browser,cb)
+module.exports.test = function(browser, cb)
 {
-	browser
-		
-        .url('http://www.google.com')
+    browser
+        .url('http://localhost:3000/adl/sandbox/')
         .getTitle()
-        .then(function(title) {
+        .then(function(title)
+        {
             console.log('Title was: ' + title);
         })
-        .catch(function(error) {
+        .catch(function(error)
+        {
             console.log('uups something went wrong', error);
         })
-        .then(cb(true));
+        .then(function()
+        {
+            cb(true)
+        });
+
 }
