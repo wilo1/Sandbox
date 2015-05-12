@@ -23,7 +23,7 @@ define(function() {
 
 	function initialize() {
 		var self = this;
-		
+		this.ready = false;
 		
 		//$('#' + this.contentID).append("<span>Filter: </span><input type='text' id='HeirarchyFilter' class=''></input>");
 		$('#' + this.contentID).append("<div id='hierarchyDisplay' style=''></div>");
@@ -306,6 +306,8 @@ define(function() {
 		}
 		this.BuildGUI = function() {
 
+			if(!this.ready)
+				return;
 			$('#hierarchyManagerMakeNode').hide();
 			_RenderManager.removeHilightObject(HierarchyManager.previewNode);
 			
@@ -436,7 +438,11 @@ define(function() {
 				this.appendThreeChildDOM(node.children[i], thisid + 'container', type);
 			}
 		}
-		
+		this.initializedNode = function(id)
+		{
+			if(id == vwf.application())
+				this.ready = true;
+		}
 		this.createdNode = function(id) {
 
 			
