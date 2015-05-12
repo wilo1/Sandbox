@@ -9,8 +9,6 @@ module.exports.test = function(browser,cb)
             console.log('Title was: ' + title);
             cb(true,title);
         })
-        .catch(function(error) {
-            console.log('uups something went wrong', error);
-        })
+        
         
 }

@@ -1,4 +1,4 @@
-
+var node;
 module.exports = {
     'Test behavior accessing parents transformAPI': function(browser, finished) {
         
@@ -14,13 +14,15 @@ module.exports = {
         .getProperty('testSphere','transform', function(err, prop){
         	console.log("transform is " + prop.value);  //we must pass the whole return object, because for some strange reason, we cannot pass an array
         })
-        .getNode('testSphere', function(err, node){
-			finished(node.properties.transform[12] !== 0, node.properties.transform);
+        .getNode('testSphere', function(err, n){
+        	node = n
+			//finished(node.properties.transform[12] !== 0, node.properties.transform);
+        }).
+		pause(1000).then(function(){
+
+        	//throw new Error('need to cancel this queue after finished!')
+        	finished(node.properties.transform[12] !== 0, node.properties.transform);
+
         })
-		/*.pause(1000).then(function(){
-
-        	throw new Error('need to cancel this queue after finished!')
-
-        })*/
     }
 }

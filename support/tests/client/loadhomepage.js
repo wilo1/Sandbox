@@ -11,5 +11,5 @@ module.exports.test = function(cb)
         .catch(function(error) {
             console.log('uups something went wrong', error);
         })
-        .end().then(cb(true));
+        .then(cb(true));
 }
