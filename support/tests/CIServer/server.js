@@ -33,41 +33,52 @@ function readFiles(nextStep) {
         //bail out of all tests if canceling
         if (status == CANCELING) {
             console.log("canceling run")
-            global.setTimeout(nextfile, 500)
+            global.setTimeout(nextStep, 50)
             return;
         }
-        //each test can be a function that returns an array of tests, or a single test
-        delete require.cache["../client/" + filename] // remove so the results are not cached, and the above git pull can update tests
-        var test = require("../client/" + filename);
-        var newTests = null;
-        //the module is a function that returns an array of tests
-        if (test instanceof Function)
-            newTests = test();
-        //the module is a test
-        else if (test.test instanceof Function)
-            newTests = [test]
-        else //the module is a nightwatch style test
-        {
-            var title = Object.keys(test)[0]
-            var newtest = test[title];
-            if (newtest instanceof Function)
-                newTests = [{
-                    title: title,
-                    test: newtest
-                }]
-        }
-        tests = tests.concat(newTests)
-        for (var i in newTests) {
-            var test = newTests[i]
-            test.filename = filename;
-            var id = test.filename + ":" + test.title;
-            report.tests[id] = {
-                status: "not started",
+        try {
+            //each test can be a function that returns an array of tests, or a single test
+            delete require.cache["../client/" + filename] // remove so the results are not cached, and the above git pull can update tests
+            var test = require("../client/" + filename);
+            var newTests = null;
+            //the module is a function that returns an array of tests
+            if (test instanceof Function)
+                newTests = test();
+            //the module is a test
+            else if (test.test instanceof Function)
+                newTests = [test]
+            else //the module is a nightwatch style test
+            {
+                var title = Object.keys(test)[0]
+                var newtest = test[title];
+                if (newtest instanceof Function)
+                    newTests = [{
+                        title: title,
+                        test: newtest
+                    }]
+            }
+            tests = tests.concat(newTests)
+            for (var i in newTests) {
+                var test = newTests[i]
+                test.filename = filename;
+                var id = test.filename + ":" + test.title;
+                report.tests[id] = {
+                    status: "not started",
+                    result: null,
+                    message: null,
+                    title: test.title,
+                    filename: test.filename
+                }
+            }
+        } catch (e) {
+            report.tests[filename] = {
+                status: "test load error",
                 result: null,
                 message: null,
-                title: test.title,
-                filename: test.filename
+                title: filename,
+                filename: filename
             }
+
         }
         nextfile();
     }, nextStep);
@@ -113,7 +124,7 @@ function run_one_test(thistest, nextTest) {
             report.tests[id].result = "error";
             report.tests[id].message = e.toString();
             domain.exit();
-            console.log(e);
+            console.log(e.stack);
             process.removeListener('uncaughtException', handler);
             global.clearTimeout(timeoutID);
             console.log("EXCEPTION")
@@ -130,7 +141,7 @@ function run_one_test(thistest, nextTest) {
             console.log("TIMEOUT")
             global.setTimeout(nextTest, 500)
         }
-        timeoutID = global.setTimeout(timeout, 30 * 1000)
+        timeoutID = global.setTimeout(timeout, 60 * 1000)
         process.on('uncaughtException', handler);
         //the actual test
         thistest.test(global.browser, function(success, message) {
@@ -163,6 +174,7 @@ function startup_tests(cb) {
         }
     };
     global.browser = webdriverio.remote(options);
+    require('../utils/testutils').hookupUtils(browser);
 
     report.gitLog = "";
     cb();

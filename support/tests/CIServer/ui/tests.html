@@ -31,7 +31,7 @@ $(document).ready(function()
 				$.getJSON("../status", function(status)
 				{
 					//$("#status").text(JSON.stringify(status));		
-					$("#tests").empty();
+					//$("#tests").empty();
 					$("#gitLog").text(status.gitLog);
 					if(status.status == 1)
 						$("#test_status").text('Running');
@@ -45,20 +45,29 @@ $(document).ready(function()
 					for (var i in tests)
 					{
 						var testID = i.replace(/[^a-zA-Z]/g, "_");
-						$("#tests").append("<div class='testrow' id = '" + testID + "' ></div>")
-						$("#" + testID).append("<div  class='runtest' id='run"+testID+"'>Run</div>");
-						$("#run" + testID).attr('test',i)
-						$("#run" + testID).click(function()
+						if($('#' + testID).length == 0)
 						{
-							var id = $(this).attr('test');
-							$.get("../runOne?" + encodeURIComponent(id));
-						})
-						$("#run" + testID).button();
-						$("#" + testID).append("<div class='testtitle'>" + tests[i].title + "</div>");
-						$("#" + testID).append("<div class='testfile'>" + tests[i].filename + "</div>");
-						$("#" + testID).append("<div class='teststatus'>" + tests[i].status + "</div>");
-						$("#" + testID).append("<div class='testresult'>" + tests[i].result + "</div>");
-						$("#" + testID).append("<div class='testmessage'>" + tests[i].message + "</div>");
+							$("#tests").append("<div class='testrow' id = '" + testID + "' ></div>")
+							$("#" + testID).append("<div  class='runtest' id='run"+testID+"'>Run</div>");
+							$("#run" + testID).attr('test',i)
+							$("#run" + testID).click(function()
+							{
+								var id = $(this).attr('test');
+								$.get("../runOne?" + encodeURIComponent(id));
+							})
+							$("#run" + testID).button();
+							$("#" + testID).append("<div class='testtitle'>" + tests[i].title + "</div>");
+							$("#" + testID).append("<div class='testfile'>" + tests[i].filename + "</div>");
+							$("#" + testID).append("<div class='teststatus'>" + tests[i].status + "</div>");
+							$("#" + testID).append("<div class='testresult'>" + tests[i].result + "</div>");
+							$("#" + testID).append("<div class='testmessage'>" + tests[i].message + "</div>");
+						}else
+						{
+							
+							$("#" + testID +" .teststatus").text(tests[i].status)
+							$("#" + testID +" .testresult").text(tests[i].result)
+							$("#" + testID +" .testmessage").text(tests[i].message)
+						}
 					}
 					$(".testresult:contains('passed')").css("background-color", "green");
 					$(".testresult:contains('failed')").css("background-color", "red");
@@ -66,6 +75,9 @@ $(document).ready(function()
 					$(".teststatus:contains('error')").css("background-color", "orange");
 					$(".teststatus:contains('complete')").css("background-color", "green");
 					$(".teststatus:contains('running')").css("background-color", "lightgreen");
+
+					$(".teststatus:contains('not started')").css("background-color");
+					$(".teststatus:contains('not started')").css("background-color");
 				});
 			}
 			display();
