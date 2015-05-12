@@ -28,9 +28,9 @@ module.exports.hookupUtils = function(browser) {
             })
         })
     });
-    browser.addCommand("getNode", function(nodename) {
+    browser.addCommand("getNode", function(nodename, cb) {
         
-        var cb = arguments[arguments.length -1]
+        //var cb = arguments[arguments.length -1]
         module.exports.waitForNode(nodename, 10000, function(node) {
             if (!node)
                 throw (new Error('Node not created'))
@@ -99,14 +99,14 @@ module.exports.waitForNode = function(name, timeout, done) {
             browser.execute(getNode, name, function(err, r) {
                 result = r && r.value;
             });
-            global.setTimeout(loop, 100);
-        } else {
-
-            done(result);
+            global.setTimeout(loop, 500);
         }
+		else{
+			done(result);
+		}
     };
 
-    global.setTimeout(loop, 100);
+    global.setTimeout(loop, 500);
 }
 
 function getNode(name) {

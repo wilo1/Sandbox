@@ -11,19 +11,16 @@ module.exports = {
         .click('#playButton')
         .pause(2000)
         .click('#pauseButton').pause(200)
-        .getProperty('testSphere','transform')
-        .then(function(prop)
-        {
+        .getProperty('testSphere','transform', function(err, prop){
         	console.log("transform is " + prop.value);  //we must pass the whole return object, because for some strange reason, we cannot pass an array
         })
-        .getNode('testSphere')
-        .then(function(node)
-        {
+        .getNode('testSphere', function(err, node){
 			finished(node.properties.transform[12] !== 0, node.properties.transform);
-        }).pause(1000).then(function(){
+        })
+		/*.pause(1000).then(function(){
 
         	throw new Error('need to cancel this queue after finished!')
 
-        })
+        })*/
     }
 }
