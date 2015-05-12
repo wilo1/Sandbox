@@ -138,6 +138,7 @@ function run_one_test(thistest, nextTest) {
             global.setTimeout(nextTest, 500)
         }
         var timeout = function(e) {
+        	console.log("TIMEOUT")
             //should return false or true
             report.tests[id].status = "error";
             report.tests[id].result = "error";
@@ -145,10 +146,10 @@ function run_one_test(thistest, nextTest) {
             domain.dispose();
             process.removeListener('uncaughtException', handler);
             global.clearTimeout(timeoutID);
-            console.log("TIMEOUT")
+            
             global.setTimeout(nextTest, 500)
         }
-        timeoutID = global.setTimeout(timeout, 60 * 1000)
+        timeoutID = global.setTimeout(timeout, 10 * 1000)
         process.on('uncaughtException', handler);
         //the actual test
         domain.bind(thistest.test)(global.browser, function(success, message) {
@@ -420,6 +421,11 @@ server.on('request', function(request, response) {
     }
     if (request.url == "/quit") {
 
+    	setTimeout(function()
+    	{
+    		console.log("force quit");
+    		process.exit();
+    	},5000)
         cancel_run(function() {
             process.exit();
         });
@@ -481,7 +487,7 @@ else if (process.argv.indexOf('startOne') > -1)
     })
 }
 else
-	r
+	
     findFiles(function() {
         readFiles(function() {})
     })
