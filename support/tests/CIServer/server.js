@@ -382,6 +382,10 @@ server.on('request', function(request, response) {
         cancel_run(function() {
             process.exit();
         });
+        setTimeout(function()
+        {
+            process.exit();
+        },5000)
     }
     if (request.url == "/stop") {
 
@@ -392,6 +396,10 @@ server.on('request', function(request, response) {
     if (request.url == "/reload") {
 
         cancel_run(quit_and_reload);
+        setTimeout(function()
+        {
+            quit_and_reload();
+        },5000)
     }
     if (request.url == "/status") {
         report.status = status;
