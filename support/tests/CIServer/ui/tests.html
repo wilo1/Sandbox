@@ -11,6 +11,7 @@ $(document).ready(function()
 			$("#runTests").click(function()
 			{
 				$.get("../runTests");
+				window.location.reload();
 				
 			});
 			$("#quitTests").button();
@@ -29,6 +30,7 @@ $(document).ready(function()
 			$("#reloadTests").click(function()
 			{
 				$.get("../reload");
+				window.location.reload();
 				
 			});
 
@@ -76,7 +78,7 @@ $(document).ready(function()
 							$("#" + testID +" .testmessage").text(tests[i].message)
 						}
 					}
-					
+					$('#log').text(status.log);
 					var rows = $("#tests .testrow")
 					for(var i =0 ; i <  rows.length; i ++)
 					{
@@ -107,16 +109,16 @@ $(document).ready(function()
 			}, 500)
 			window.setInterval(function()
 			{
-				window.location.reload();
+			//	window.location.reload();
 			}, 60000) 
 })
 </script>
 </head>
 <body>
-	<div id = "runTests">Run</div>
+	
+	<div id = "status">< <div id="gitLog" ></div><div id="test_status" ></div> <div id="tests" ></div><div id = "runTests">Run</div>
 	<div id = "quitTests">Quit</div>
 	<div id = "stopTests">Stop</div>
-	<div id = "reloadTests">Reload</div>
-	<div id = "status"> <div id="gitLog" ></div><div id="test_status" ></div> <div id="tests" ></div></div>
+	<div id = "reloadTests">Reload</div><pre id="log" ></pre>
 </body>
 </html>
