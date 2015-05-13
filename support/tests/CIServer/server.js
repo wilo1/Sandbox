@@ -54,7 +54,7 @@ var logger = {
                 this._log += arg+'\n';
             else if(arg instanceof Object)
                 this._log += JSON.strinigy(arg)+'\n';
-            else
+            else if(arg)
                 this._log += arg.toString() + '\n';
         }    
     },
