@@ -78,8 +78,8 @@ module.exports.hookupUtils = function(browser) {
 module.exports.loadBlankScene = function(cb) {
     browser
         .url('http://localhost:3000/adl/sandbox/example_blank/')
-        .waitForExist('#preloadGUIBack', 10000)
-        .waitForVisible('#preloadGUIBack', 10000, true)
+        .waitForExist('#preloadGUIBack', 60000)
+        .waitForVisible('#preloadGUIBack', 60000, true)
         .pause(3000).then(cb);
 
 

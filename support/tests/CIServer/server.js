@@ -376,6 +376,11 @@ server.on('request', function(request, response) {
         response.end();
         request.connection.destroy();
         cancel_run(quit_and_restart);
+         setTimeout(function()
+        {
+            quit_and_restart();
+        },5000)
+
     }
     if (request.url == "/quit") {
 
