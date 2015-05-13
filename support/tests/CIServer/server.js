@@ -215,7 +215,7 @@ function startSandbox(cb) {
         if (data.toString().indexOf("Startup complete") > -1)
         {
             startupGood = true;
-            sandbox.removeListener('exit')
+            sandbox.removeAllListeners('exit')
             cb();
         }
     })
