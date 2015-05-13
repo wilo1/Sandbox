@@ -16,13 +16,30 @@ var status = NOTSTARTED;
 var tests = [];
 var files = [];
 
-function findFiles(nextStep) {
+function findFiles(nextStep, dir) {
     logger.log("findFiles")
-    fs.readdir("../client/",
-        function(err, foundfiles) {
-            files = foundfiles;
-            nextStep();
-        });
+	var foundFiles;
+	var baseDir = "../client/";
+	dir = dir ? dir : "";
+	
+    try{
+		foundFiles = fs.readdirSync(baseDir + dir);
+	}
+	catch(e){
+		if(nextStep) nextStep();
+		return;
+	}
+
+	//iterate over "foundFiles" and if directory, recursively call findFiles...
+	for(var i = 0; i < foundFiles.length; i++){
+		if(fs.lstatSync(baseDir + dir + foundFiles[i]).isDirectory()){
+			findFiles(null, dir + foundFiles[i] + "/");
+		}
+		else 
+			files.push(dir + foundFiles[i]);
+	}
+	
+	if(nextStep) nextStep();
 };
 
 var logger = {
