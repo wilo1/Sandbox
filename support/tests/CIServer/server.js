@@ -213,6 +213,7 @@ function startup_tests(cb) {
         }
     };
     global.browser = webdriverio.remote(options);
+    console.log(Object.keys(global.browser));
     require('../utils/testutils').hookupUtils(browser);
 
     report.gitLog = "";
@@ -231,6 +232,7 @@ function startSandbox(cb) {
         if (data.toString().indexOf("Startup complete") > -1)
         {
             startupGood = true;
+            sandbox.removeAllListeners('exit')
             cb();
         }
     })
@@ -249,20 +251,36 @@ function startBrowser(cb) {
         cb()
     });
 }
-
-function killSandbox(cb) {
+function killSandbox(cb)
+{
     logger.log("Sandbox stop");
-    if(sandbox)
+    var called = false;
+    if (sandbox)
     {
-        sandbox.kill();
-        sandbox.on('exit', function(code) {
-            sandbox = null;
+        var timeoutid = setTimeout(function()
+        {
+            called = true;
+            logger.log('exiting calling callback')
             cb();
+        }, 2000)
+        sandbox.on('exit', function(code)
+        {
+            sandbox = null;
+            if (!called)
+            {
+                clearTimeout(timeoutid)
+                called = true;
+                logger.log('exiting calling callback')
+                cb();
+            }
         });
-    }else
-    {cb()}
+        sandbox.kill();
+    }
+    else
+    {
+        cb()
+    }
 }
-
 function updateAndRunTests(cb2) {
     //bail if already running. This really should never happen
     if (status == RUNNING) {
@@ -315,7 +333,8 @@ function updateAndRunTests(cb2) {
             },
             function wait(cb) {
                 logger.log('Wait for browser close')
-                browser.end().then(cb)
+                browser.end()
+                cb();
             },
             killSandbox
         ],
@@ -486,10 +505,20 @@ server.on('request', function(request, response) {
                         },
                         function wait(cb) {
                             logger.log('Wait for browser close')
-                            browser.end().then(cb)
+                            browser.end()
+                            cb();
                         },
-                        killSandbox,
-                    ], function() {
+                        function(cb)
+                        {
+                            killSandbox(function()
+                            {
+                                logger.log('finised killing sandbox')
+                                cb();
+                            })    
+                        }
+                        
+                    ], function(err) {
+                        console.log(err)
                         logger.log('Run one test exit')
                         status = COMPLETE;
                     });
