@@ -189,11 +189,23 @@ function startSandbox(cb) {
     sandbox = childprocess.spawn("node", ["app.js"], {
         cwd: "../../../"
     });
+    var startupGood = false;
     sandbox.stdout.on('data', function(data) {
         //Wait for startup complete
         if (data.toString().indexOf("Startup complete") > -1)
+        {
+            startupGood = true;
             cb();
+        }
     })
+    sandbox.on('exit', function(code) {
+            if(sandbox && startupGood == false)
+            {
+                console.log('sandbox exit without good start')
+                sandbox = null;
+                cb();
+            }
+    });
 }
 
 function startBrowser(cb) {
@@ -204,10 +216,15 @@ function startBrowser(cb) {
 
 function killSandbox(cb) {
     console.log("Sandbox stop");
-    sandbox.kill();
-    sandbox.on('close', function(code) {
-        cb();
-    });
+    if(sandbox)
+    {
+        sandbox.kill();
+        sandbox.on('exit', function(code) {
+            sandbox = null;
+            cb();
+        });
+    }else
+    {cb()}
 }
 
 function updateAndRunTests(cb2) {
