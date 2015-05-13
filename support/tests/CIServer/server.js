@@ -310,7 +310,8 @@ function updateAndRunTests(cb2) {
             },
             function wait(cb) {
                 logger.log('Wait for browser close')
-                browser.end().then(cb)
+                browser.end()
+                cb();
             },
             killSandbox
         ],
@@ -481,7 +482,8 @@ server.on('request', function(request, response) {
                         },
                         function wait(cb) {
                             logger.log('Wait for browser close')
-                            browser.end().then(cb)
+                            browser.end()
+                            cb();
                         },
                         killSandbox,
                     ], function() {
