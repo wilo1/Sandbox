@@ -235,12 +235,24 @@ function startBrowser(cb) {
 
 function killSandbox(cb) {
     logger.log("Sandbox stop");
+    var called = false;
+    var timeoutid = setTimeout(function()
+    {
+        called = true;
+        cb();
+    },2000)
     if(sandbox)
     {
         sandbox.kill();
         sandbox.on('exit', function(code) {
             sandbox = null;
-            cb();
+            if(!called)
+            {
+                clearTimeout(timeoutid)
+                called = true;
+                cb();
+            }
+            
         });
     }else
     {cb()}
