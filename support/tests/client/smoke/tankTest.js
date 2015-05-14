@@ -1,7 +1,10 @@
 module.exports = {
-    'Create and control a T90 Tank': function(browser, finished) {
+    'Create and control a T90 Tank3': function(browser, finished) {
         global.browser = browser;
+
         var testUtils = global.testUtils;
+		
+		var minDistance = 10;
 		var outStr = "";
 		var passed = true;
 		var oldPos;
@@ -26,14 +29,14 @@ module.exports = {
 		.pause(5000)
 		.getProperty("testTank", "transform", function(err, prop){
 			var distance = testUtils.getDistance(oldPos, prop.value.slice(12, 15));
-			if(distance <= 10){
+			if(distance <= minDistance){
 				passed = false;
-				outStr += "; Distance traveled: " + distance + " <= 10; ";
+				outStr += "; Distance traveled: " + distance + " <= " + minDistance + "; ";
 			}
-			else outStr += "; Distance traveled: " + distance + " > 10; ";
+			else outStr += "; Distance traveled: " + distance + " > " + minDistance + "; ";
 		})
 		.pause(500, function(err, data){
 			finished(passed, outStr);
 		});
     }
-};
+}
