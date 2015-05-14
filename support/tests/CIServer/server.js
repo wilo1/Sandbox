@@ -47,7 +47,7 @@ function findFiles(nextStep, dir) {
 	if(nextStep) nextStep();
 };
 
-var logger = {
+global.logger = {
     log:function()
     {
         for (var i = 0; i < arguments.length; i++)
@@ -58,7 +58,7 @@ var logger = {
             else if(arg instanceof String)
                 this._log += arg+'\n';
             else if(arg instanceof Object)
-                this._log += JSON.strinigy(arg)+'\n';
+                this._log += JSON.stringify(arg)+'\n';
             else if(arg)
                 this._log += arg.toString() + '\n';
         }    
