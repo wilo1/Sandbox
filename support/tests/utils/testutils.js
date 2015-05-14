@@ -1,4 +1,8 @@
 var async = require("async");
+
+module.exports.USER = "joe";
+module.exports.PASS = "Abc123456";
+
 module.exports.hookupUtils = function(browser) {
     console.log('hook up utils');
 
@@ -97,8 +101,6 @@ module.exports.hookupUtils = function(browser) {
 	});
 }
 
-module.exports.USER = "joe";
-module.exports.PASS = "Abc123456";
 module.exports.login = function(cb){
 	browser
         .url('http://localhost:3000/adl/sandbox/')
@@ -108,8 +110,8 @@ module.exports.login = function(cb){
 				browser.url('http://localhost:3000/adl/sandbox/login')
 					.waitForExist('#txtusername')
 					.click('#txtusername').keys(module.exports.USER)
-					.click('#txtpassword').keys(module.exports.PASS).pause(10000)
-					.click('input[type="submit"]').pause(10000)
+					.click('#txtpassword').keys(module.exports.PASS).pause(1000)
+					.click('input[type="submit"]').pause(1000)
 					.url(function(err, url){
 						if (url.value == 'http://localhost:3000/adl/sandbox/')
 						{
@@ -122,7 +124,7 @@ module.exports.login = function(cb){
 							.then(function(text)
 							{
 								console.log('Title was: ' + text);
-								cb(text.indexOf('Error') == -1, text);
+								cb(true, text);
 							})
 						}
 					});
