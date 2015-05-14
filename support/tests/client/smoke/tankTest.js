@@ -25,7 +25,7 @@ module.exports = {
 		})
 		.click("#playButton")
 		.pause(2000)
-		.$keydown("W", "canvas")
+		.$keydown("canvas", "W")
 		.pause(5000)
 		.getProperty("testTank", "transform", function(err, prop){
 			var distance = testUtils.getDistance(oldPos, prop.value.slice(12, 15));

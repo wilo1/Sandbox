@@ -81,13 +81,13 @@ module.exports.hookupUtils = function(browser) {
         	cb(null, jqObj);
         });
 	});	
-	browser.addCommand("$keydown", function(key, cssSelector) {
+	browser.addCommand("$keydown", function(cssSelector, key) {
 		var cb = arguments[arguments.length -1];
-        browser.execute(function(k, c) {
+        browser.execute(function(c, k) {
 			var e = $.Event("keydown");
 			e.which = e.keyCode = k.charCodeAt(0);
         	return $(c).trigger(e);
-        }, key, cssSelector, function(err, jqObj)
+        }, cssSelector, key, function(err, jqObj)
         {
         	cb(null, jqObj);
         });
