@@ -1,5 +1,5 @@
 module.exports = {
-    'Load Arcade Game Console from 3DR': function(browser, finished) {
+    'Test simulated physics with two spheres': function(browser, finished) {
         global.browser = browser;
         var testUtils = global.testUtils;
 		var passed = true;
@@ -14,19 +14,19 @@ module.exports = {
 		addSphere("testSphere1", initial1, -0.5, 0, 15);
 		addSphere("testSphere2", initial2, 0.5, 0, 5);
 		
-		browser.setProperty("testSphere1", "___physics_enabled", true)
-		.setProperty("testSphere2", "___physics_enabled", true)
-		.click("#playButton")
-		.pause(5000)
-		
-		.getProperty("testSphere1", "transform", function(err, prop){
-			checkDistance("testSphere1", initial1, prop.value);
-		})
-		.getProperty("testSphere2", "transform", function(err, prop){
-			checkDistance("testSphere2", initial2, prop.value);
-			finished(passed, outStr);
-		})
-		
+		browser
+			.setProperty("testSphere1", "___physics_enabled", true)
+			.setProperty("testSphere2", "___physics_enabled", true)
+			.click("#playButton")
+			.pause(5000)
+			
+			.getProperty("testSphere1", "transform", function(err, prop){
+				checkDistance("testSphere1", initial1, prop.value);
+			})
+			.getProperty("testSphere2", "transform", function(err, prop){
+				checkDistance("testSphere2", initial2, prop.value);
+				finished(passed, outStr);
+			});
 		
 		function checkDistance(name, initial, transform){
 			var dist = Math.round(testUtils.getDistance(initial.slice(12, 15), transform.slice(12, 15))* 100) / 100;
