@@ -80,12 +80,24 @@ module.exports.hookupUtils = function(browser) {
         {
         	cb(null, jqObj);
         });
+	});	
+	browser.addCommand("$keydown", function(key, cssSelector) {
+		var cb = arguments[arguments.length -1];
+        browser.execute(function(k, c) {
+			var e = $.Event("keydown");
+			e.which = e.keyCode = k.charCodeAt(0);
+        	return $(c).trigger(e);
+        }, key, cssSelector, function(err, jqObj)
+        {
+        	cb(null, jqObj);
+        });
 	});
 }
 
 module.exports.loadBlankScene = function(cb) {
     browser
-        .url('http://localhost:3000/adl/sandbox/example_blank/?norender=true')
+        //.url('http://localhost:3000/adl/sandbox/example_blank/?norender=true')
+        .url('http://localhost:3000/adl/sandbox/example_blank/')
         .waitForExist('#preloadGUIBack', 60000)
         .waitForVisible('#preloadGUIBack', 60000, true)
         .pause(3000).then(cb);
@@ -115,6 +127,16 @@ module.exports.waitForNode = function(name, timeout, done) {
     };
 
     global.setTimeout(loop, 500);
+}
+
+module.exports.getDistance = function(arr1, arr2){
+	for(var i = 0; i < arr1.length; i++){
+		arr1[i] = (arr1[i]-arr2[i])*(arr1[i]-arr2[i]);
+	}
+
+	return Math.sqrt(arr1.reduce(function(a, b){
+		return a + b;
+	}));
 }
 
 function getNode(name) {
