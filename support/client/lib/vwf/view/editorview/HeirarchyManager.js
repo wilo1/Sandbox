@@ -443,12 +443,14 @@ define(function() {
 			if(id == vwf.application())
 				this.ready = true;
 		}
-		this.createdNode = function(id) {
+		this.calledMethod = function(id,method) {
 
-			
+				if(method == 'ready')
+				{
 				window.setTimeout(function() {
 					this.BuildGUI();
 				}.bind(this), 500)
+			    }
 
 			
 		}
