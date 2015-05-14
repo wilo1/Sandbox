@@ -531,20 +531,19 @@ transition: background 1s, opacity 1s;
 		/* border: 4px inset #444; */
 		margin-left: 3px;
 		/* border-radius: 2px; */
-		background-color: -webkit-linear-gradient(right, white 0%, rgb(217, 238, 239) 100%);
+
 		/* background-color:white; */
 		padding: 1px;
 		cursor:pointer;
 		display:inline-block;
-		-moz-border-bottom-colors: #4B4B4B #4B4B4B #4B4B4B #4B4B4B #4B4B4B #4B4B4B #4B4B4B #4B4B4B
--moz-border-right-colors: #4B4B4B #4B4B4B #4B4B4B #4B4B4B #4B4B4B #4B4B4B #4B4B4B #4B4B4B
+
 
 	;
 		zoom: 1.15;
 }
 	.icon:hover
 	{
-		background-color: -webkit-linear-gradient(left, rgb(117, 138, 339) 0%, rgb(217, 238, 239) 100%);
+		
 		margin-top: 1px;
 		margin-left: 1px;
 		margin-right: 2px;
@@ -555,13 +554,13 @@ transition: background 1s, opacity 1s;
 	{
 		background-color: rgb(58, 143, 255);
 		padding: 2px;
-		border: 3px inset #444
-		-moz-border-bottom-colors: #4B4B4B #4B4B4B #4B4B4B #4B4B4B #4B4B4B #4B4B4B #4B4B4B #4B4B4B
--moz-border-right-colors: #4B4B4B #4B4B4B #4B4B4B #4B4B4B #4B4B4B #4B4B4B #4B4B4B #4B4B4B
+		
+
 	}
 	.icondisabled
 	{
-		background-color:#555555;
+		  opacity: .1;
+  pointer-events: none;
 	}
 	
 	.seperator
@@ -823,6 +822,7 @@ white-space: nowrap;
 .jspPane
 {
 	position: absolute;
+	left: 0px !important;
 }
 
 .jspVerticalBar
