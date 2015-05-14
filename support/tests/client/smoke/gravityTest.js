@@ -29,11 +29,11 @@ module.exports = {
 		
 		
 		function checkDistance(name, initial, transform){
-			var dist = testUtils.getDistance(initial.slice(12, 15), transform.slice(12, 15));
-			if(dist > minDist) outStr += " " + name + " traveled: " + dist + " > " + minDist + "; ";
+			var dist = Math.round(testUtils.getDistance(initial.slice(12, 15), transform.slice(12, 15))* 100) / 100;
+			if(dist > minDist) outStr += " " + name + " traveled: " + dist + " > min " + minDist + "; ";
 			else{
 				passed = false;
-				outStr += " " + name + " traveled: " + dist + " <= " + minDist + "; ";
+				outStr += " " + name + " traveled: " + dist + " <= min " + minDist + "; ";
 			}
 		}
 		

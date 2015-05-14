@@ -28,12 +28,12 @@ module.exports = {
 		.$keydown("canvas", "W")
 		.pause(5000)
 		.getProperty("testTank", "transform", function(err, prop){
-			var distance = testUtils.getDistance(oldPos, prop.value.slice(12, 15));
+			var distance = Math.round(testUtils.getDistance(oldPos, prop.value.slice(12, 15))* 100) / 100;
 			if(distance <= minDistance){
 				passed = false;
-				outStr += "; Distance traveled: " + distance + " <= " + minDistance + "; ";
+				outStr += "; Distance traveled: " + distance + " <= min " + minDistance + "; ";
 			}
-			else outStr += "; Distance traveled: " + distance + " > " + minDistance + "; ";
+			else outStr += "; Distance traveled: " + distance + " > min " + minDistance + "; ";
 		})
 		.pause(500, function(err, data){
 			finished(passed, outStr);
