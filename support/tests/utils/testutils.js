@@ -72,7 +72,15 @@ module.exports.hookupUtils = function(browser) {
         	cb(null,r.value)
         });
     });
-
+	browser.addCommand("$click", function(cssSelector) {
+		var cb = arguments[arguments.length -1];
+        browser.execute(function(a) {
+        	return $(a).click();
+        }, cssSelector,function(err, jqObj)
+        {
+        	cb(null, jqObj);
+        });
+	});
 }
 
 module.exports.loadBlankScene = function(cb) {

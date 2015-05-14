@@ -20,6 +20,8 @@ function findFiles(nextStep, dir) {
     logger.log("findFiles")
 	var foundFiles;
 	var baseDir = "../client/";
+	var dirList = [];
+	
 	dir = dir ? dir : "";
 	
     try{
@@ -32,17 +34,20 @@ function findFiles(nextStep, dir) {
 
 	//iterate over "foundFiles" and if directory, recursively call findFiles...
 	for(var i = 0; i < foundFiles.length; i++){
-		if(fs.lstatSync(baseDir + dir + foundFiles[i]).isDirectory()){
-			findFiles(null, dir + foundFiles[i] + "/");
-		}
+		if(fs.lstatSync(baseDir + dir + foundFiles[i]).isDirectory())
+			dirList.push(dir + foundFiles[i] + "/");
+		
 		else 
 			files.push(dir + foundFiles[i]);
 	}
 	
+	for(var i = 0; i < dirList.length; i++)
+		findFiles(null, dirList[i]);
+	
 	if(nextStep) nextStep();
 };
 
-var logger = {
+global.logger = {
     log:function()
     {
         for (var i = 0; i < arguments.length; i++)
@@ -53,7 +58,7 @@ var logger = {
             else if(arg instanceof String)
                 this._log += arg+'\n';
             else if(arg instanceof Object)
-                this._log += JSON.strinigy(arg)+'\n';
+                this._log += JSON.stringify(arg)+'\n';
             else if(arg)
                 this._log += arg.toString() + '\n';
         }    
@@ -214,7 +219,9 @@ function startup_tests(cb) {
     };
     global.browser = webdriverio.remote(options);
     console.log(Object.keys(global.browser));
-    require('../utils/testutils').hookupUtils(browser);
+	
+	global.testUtils = require('../utils/testutils');
+    global.testUtils.hookupUtils(browser);
 
     report.gitLog = "";
     cb();
