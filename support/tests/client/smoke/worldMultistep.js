@@ -9,11 +9,11 @@ module.exports = {
         browser
 			.login(function(err, val){
 				if(err){
-					outStr += "Unable to log in";
+					outStr += "Unable to log in; ";
 					passed = false;
 					//Exit test here...
 				}
-				else outStr += "Login successful";
+				else outStr += "Login successful; ";
 			})
 			
 			//Create world
@@ -38,27 +38,56 @@ module.exports = {
 			
 			.nextGUID("testWorldPrim")
 			.click("#MenuCreateSphereicon")
-			.pause(6000).then(function() {
+			.pause(5000).then(function() {
 				testUtils.assertNodeExists("testWorldPrim", function(assertStatus, msg){
-					passed = passed && assertStatus;
-					outStr += msg;
+					passed = passed && !!assertStatus;
+					outStr += "First time: " + msg + "; ";
 				});
 			})
 			
+			//Wait for node check before navigating to new page
+			.pause(3000)
+			
 			//Exit world
 			.url("http://localhost:3000")
+			.alertAccept(function(){})
 			.pause(3000).then(function(){
 				browser.url("http://localhost:3000/adl/sandbox/" + worldId)
 			})
 			
 			.waitForExist('#preloadGUIBack', 60000)
 			.waitForVisible('#preloadGUIBack', 60000, true)
-			.pause(3000).then(function() {
+			.pause(5000).then(function() {
 				testUtils.assertNodeExists("testWorldPrim", function(assertStatus, msg){
-					passed = passed && assertStatus;
-					outStr += msg;
-					finished(passed, outStr);
+					passed = passed && !!assertStatus;
+					outStr += "Second time: " + msg + "; ";
 				});
-			});
+			})
+			
+			.pause(3000)
+			
+			//Go straight to the delete page because we can safely assume that
+			//the existence of the world has already been tested above
+			.url("http://localhost:3000/adl/sandbox/remove?id=" + worldId)
+			.alertAccept(function(){})
+			
+			.waitForExist("input[value='Delete']", 5000)
+			.click("input[value='Delete']")
+			
+			//World should be deleted, attempt to navigate to deleted world page
+			.url("http://localhost:3000/adl/sandbox/world/" + worldId)
+			.pause(3000)
+			.url(function(err, url){
+				//if worldId is in the url, we were not redirected to homepage
+				if(url.value.indexOf(worldId) > 0){
+					passed = false;
+					outStr += "World: " + worldId + " not successfully deleted; ";
+				}
+				else{
+					outStr += "World: " + worldId + " successfully deleted; ";
+				}
+				
+				finished(passed, outStr);
+			});			
     }
 }
