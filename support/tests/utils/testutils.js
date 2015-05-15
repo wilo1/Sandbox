@@ -1,7 +1,14 @@
 var async = require("async");
+
+module.exports.USER = "joe";
+module.exports.PASS = "Abc123456";
+
 module.exports.hookupUtils = function(browser) {
     console.log('hook up utils');
 
+	browser.addCommand("login", function(cb) {
+        module.exports.login(cb);
+    });
     browser.addCommand("loadBlankScene", function(cb) {
         module.exports.loadBlankScene(cb)
     });
@@ -80,12 +87,55 @@ module.exports.hookupUtils = function(browser) {
         {
         	cb(null, jqObj);
         });
+	});	
+	browser.addCommand("$keydown", function(cssSelector, key) {
+		var cb = arguments[arguments.length -1];
+        browser.execute(function(c, k) {
+			var e = $.Event("keydown");
+			e.which = e.keyCode = k.charCodeAt(0);
+        	return $(c).trigger(e);
+        }, cssSelector, key, function(err, jqObj)
+        {
+        	cb(null, jqObj);
+        });
 	});
 }
 
+module.exports.login = function(cb){
+	browser
+        .url('http://localhost:3000/adl/sandbox/')
+		.waitForExist("#logina", 1500, function(err, value){
+			console.log("This is the value: " + value);
+			if(!err){
+				browser.url('http://localhost:3000/adl/sandbox/login')
+					.waitForExist('#txtusername')
+					.click('#txtusername').keys(module.exports.USER)
+					.click('#txtpassword').keys(module.exports.PASS).pause(1000)
+					.click('input[type="submit"]').pause(1000)
+					.url(function(err, url){
+						if (url.value == 'http://localhost:3000/adl/sandbox/')
+						{
+							cb(false, module.exports.USER)
+							return;
+						}
+						else
+						{
+							browser.getText(".help-block")
+							.then(function(text)
+							{
+								console.log('Title was: ' + text);
+								cb(true, text);
+							})
+						}
+					});
+			}
+			else cb(false, module.exports.USER);
+		});
+};
 module.exports.loadBlankScene = function(cb) {
     browser
-        .url('http://localhost:3000/adl/sandbox/example_blank/?norender=true')
+        //.url('http://localhost:3000/adl/sandbox/example_blank/?norender=true')
+        .url('http://localhost:3000/adl/sandbox/example_blank/')
         .waitForExist('#preloadGUIBack', 60000)
         .waitForVisible('#preloadGUIBack', 60000, true)
         .pause(3000).then(cb);
@@ -115,6 +165,16 @@ module.exports.waitForNode = function(name, timeout, done) {
     };
 
     global.setTimeout(loop, 500);
+}
+
+module.exports.getDistance = function(arr1, arr2){
+	for(var i = 0; i < arr1.length; i++){
+		arr1[i] = (arr1[i]-arr2[i])*(arr1[i]-arr2[i]);
+	}
+
+	return Math.sqrt(arr1.reduce(function(a, b){
+		return a + b;
+	}));
 }
 
 function getNode(name) {

@@ -4,8 +4,8 @@ module.exports.test = function(browser, cb)
     browser
         .url('http://localhost:3000/adl/sandbox/')
         .click('#logina').
-    click('#txtusername').keys('Rob').pause(1000).
-    click('#txtpassword').keys('1111').pause(1000).
+    click('#txtusername').keys(global.testUtils.USER).pause(1000).
+    click('#txtpassword').keys(global.testUtils.PASS).pause(1000).
     click('input[type="submit"]').pause(1000).
     url(function(err, url)
     {
