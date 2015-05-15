@@ -50,6 +50,7 @@ module.exports = {
 			
 			//Exit world
 			.url("http://localhost:3000")
+			.pause(1000)
 			.alertAccept(function(){})
 			.pause(3000).then(function(){
 				browser.url("http://localhost:3000/adl/sandbox/" + worldId)
@@ -69,6 +70,7 @@ module.exports = {
 			//Go straight to the delete page because we can safely assume that
 			//the existence of the world has already been tested above
 			.url("http://localhost:3000/adl/sandbox/remove?id=" + worldId)
+			.pause(1000)
 			.alertAccept(function(){})
 			
 			.waitForExist("input[value='Delete']", 5000)
