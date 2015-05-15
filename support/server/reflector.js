@@ -326,20 +326,24 @@ function WebSocketConnection(socket, _namespace)
         if (!socket.loginData.UID && socket.loginData.Username)
             socket.loginData.UID = socket.loginData.Username;
         var namespace = _namespace || getNamespace(socket);
-        socket.on('setNamespace', function(msg)
+        //let the data viewer tool connect, but wait for it to tell us what namespace to join 
+        if(namespace.indexOf('_adl_dataview_') == 0)
         {
-            logger.info(msg.space, 2);
-            WebSocketConnection(socket, msg.space.replace(/[\\\/]/g, '_'));
-            socket.emit('namespaceSet',
-            {});
-        });
+            socket.on('setNamespace', function(msg)
+            {
+                logger.info(msg.space, 2);
+                WebSocketConnection(socket, msg.space.replace(/[\\\/]/g, '_'));
+                socket.emit('namespaceSet',
+                {});
+            });
+            return;
+        }
 
         socket.on('connectionTest', function(msg)
         {
             socket.emit('connectionTest', msg);
         })
-        if(_namespace)  //be sure to test for this - a null namespace will cause logic below to serve a blank world, when really it should do nothing. This can sit and wait for a setNamesapce
-        {
+        
             DAL.getInstance(namespace, function(instancedata)
             {
                
@@ -382,7 +386,7 @@ function WebSocketConnection(socket, _namespace)
                 else
                     ClientConnected(socket, namespace, instancedata);
             });
-        }
+        
     });
 };
 
