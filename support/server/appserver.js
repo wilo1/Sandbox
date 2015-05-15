@@ -545,12 +545,12 @@ function handleRequest(request, response, next) {
             },
             function final_404(resolved,callback)
             {
-               
+                next(); // give up, return to express route stack
                 callback(null, false);
             }
         ],
         function appserver_waterfall_complete(err, results) {
-             next(); // give up, return to express route stack
+            
 
         });
 } // close onRequest
