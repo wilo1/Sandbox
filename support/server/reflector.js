@@ -329,7 +329,7 @@ function WebSocketConnection(socket, _namespace)
         socket.on('setNamespace', function(msg)
         {
             logger.info(msg.space, 2);
-            WebSocketConnection(socket, msg.space);
+            WebSocketConnection(socket, msg.space.replace(/[\\\/]/g, '_'));
             socket.emit('namespaceSet',
             {});
         });
@@ -338,48 +338,51 @@ function WebSocketConnection(socket, _namespace)
         {
             socket.emit('connectionTest', msg);
         })
-        DAL.getInstance(namespace, function(instancedata)
+        if(_namespace)  //be sure to test for this - a null namespace will cause logic below to serve a blank world, when really it should do nothing. This can sit and wait for a setNamesapce
         {
-           
-            
-            if (!instancedata)
+            DAL.getInstance(namespace, function(instancedata)
             {
-                require('./examples.js')
-                    .getExampleMetadata(namespace, function(instancedata)
-                    {
-                        if (instancedata)
+               
+                
+                if (!instancedata)
+                {
+                    require('./examples.js')
+                        .getExampleMetadata(namespace, function(instancedata)
                         {
-                            xapi.sendStatement(socket.loginData.UID, xapi.verbs.joined, namespace,instancedata.title,instancedata.description,namespace);
-                            //if this is a single player published world, there is no need for the server to get involved. Server the world state and tell the client to disconnect
-                            if (instancedata && instancedata.publishSettings && instancedata.publishSettings.singlePlayer)
+                            if (instancedata)
                             {
-                                ServeSinglePlayer(socket, namespace, instancedata)
+                                xapi.sendStatement(socket.loginData.UID, xapi.verbs.joined, namespace,instancedata.title,instancedata.description,namespace);
+                                //if this is a single player published world, there is no need for the server to get involved. Server the world state and tell the client to disconnect
+                                if (instancedata && instancedata.publishSettings && instancedata.publishSettings.singlePlayer)
+                                {
+                                    ServeSinglePlayer(socket, namespace, instancedata)
+                                }
+                                else
+                                    ClientConnected(socket, namespace, instancedata);
                             }
                             else
-                                ClientConnected(socket, namespace, instancedata);
-                        }
-                        else
-                        {
-                            socket.disconnect();
-                            return;
-                        }
-                    });
-                return;
-            }
+                            {
+                                socket.disconnect();
+                                return;
+                            }
+                        });
+                    return;
+                }
 
-            if(instancedata)
-            {
-                xapi.sendStatement(socket.loginData.UID, xapi.verbs.joined, namespace,instancedata.title,instancedata.description,namespace);   
-            }
-            
-            //if this is a single player published world, there is no need for the server to get involved. Server the world state and tell the client to disconnect
-            if (instancedata && instancedata.publishSettings && instancedata.publishSettings.singlePlayer)
-            {
-                ServeSinglePlayer(socket, namespace, instancedata)
-            }
-            else
-                ClientConnected(socket, namespace, instancedata);
-        });
+                if(instancedata)
+                {
+                    xapi.sendStatement(socket.loginData.UID, xapi.verbs.joined, namespace,instancedata.title,instancedata.description,namespace);   
+                }
+                
+                //if this is a single player published world, there is no need for the server to get involved. Server the world state and tell the client to disconnect
+                if (instancedata && instancedata.publishSettings && instancedata.publishSettings.singlePlayer)
+                {
+                    ServeSinglePlayer(socket, namespace, instancedata)
+                }
+                else
+                    ClientConnected(socket, namespace, instancedata);
+            });
+        }
     });
 };
 
