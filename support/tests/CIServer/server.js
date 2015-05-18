@@ -18,52 +18,49 @@ var files = [];
 
 function findFiles(nextStep, dir) {
     logger.log("findFiles")
-	var foundFiles;
-	var baseDir = "../client/";
-	var dirList = [];
-	
-	dir = dir ? dir : "";
-	
-    try{
-		foundFiles = fs.readdirSync(baseDir + dir);
-	}
-	catch(e){
-		if(nextStep) nextStep();
-		return;
-	}
+    var foundFiles;
+    var baseDir = "../client/";
+    var dirList = [];
 
-	//iterate over "foundFiles" and if directory, recursively call findFiles...
-	for(var i = 0; i < foundFiles.length; i++){
-		if(fs.lstatSync(baseDir + dir + foundFiles[i]).isDirectory())
-			dirList.push(dir + foundFiles[i] + "/");
-		
-		else 
-			files.push(dir + foundFiles[i]);
-	}
-	
-	for(var i = 0; i < dirList.length; i++)
-		findFiles(null, dirList[i]);
-	
-	if(nextStep) nextStep();
+    dir = dir ? dir : "";
+
+    try {
+        foundFiles = fs.readdirSync(baseDir + dir);
+    } catch (e) {
+        if (nextStep) nextStep();
+        return;
+    }
+
+    //iterate over "foundFiles" and if directory, recursively call findFiles...
+    for (var i = 0; i < foundFiles.length; i++) {
+        if (fs.lstatSync(baseDir + dir + foundFiles[i]).isDirectory())
+            dirList.push(dir + foundFiles[i] + "/");
+
+        else
+            files.push(dir + foundFiles[i]);
+    }
+
+    for (var i = 0; i < dirList.length; i++)
+        findFiles(null, dirList[i]);
+
+    if (nextStep) nextStep();
 };
 
 global.logger = {
-    log:function()
-    {
-        for (var i = 0; i < arguments.length; i++)
-        {
+    log: function() {
+        for (var i = 0; i < arguments.length; i++) {
             var arg = arguments[i];
-            if(arg instanceof Number)
-                this._log += arg +'\n';
-            else if(arg instanceof String)
-                this._log += arg+'\n';
-            else if(arg instanceof Object)
-                this._log += JSON.stringify(arg)+'\n';
-            else if(arg)
+            if (arg instanceof Number)
+                this._log += arg + '\n';
+            else if (arg instanceof String)
+                this._log += arg + '\n';
+            else if (arg instanceof Object)
+                this._log += JSON.stringify(arg) + '\n';
+            else if (arg)
                 this._log += arg.toString() + '\n';
-        }    
+        }
     },
-    _log:""
+    _log: ""
 }
 
 function readFiles(nextStep) {
@@ -126,7 +123,7 @@ function readFiles(nextStep) {
 }
 
 
-function run_one_test(thistest, nextTest) {
+function run_one_test(thistest, next) {
 
     //setup reporting data
     var id = thistest.filename + ":" + thistest.title;
@@ -150,59 +147,74 @@ function run_one_test(thistest, nextTest) {
         logger.log(id);
         logger.log(err.stack);
         logger.log("DOMAIN ERROR")
-        
+
         process.removeListener('uncaughtException', handler);
         global.clearTimeout(timeoutID);
-        global.setTimeout(function()
-        	{
-        		domain.exit();
-        		nextTest();
-        	}, 500)
+        global.setTimeout(function() {
+            domain.exit();
+            next();
+        }, 500)
     })
     logger.log("starting test " + id);
     //run the test in the error handling context
-    
-        handler = function(e) {
+
+    handler = function(e) {
+        //should return false or true
+        logger.log("EXCEPTION")
+
+        report.tests[id].status = "error";
+
+        report.tests[id].result = "error"
+
+        report.tests[id].message = e;
+        global.clearTimeout(timeoutID);
+        domain.exit();
+        process.removeListener('uncaughtException', handler);
+        global.setTimeout(function() {
+           
+            next();
+        }, 500)
+    }
+    var timeout = function(e) {
             //should return false or true
-            report.tests[id].status = "error";
-            report.tests[id].result = "error";
-            report.tests[id].message = e.toString();
-            domain.dispose();
-            logger.log(e.stack);
-            process.removeListener('uncaughtException', handler);
-            global.clearTimeout(timeoutID);
-            logger.log("EXCEPTION")
-            global.setTimeout(nextTest, 500)
-        }
-        var timeout = function(e) {
-            //should return false or true
-            report.tests[id].status = "error";
-            report.tests[id].result = "error";
-            report.tests[id].message = "Total test timeout";
-            domain.dispose();
-            process.removeListener('uncaughtException', handler);
-            global.clearTimeout(timeoutID);
             logger.log("TIMEOUT")
-            global.setTimeout(nextTest, 500)
-        }
-        timeoutID = global.setTimeout(timeout, 60 * 1000)
-        process.on('uncaughtException', handler);
-        //the actual test
-        domain.bind(thistest.test)(global.browser, function(success, message) {
-            //should return false or true
-            logger.log("SUCCESS")
-            report.tests[id].status = "complete";
-            if (success)
-                report.tests[id].result = "passed"
-            else
-                report.tests[id].result = "failed";
-            report.tests[id].message = message;
+
+            report.tests[id].status = "timeout";
+
+            report.tests[id].result = "timeout"
+
+            report.tests[id].message = e;
             global.clearTimeout(timeoutID);
-            domain.dispose();
+            domain.exit();
             process.removeListener('uncaughtException', handler);
-            global.setTimeout(nextTest, 500)
-        })
-    
+            global.setTimeout(function() {
+                
+                next();
+            }, 500)
+        }
+        //    timeoutID = global.setTimeout(timeout, 60 * 1000)
+    process.on('uncaughtException', handler);
+    //the actual test
+    domain.bind(thistest.test)(global.browser, function(success, message) {
+        //should return false or true
+        logger.log("SUCCESS")
+
+        report.tests[id].status = "complete";
+        if (success)
+            report.tests[id].result = "passed"
+        else
+            report.tests[id].result = "failed";
+        //report.tests[id].message = message;
+        global.clearTimeout(timeoutID);
+        domain.exit();
+        process.removeListener('uncaughtException', handler);
+        global.setTimeout(function() {
+           
+            next();
+        }, 500)
+
+    })
+
 
 }
 
@@ -219,8 +231,8 @@ function startup_tests(cb) {
     };
     global.browser = webdriverio.remote(options);
     console.log(Object.keys(global.browser));
-	
-	global.testUtils = require('../utils/testutils');
+
+    global.testUtils = require('../utils/testutils');
     global.testUtils.hookupUtils(browser);
 
     report.gitLog = "";
@@ -236,20 +248,18 @@ function startSandbox(cb) {
     var startupGood = false;
     sandbox.stdout.on('data', function(data) {
         //Wait for startup complete
-        if (data.toString().indexOf("Startup complete") > -1)
-        {
+        if (data.toString().indexOf("Startup complete") > -1) {
             startupGood = true;
             sandbox.removeAllListeners('exit')
             cb();
         }
     })
     sandbox.on('exit', function(code) {
-            if(sandbox && startupGood == false)
-            {
-                logger.log('sandbox exit without good start')
-                sandbox = null;
-                cb();
-            }
+        if (sandbox && startupGood == false) {
+            logger.log('sandbox exit without good start')
+            sandbox = null;
+            cb();
+        }
     });
 }
 
@@ -258,23 +268,19 @@ function startBrowser(cb) {
         cb()
     });
 }
-function killSandbox(cb)
-{
+
+function killSandbox(cb) {
     logger.log("Sandbox stop");
     var called = false;
-    if (sandbox)
-    {
-        var timeoutid = setTimeout(function()
-        {
+    if (sandbox) {
+        var timeoutid = setTimeout(function() {
             called = true;
             logger.log('exiting calling callback')
             cb();
         }, 2000)
-        sandbox.on('exit', function(code)
-        {
+        sandbox.on('exit', function(code) {
             sandbox = null;
-            if (!called)
-            {
+            if (!called) {
                 clearTimeout(timeoutid)
                 called = true;
                 logger.log('exiting calling callback')
@@ -282,12 +288,11 @@ function killSandbox(cb)
             }
         });
         sandbox.kill();
-    }
-    else
-    {
+    } else {
         cb()
     }
 }
+
 function updateAndRunTests(cb2) {
     //bail if already running. This really should never happen
     if (status == RUNNING) {
@@ -311,7 +316,7 @@ function updateAndRunTests(cb2) {
             },
             //do a get pull and update the dev branch
             startSandbox,
-            startBrowser,
+            // startBrowser,
             //run the selenium tests
             function findAndRunTests(cb) {
                 logger.log("findAndRunTests")
@@ -325,24 +330,34 @@ function updateAndRunTests(cb2) {
                     function runTests(nextStep) {
                         //for each test in this file
                         async.eachSeries(tests, function(thistest, nextTest) {
+
+
                             //bail out of all tests if canceling
                             if (status == CANCELING) {
                                 logger.log("canceling run")
                                 global.setTimeout(nextTest, 500)
                                 return;
                             }
-                            run_one_test(thistest, nextTest)
+                            logger.log('browser starting')
+                            startBrowser(function() {
+                                run_one_test(thistest, function() {
+                                    logger.log('browser ending')
+                                    browser.end()
+                                    nextTest();
+                                })
+                            })
+
                         }, nextStep);
                     },
                 ], function() {
                     cb();
                 })
             },
-            function wait(cb) {
+            /*   function wait(cb) {
                 logger.log('Wait for browser close')
                 browser.end()
                 cb();
-            },
+            },*/
             killSandbox
         ],
         function() {
@@ -408,6 +423,8 @@ function quit_and_reload() {
                 child.unref();
                 logger.log('close');
                 global.setTimeout(function() {
+                    logger.log('killing server');
+                    process.kill(process.pid);
                     process.exit();
                 }, 1000);
             });
@@ -430,6 +447,8 @@ function quit_and_restart() {
                 child.unref();
                 logger.log('close');
                 global.setTimeout(function() {
+                    logger.log('killing server');
+                    process.kill(process.pid);
                     process.exit();
                 }, 1000);
             });
@@ -439,10 +458,10 @@ function quit_and_restart() {
 var server = http.createServer();
 server.on('request', function(request, response) {
     request.url = decodeURI(request.url);
-   
-    if (request.url ==="/ui/") {
-    	request.url += 'tests.html'
-    }   
+
+    if (request.url === "/ui/") {
+        request.url += 'tests.html'
+    }
     if (request.url.indexOf("/ui/") == 0) {
         try {
             var data = fs.readFileSync("." + request.url);
@@ -454,24 +473,32 @@ server.on('request', function(request, response) {
         response.end();
     }
     if (request.url == "/runTests") {
+
+        setTimeout(function() {
+            quit_and_restart();
+        }, 5000)
         response.end();
         request.connection.destroy();
         cancel_run(quit_and_restart);
-         setTimeout(function()
-        {
-            quit_and_restart();
-        },5000)
+
 
     }
     if (request.url == "/quit") {
 
+        setTimeout(function() {
+            logger.log('killing server');
+            process.kill(process.pid);
+            process.exit();
+        }, 5000)
+
         cancel_run(function() {
             process.exit();
         });
-        setTimeout(function()
-        {
-            process.exit();
-        },5000)
+
+        logger.log('killing server');
+        process.kill(process.pid);
+        process.exit();
+
     }
     if (request.url == "/stop") {
 
@@ -481,11 +508,11 @@ server.on('request', function(request, response) {
     }
     if (request.url == "/reload") {
 
-        cancel_run(quit_and_reload);
-        setTimeout(function()
-        {
+        setTimeout(function() {
             quit_and_reload();
-        },5000)
+        }, 5000)
+        cancel_run(quit_and_reload);
+
     }
     if (request.url == "/status") {
         report.status = status;
@@ -515,15 +542,13 @@ server.on('request', function(request, response) {
                             browser.end()
                             cb();
                         },
-                        function(cb)
-                        {
-                            killSandbox(function()
-                            {
+                        function(cb) {
+                            killSandbox(function() {
                                 logger.log('finised killing sandbox')
                                 cb();
-                            })    
+                            })
                         }
-                        
+
                     ], function(err) {
                         console.log(err)
                         logger.log('Run one test exit')
