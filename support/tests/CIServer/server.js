@@ -204,7 +204,7 @@ function run_one_test(thistest, next) {
             report.tests[id].result = "passed"
         else
             report.tests[id].result = "failed";
-        //report.tests[id].message = message;
+        report.tests[id].message = message;
         global.clearTimeout(timeoutID);
         domain.exit();
         process.removeListener('uncaughtException', handler);
