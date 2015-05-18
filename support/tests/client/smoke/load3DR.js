@@ -5,7 +5,7 @@ module.exports = {
 		
         browser.loadBlankScene()
 			.nextGUID("testCouch")
-			.click("#MenuModelsicon")
+			.$click("#MenuModelsicon")
 			.pause(2000)
 			.setValue("#ModelSearchTerm", "couch")
 			.click("#ModelSearchButton")

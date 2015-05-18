@@ -99,6 +99,21 @@ module.exports.hookupUtils = function(browser) {
         	cb(null, jqObj);
         });
 	});
+	browser.addCommand("saveDataBeforeUnload", function(){
+		var cb = arguments[arguments.length -1];
+        browser.execute(function(){
+			window.onbeforeunload = function(){};
+			if(_UserManager.GetCurrentUserName() && _DataManager.getInstanceData().publishSettings.persistence){
+				_DataManager.saveToServer(true);
+				return true;
+			}
+			
+        	return false;
+        }, function(err, didSave)
+        {
+        	cb(null, didSave);
+        });
+	});	
 }
 
 module.exports.login = function(cb){
