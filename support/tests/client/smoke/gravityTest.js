@@ -39,7 +39,7 @@ module.exports = {
 		
 		function addSphere(name, outArr, deltaX, deltaY, deltaZ){
 			browser.nextGUID(name)
-			.click("#MenuCreateSphereicon")
+			.$click("#MenuCreateSphereicon")
 			.pause(6000).then(function(){
 				testUtils.assertNodeExists(name, function(assertStatus, msg){
 					outStr += msg + ";";
