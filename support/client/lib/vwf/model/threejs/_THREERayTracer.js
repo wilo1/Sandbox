@@ -75,6 +75,7 @@ THREE.CPUPickOptions = function() {
     this.objectRegionsTested = 0;
     this.objectsTested = [];
     this.filter = null;
+    this.noTraverse = true;
 }
 // Return the nearsest, highest priority hit 
 THREE.Scene.prototype.CPUPick = function(origin, direction, options, hitlist) {
