@@ -226,7 +226,7 @@ function startup_tests(cb) {
     webdriverio = require('webdriverio');
     options = {
         desiredCapabilities: {
-            browserName: 'firefox'
+            browserName: 'chrome'
         }
     };
     global.browser = webdriverio.remote(options);
