@@ -48,7 +48,7 @@ function executionContext(parentContext)
             return this.touchedProperties[id+name].val;
         else
         {
-            if(this.parent && this.parent.getProperty(id,name))
+            if(this.parent && this.parent instanceof executionContext &&  this.parent.getProperty(id,name))
             {
                 return this.parent.getProperty(id,name);
             }
@@ -68,7 +68,7 @@ function executionContext(parentContext)
         //debugger;
         for(var i in this.touchedProperties)
         {
-            vwf.setProperty(this.touchedProperties[i].id,this.touchedProperties[i].name,this.touchedProperties[i].val);
+           // this.parent.setProperty(this.touchedProperties[i].id,this.touchedProperties[i].name,this.touchedProperties[i].val);
         }
     }
 }
@@ -119,7 +119,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
         enterNewContext: function(log)
         {
             
-            this.contextStack.unshift(new executionContext(this.contextStack[1]))
+            this.contextStack.unshift(new executionContext(this.contextStack[0]))
         },
         exitContext:function(log)
         {
@@ -768,7 +768,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 
                 return ret;
             } catch (e) {
-                this.logger.warn("gettingProperty", nodeID, propertyName, propertyValue,
+                this.logger.warn("gettingProperty", node.id, propertyName, propertyValue,
                     "exception in getter:", utility.exceptionMessage(e));
                 return undefined;
             }
