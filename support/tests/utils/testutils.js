@@ -211,3 +211,13 @@ module.exports.assertNodeExists = function(name, assert) {
             assert(false, "timeout waiting on node creation");
     });
 }
+
+module.exports.GUID = function(){
+	
+	var S4 = function() {
+		return Math.floor(Math.random() * 0x10000 /* 65536 */ ).toString(16);
+	};
+	//can we generate nicer GUID? does it really have to be so long?
+	return 'N'+S4()+S4();
+	return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+}

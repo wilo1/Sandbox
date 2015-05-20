@@ -1,7 +1,7 @@
 module.exports.title = "create an account"
 module.exports.test = function(browser, cb)
 {
-   
+	var GUID = global.testUtils.GUID;
     var password = GUID();
     browser
         .url('http://localhost:3000/adl/sandbox/')
