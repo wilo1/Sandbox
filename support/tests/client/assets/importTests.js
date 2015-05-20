@@ -25,37 +25,62 @@ function runAssetTest(browser, finished, i){
 	var outStr = "";
 	var passed = true;
 	
-	browser.loadBlankScene()
-		.nextGUID(models[0])
-		.click("#MenuCreate")
-		.pause(2000)
+	browser.loadBlankScene();
+
+	loadModel("this_shouldnt_exist.dae")
+		.pause(3000)
+		.hasViewNode("this_shouldnt_exist.dae", function(err, exists){
+			if(!exists){
+				outStr += "Nonexistent model successfully not loaded; " + exists;
+			}
+			else{
+				outStr += "Nonexistent model erroneously loaded; " + exists;
+				passed = false;
+			}
+		})
+		.getText("#alertify .alertify-message", function(err, msg){
+			if(msg.toLowerCase().indexOf("error") > -1){
+				outStr += "Error message successfully shown; ";
+			}
+			else{
+				outStr += "Error: Error dialog not shown; ";
+				passed = false;
+			}
+		})
+		.click("#alertify-ok");
 		
-		.click("#MenuCreateLoadMeshURL")
-		
-		.waitForExist("#choice" + i, 3000)
-		.click("#choice" + i)
-		
-		.pause(2000)
-		.waitForExist("#alertify-ok", 3000)
-		.click("#alertify-ok")
-		
-		.waitForExist("#alertify-text", 3000)
-		.setValue("#alertify-text", base + models[0])
-		
-		.pause(2000)
-		.click("#alertify-ok")
-		
-		//This should result in the create button
+	loadModel(models[0])		
 		.pause(6000).then(function() {
-			/*testUtils.assertNodeExists(models[0], function(assertStatus, msg){
+			testUtils.assertNodeExists(models[0], function(assertStatus, msg){
 				passed = passed && !!assertStatus;
 				outStr += msg + "; ";
-			});*/
+			});
 		})
-		.getViewNode(models[0], function(err, viewNode){
+		.hasViewNode(models[0], function(err, viewNode){
 			
-			outStr += "View node: " + viewNode + "; " + err;
+			outStr += "View node: " + JSON.stringify(viewNode.value) + "; ";
 			finished(passed, outStr);
 		});
+		
+	function loadModel(model){
+		return browser.nextGUID(model)
+			.click("#MenuCreate")
+			.pause(1000)
+			
+			.click("#MenuCreateLoadMeshURL")
+			
+			.waitForExist("#choice" + i, 2000)
+			.click("#choice" + i)
+			
+			.pause(1000)
+			.waitForExist("#alertify-ok", 2000)
+			.click("#alertify-ok")
+			
+			.waitForExist("#alertify-text", 2000)
+			.setValue("#alertify-text", base + model)
+			
+			.pause(1000)
+			.click("#alertify-ok");
+	}
 }
 
