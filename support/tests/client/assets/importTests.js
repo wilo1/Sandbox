@@ -3,10 +3,12 @@ var outArr = [];
 module.exports = function(){ return outArr; };
 
 var tests = [
-	{ title: "Test import of unoptimized Collada file", model: "usmale.dae"},
-	{ title: "Test import of optimized Collada file", model: "usmale.dae"},
-	{ title: "Test import of 3DR JSON file", model: "house2.json", base: globalBase + "examples/3drjson/"},
-	{ title: "Test import of glTF JSON file", model: "monster.json", base: globalBase + "examples/gltfAsset/"}
+	{ title: "Import unoptimized Collada without animation", model: "gameboard.DAE", base: globalBase + "examples/collada/"},
+	{ title: "Import optimized Collada without animation", model: "gameboard.DAE", base: globalBase + "examples/collada/"},
+	{ title: "Import unoptimized Collada with animation", model: "usmale.dae", animation: true,  i: 0},
+	{ title: "Import optimized Collada with animation", model: "usmale.dae", animation: true,    i: 1},
+	{ title: "Import 3DR JSON file", model: "house2.json", base: globalBase + "examples/3drjson/",     i: 2},
+	{ title: "Import glTF JSON file", model: "monster.json", base: globalBase + "examples/gltfAsset/", i: 3, animation: true}
 ];
 		
 for(var i = 0; i < tests.length; i++){
@@ -26,7 +28,7 @@ function runAssetTest(browser, finished, test){
 	var testUtils = global.testUtils;
 	var outStr = "";
 	var passed = true;
-	var i = tests.indexOf(test);
+	var i = test.i !== undefined ? test.i : tests.indexOf(test);
 	
 	browser.loadBlankScene();
 
@@ -52,6 +54,18 @@ function runAssetTest(browser, finished, test){
 				passed = passed && !!assertStatus;
 				outStr += msg + "; ";
 			});
+		})
+		.getProperty(test.model, "animationLength", function(err, obj){
+			var length = obj.value;
+			
+			if(test.animation){
+				passed = passed && length>0;
+				outStr += "Animation: " + length + ", expected > 0; ";
+			}
+			else{
+				passed = passed && length===0;
+				outStr += "Animation: " + length + ", expected: 0; ";
+			}
 		})
 		.hasViewNode(test.model, function(err, exists){
 			passed = passed && exists;
