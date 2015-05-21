@@ -28,24 +28,15 @@ function runAssetTest(browser, finished, i){
 	browser.loadBlankScene();
 
 	loadModel("this_shouldnt_exist.dae")
-		.pause(3000)
+		.pause(1000)
 		.hasViewNode("this_shouldnt_exist.dae", function(err, exists){
-			if(!exists){
-				outStr += "Nonexistent model successfully not loaded; " + exists;
-			}
-			else{
-				outStr += "Nonexistent model erroneously loaded; " + exists;
-				passed = false;
-			}
+			passed = passed && !exists;
+			outStr += "Nonexistent model: " + exists + ", expected: false; ";
 		})
 		.getText("#alertify .alertify-message", function(err, msg){
-			if(msg.toLowerCase().indexOf("error") > -1){
-				outStr += "Error message successfully shown; ";
-			}
-			else{
-				outStr += "Error: Error dialog not shown; ";
-				passed = false;
-			}
+			var success = msg.toLowerCase().indexOf("error") > -1;
+			passed = passed && success;
+			outStr += "Error message: "+success+", expected: true; ";
 		})
 		.click("#alertify-ok");
 		
@@ -56,9 +47,10 @@ function runAssetTest(browser, finished, i){
 				outStr += msg + "; ";
 			});
 		})
-		.hasViewNode(models[0], function(err, viewNode){
+		.hasViewNode(models[0], function(err, exists){
 			
-			outStr += "View node: " + JSON.stringify(viewNode.value) + "; ";
+			passed = passed && exists;
+			outStr += models[0] + ": " + exists + ", expected: true; ";
 			finished(passed, outStr);
 		});
 		
@@ -72,14 +64,14 @@ function runAssetTest(browser, finished, i){
 			.waitForExist("#choice" + i, 2000)
 			.click("#choice" + i)
 			
-			.pause(1000)
+			.pause(500)
 			.waitForExist("#alertify-ok", 2000)
 			.click("#alertify-ok")
 			
 			.waitForExist("#alertify-text", 2000)
 			.setValue("#alertify-text", base + model)
 			
-			.pause(1000)
+			.pause(500)
 			.click("#alertify-ok");
 	}
 }
