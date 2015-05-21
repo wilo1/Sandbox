@@ -6,6 +6,8 @@ var outArr = [];
 module.exports = function(){
 	return outArr;
 };
+//		https://3dr.adlnet.gov/api/_3DRAPI.svc/adl:508/Format/json?ID=00-00-00
+//		https://3dr.adlnet.gov/api/rest/adl:508/Metadata/json?id=00-00-00
 		
 for(var i = 0; i < tests.length; i++){
 	outArr.push({
