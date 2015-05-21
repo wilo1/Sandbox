@@ -68,7 +68,7 @@ function executionContext(parentContext)
         //debugger;
         for(var i in this.touchedProperties)
         {
-           // this.parent.setProperty(this.touchedProperties[i].id,this.touchedProperties[i].name,this.touchedProperties[i].val);
+            this.parent.setProperty(this.touchedProperties[i].id,this.touchedProperties[i].name,this.touchedProperties[i].val);
         }
     }
 }
@@ -1045,12 +1045,15 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             var body = node.private.bodies && node.private.bodies[methodName];
 
             if (body) {
-                this.enterNewContext(["enter" , nodeID, methodName]);
+                var inContext = this.contextStack.length > 1;
+                if(!inContext)
+                    this.enterNewContext(["enter" , nodeID, methodName]);
                 try {
                     var ret = body.apply(node, methodParameters);
                     if (ret && ret.internal_val) return ret.internal_val;
                     {
-                        this.exitContext(["exit",nodeID, methodName]);
+                        if(!inContext)
+                            this.exitContext(["exit",nodeID, methodName]);
                         return ret;
                     }
                 } catch (e) {
@@ -1058,8 +1061,8 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     //            this.logger.warn( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
                     //              "exception:", utility.exceptionMessage( e ) );
                 }
-
-                this.exitContext(["exit",nodeID, methodName]);
+                if(!inContext)
+                    this.exitContext(["exit",nodeID, methodName]);
             }
 
             //call the method on the child behaviors
@@ -1216,9 +1219,12 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             var body = node.private.bodies && node.private.bodies[method];
 
             if (body) {
-                this.enterNewContext();
+                var inContext = this.contextStack.length > 1;
+                if(!inContext)
+                    this.enterNewContext();
                 body.apply(node, args);
-                this.exitContext();
+                if(!inContext)
+                    this.exitContext();
             }
 
             if (node.children)
