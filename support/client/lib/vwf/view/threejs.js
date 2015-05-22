@@ -1139,15 +1139,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
 
         function GetParticleSystems(node, list) {
 
-            for (var i = 0; i < node.children.length; i++) {
-                if (node.children[i] instanceof THREE.PointCloud) {
-                    if (!list)
-                        list = [];
-                    list.push(node.children[i]);
-                }
-                list = GetParticleSystems(node.children[i], list);
-            }
-            return list;
+            return node.__pointclouds;
         }
 
         function resetMaterial(material) {
