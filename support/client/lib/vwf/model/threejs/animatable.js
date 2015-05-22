@@ -53,6 +53,7 @@
 
                 if (frame === null) return;
 
+                /* let's stop treating morphs as animation. That is an artifact of three.js limitations from 2 years ago
                 if (skins[i].morphTargetInfluences) {
                     for (var j = 0; j < skins[i].morphTargetInfluences.length; j++) {
 
@@ -68,7 +69,7 @@
                     if (frame < (this.animationEnd || this.gettingProperty('animationLength')) - 1)
                         skins[i].morphTargetInfluences[frame + 1] = mod;
 
-                }
+                }*/
                 if (skins[i].animationHandle) {
                    
                     skins[i].animationHandle.setKey(this.animationFrame,this.animationFPS);
@@ -147,7 +148,7 @@
             if (propertyName == 'animationLength') {
 
                 var skins = getSkin(this.getRoot(),this.getRoot());
-                if (skins[0] && skins[0].morphTargetInfluences) return skins[0].morphTargetInfluences.length;
+                //if (skins[0] && skins[0].morphTargetInfluences) return skins[0].morphTargetInfluences.length;
                 if (skins[0] && skins[0].animationHandle)
                     return skins[0].animationHandle.data.length * skins[0].animationHandle.data.fps;
                 return 0;
