@@ -504,6 +504,8 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                     if (this.state.nodes[i].setAnimationFrameInternal) {
                         if (this.state.nodes[i].lastAnimationInterp)
                             interpA = this.lerp(this.state.nodes[i].lastAnimationInterp, now, lerpStep);
+                        
+                        this.state.nodes[i].backupTransforms(this.nodes[i].currentAnimationFrame);
                         this.state.nodes[i].setAnimationFrameInternal(interpA, false);
                         this.state.nodes[i].lastAnimationInterp = interpA || 0;
                     }
@@ -555,7 +557,11 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                 this.nodes[i].currentAnimationFrame = null;
                 if (now != null) {
                     if (this.state.nodes[i].setAnimationFrameInternal)
+                    {
+                        
+                        //this.state.nodes[i].restoreTransforms();
                         this.state.nodes[i].setAnimationFrameInternal(now, false);
+                    }
 
                 }
 

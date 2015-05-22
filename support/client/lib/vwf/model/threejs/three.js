@@ -4461,8 +4461,6 @@ THREE.Matrix4.prototype = {
 
 
 
-
-
         temp_m.copy(this)
 
         var te = this.elements;

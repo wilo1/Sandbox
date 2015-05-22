@@ -518,7 +518,8 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
 
                     if (parentNode && parentNode.children)
                         delete parentNode.children[nodeID];
-
+                    if(parentNode && parentNode.childRemoved)
+                        parentNode.childRemoved(childNode)
                     delete this.state.nodes[nodeID];
                 }
             }
