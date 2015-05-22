@@ -114,19 +114,19 @@ module.exports.hookupUtils = function(browser) {
         	cb(null, didSave);
         });
 	});	
-	browser.addCommand("getViewNode", function(nodeName, treatAsId) {
+	browser.addCommand("hasViewNode", function(nodeName, treatAsId) {
 		var cb = arguments[arguments.length -1];
         browser.execute(function(a, b) {
 			try{
 				a = b ? a : vwf.find(vwf.application(), a)[0];
-				return findviewnode(a).children[0];
+				return findviewnode(a).children[0].children[0] ? true : false;
 			} 
 			catch(e){
-				return e;
+				return false;
 			}
         }, nodeName, treatAsId, function(err, viewNode)
         {
-        	cb(err, viewNode);
+        	cb(err, viewNode.value);
         });
 	});	
 }
@@ -164,8 +164,8 @@ module.exports.login = function(cb){
 };
 module.exports.loadBlankScene = function(cb) {
     browser
-        //.url('http://localhost:3000/adl/sandbox/example_blank/?norender=true')
-        .url('http://localhost:3000/adl/sandbox/example_blank/')
+        .url('http://localhost:3000/adl/sandbox/example_blank/?norender=true')
+        //.url('http://localhost:3000/adl/sandbox/example_blank/')
         .waitForExist('#preloadGUIBack', 60000)
         .waitForVisible('#preloadGUIBack', 60000, true)
         .pause(3000).then(cb);
