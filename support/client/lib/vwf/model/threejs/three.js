@@ -29716,11 +29716,7 @@ THREE.Animation.prototype.setKey = function(keyf) {
             object.updateMatrix();
             object.matrixWorld.multiplyMatrices(this.root.matrixWorld,object.matrix);
 
-  for(var i = 0; i < object.children.length; i ++)
-            {
-            	if(this.hierarchy.indexOf(object.children[i]) == -1)
-            		object.children[i].matrixWorld.multiplyMatrices(object.matrixWorld,object.children[i].matrix)
-            }
+
 
             if (object.debugobject) {
                 object.debugobject.matrix.copy(object.matrix);
@@ -29750,11 +29746,7 @@ THREE.Animation.prototype.setKey = function(keyf) {
 			object.updateMatrix();
             object.matrixWorld.multiplyMatrices(this.root.matrixWorld,object.matrix);
 
-            for(var i = 0; i < object.children.length; i ++)
-            {
-            	if(this.hierarchy.indexOf(object.children[i]) == -1)
-            		object.children[i].matrixWorld.multiplyMatrices(object.matrixWorld,object.children[i].matrix)
-            }
+            
             if (object.debugobject) {
                 object.debugobject.matrix.copy(object.matrix);
                 object.debugobject.updateMatrixWorld();

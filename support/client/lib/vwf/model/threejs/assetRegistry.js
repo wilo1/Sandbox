@@ -101,7 +101,29 @@ function cleanAnimation(animation)
             }
         }
     }    
+    createTracksForBones(animation);
     cacheParentSpaceKeys(animation);
+}
+function createTracksForBones(animation)
+{
+    debugger;
+    var bones = animation.root.skeleton.bones;
+    for(var i =0 ; i < bones.length; i++)
+    {
+        if(animation.hierarchy.indexOf(bones[i]))
+        {
+            var parentTrack = animation.hierarchy.indexOf(bones[i].parent);
+            var newTrack = {
+                node:bones[i],
+                keys:[{time:0,pos:[0,0,0],rot:new THREE.Quaternion(),scl:[1,1,1]}]
+            }
+            var pos = new THREE.Vector3();
+            var scl = new THREE.Vector3();
+            bones[i].matrix.decompose(pos,newTrack.keys[0].rot,scl);
+            newTrack.keys[0].pos = [pos.x,pos.y,pos.z]
+            newTrack.keys[0].scl = [scl.x,scl.y,scl.z]
+        }
+    }
 }
 function cacheParentSpaceKeys(animation)
 {
