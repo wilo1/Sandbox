@@ -48,7 +48,7 @@
     "google_callback_url": "http://localhost:3000/adl/sandbox/auth/google/callback"
     "branding"
 
-    // the URL path and data storage location of the integrated asset server
+    // the URL path and data storage location (relative to Sandbox root) of the integrated asset server
     "assetServerPath": "/adl/sas",
     "assetDataDir": "assets"
 }
