@@ -154,9 +154,12 @@
                 }*/
                 if (skins[i].animationHandle) {
                    
+                    skins[i].matrixWorld.multiplyMatrices(skins[i].parent.matrixWorld,skins[i].matrix);
+                    var boneroot = skins[i].animationHandle.hierarchy[0];
+                    boneroot.matrixWorld.multiplyMatrices(boneroot.parent.matrixWorld,boneroot.matrix);
                     skins[i].animationHandle.setKey(this.animationFrame,this.animationFPS);
                   
-                    skins[i].updateMatrixWorld();
+                    
                     
                     //odd, does not seem to update matrix on first child bone. 
                     //how does the bone relate to the skeleton?
