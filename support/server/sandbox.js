@@ -233,7 +233,7 @@ function startVWF() {
 			{
 				var liburl = require('url');
 				var parsedUrl = liburl.parse(global.configuration.assetServerPath);
-				if( !parsedUrl.host || (parsedUrl.hostname === 'localhost' && parsedUrl.port === global.configuration.port) )
+				if( !parsedUrl.host || (parsedUrl.hostname === 'localhost' && parsedUrl.port === global.configuration.port && parsedUrl.pathname) )
 				{
 					global.configuration._hostingAssets = true;
 
