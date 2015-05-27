@@ -39,7 +39,7 @@ function executionContext(parentContext)
     this.setProperty = function(id,name,val)
     {
         if(!this.touchedProperties[id+name])
-            this.touchedProperties[id+name] = {id:id,name:name,val:null}
+            this.touchedProperties[id+name] = {id:id,name:name,val:null,originalVal:null}
         this.touchedProperties[id+name].val = val;
     }
     this.getProperty = function(id,name)
@@ -56,7 +56,8 @@ function executionContext(parentContext)
             var val = vwf.getProperty(id,name);
             if(!(typeof(val) == "number" || typeof(val) == "boolean" || val == null || val == undefined))
             {
-            this.touchedProperties[id+name] = {id:id,name:name,val:null}
+            this.touchedProperties[id+name] = {id:id,name:name,val:null,originalVal:null}
+            this.touchedProperties[id+name].originalVal = $.extend(true,{},this.touchedProperties[id+name].val);
             this.touchedProperties[id+name].val = val;
             }
             return val;
@@ -68,7 +69,8 @@ function executionContext(parentContext)
         //debugger;
         for(var i in this.touchedProperties)
         {
-            this.parent.setProperty(this.touchedProperties[i].id,this.touchedProperties[i].name,this.touchedProperties[i].val);
+            if(!(Object.deepEquals(this.touchedProperties[i].val,this.touchedProperties[i].originalVal)))
+                this.parent.setProperty(this.touchedProperties[i].id,this.touchedProperties[i].name,this.touchedProperties[i].val);
         }
     }
 }
