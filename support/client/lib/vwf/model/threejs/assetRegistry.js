@@ -101,12 +101,12 @@ function cleanAnimation(animation)
             }
         }
     }    
-    createTracksForBones(animation);
+   // createTracksForBones(animation);
     cacheParentSpaceKeys(animation);
 }
 function createTracksForBones(animation)
 {
-    debugger;
+   
     var bones = animation.root.skeleton.bones;
     for(var i =0 ; i < bones.length; i++)
     {
@@ -173,29 +173,6 @@ function cacheParentSpaceKeys(animation)
             key.parentspaceScl = [key.parentspaceScl.x,key.parentspaceScl.y,key.parentspaceScl.z];
         }
     }
-   /*
-    for (var i = 0; i < 25; i++) {
-        animation.setKey(i);
-        animation.root.updateMatrixWorld();
-        for (var k = 0; k < animation.data.hierarchy.length; k++) {
-            var track = animation.data.hierarchy[k];
-            var keys = track.keys;
-            var node = animation.hierarchy[k];
-
-            for (var j = 0; j < keys.length; j++) {
-                var key = keys[j];
-                key.cachedRootMat = node.matrixWorld.clone();
-                  key.parentspacePos = new THREE.Vector3();
-            key.parentspaceScl = new THREE.Vector3();
-            key.parentspaceRot = new THREE.Quaternion();
-            key.cachedRootMat.decompose(key.parentspacePos,key.parentspaceRot,key.parentspaceScl);
-            key.parentspacePos = [key.parentspacePos.x,key.parentspacePos.y,key.parentspacePos.z];
-            key.parentspaceScl = [key.parentspaceScl.x,key.parentspaceScl.y,key.parentspaceScl.z];
-            }
-        }
-
-    }*/
-        
 }
  var NOT_STARTED = 0;
     var PENDING = 1;
@@ -265,6 +242,7 @@ var assetRegistry = function() {
         }
         if(this.assets[assetSource] && this.assets[assetSource].node && this.assets[assetSource].node.animationHandle)
         {
+
             cleanAnimation(this.assets[assetSource].node.animationHandle);
         }
     }
@@ -322,8 +300,10 @@ var assetRegistry = function() {
 
                 asset = shim;
             }
+           
             if(asset.scene.animationHandle)
             {
+                debugger;
                 cleanAnimation(asset.scene.animationHandle);
             }
             //store this asset in the registry
