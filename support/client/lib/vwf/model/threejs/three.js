@@ -29676,7 +29676,7 @@ THREE.Animation.prototype.setKey = function(keyf) {
     var l = keyf - Math.floor(keyf);
     var l2 = 1 - l;
 
-    for (var h = 0, hl = this.hierarchy.length; h < hl; h++) {
+    for (var h = 0, hl = this.data.hierarchy.length; h < hl; h++) {
         var object = this.hierarchy[h];
         var key = this.data.hierarchy[h].keys[Math.floor(keyf)];
         var key2 = this.data.hierarchy[h].keys[Math.floor(keyf + 1)];

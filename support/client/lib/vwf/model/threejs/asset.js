@@ -4,55 +4,7 @@
 
 
 
-function gltf2threejs(animation) {
-    var threeanimation = {
-        name: "animation",
-        fps: 30,
-        length: "",
-        hierarchy: []
-    };
 
-    var index = -1;
-
-    for (var i in animation) {
-        index = index +1;
-
-        threeanimation.hierarchy.push({
-            parent: index,
-            keys: []
-        });
-
-        for (var j = 0; j < animation[i].length; j++) {
-            if (animation[i][j].path == "translation") {
-                for (var l = 0; l < animation[i][j].values.length/3; l++) {
-                    var keys = animation[i][j].values;
-                    var position = new THREE.Vector3(keys[l*3+0], keys[l*3+1], keys[l*3+2]);
-                    if (!threeanimation.hierarchy[index].keys[l])
-                        threeanimation.hierarchy[index].keys[l] = {};
-                    threeanimation.hierarchy[index].keys[l].pos = position;
-                }
-            } else if (animation[i][j].path == "scale") {
-                for (var l = 0; l < animation[i][j].values.length/3; l++) {
-                    var keys = animation[i][j].values;
-                    var scale = new THREE.Vector3(keys[l*3+0], keys[l*3+1], keys[l*3+2]);
-                    if (!threeanimation.hierarchy[index].keys[l])
-                        threeanimation.hierarchy[index].keys[l] = {};
-                    threeanimation.hierarchy[index].keys[l].scl = scale;
-                }
-            } else if (animation[i][j].path == "rotation") {
-                for (var l = 0; l < animation[i][j].values.length/4; l++) {
-                    var keys = animation[i][j].values;
-                    var rotation = new THREE.Quaternion(keys[l*4+0],keys[l*4+1],keys[l*4+2],keys[l*4+3]);
-                    if (!threeanimation.hierarchy[index].keys[l])
-                        threeanimation.hierarchy[index].keys[l] = {};
-                    threeanimation.hierarchy[index].keys[l].rot = rotation;
-                }
-            }
-        }
-    }
-    console.log(threeanimation)
-    return(threeanimation)
-};
 
 
     //enum to keep track of assets that fail to load
@@ -531,7 +483,7 @@ function gltf2threejs(animation) {
             }
             this.loaded = function(asset, rawAnimationChannels)
             {
-debugger;
+
                 if (!asset)
                 {
                     this.loadFailed();
@@ -541,31 +493,22 @@ debugger;
                 //you may be wondering why we are cloning again - this is so that the object in the scene is 
                 //never the same object as in the cache
                 var self = this;
-                if (childType !== 'subDriver/threejs/asset/vnd.gltf+json')
-                {
+               // if (childType !== 'subDriver/threejs/asset/vnd.gltf+json')
+                //{
                   
                     var clone = asset.clone();
                     clone.morphTarget = asset.morphTarget; //sort of hacky way to keep a reference to morphtarget
 
                     this.getRoot().add(clone);
-                }
-                else
-                {
-                    glTFCloner.clone(asset, rawAnimationChannels, function(clone)
-                    {
-                        clone.traverse(function(o){
-                            if(o.animationHandle)
-                            {
-                                debugger;
-                                o.animationHandle = gltf2threejs([o.animationHandle]);
-                            }  
-
-                        })
-                          
-                        self.getRoot().add(clone);
-                        self.getRoot().GetBoundingBox();
-                    });
-                }
+                //}
+            //else
+           // {
+                //glTFCloner.clone(asset, rawAnimationChannels, function(clone)
+                //{
+                //    self.getRoot().add(clone);
+              //      self.getRoot().GetBoundingBox();
+                //});
+            //}
                 this.cleanTHREEJSnodes(this.getRoot());
                 //set some defaults now that the mesh is loaded
                 //the VWF should set some defaults as well
