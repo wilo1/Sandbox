@@ -5,7 +5,7 @@
 //verify the deletion
 //leave and have a good day
 module.exports = {
-	'Test delete button': function(browser, finished) {
+	'Test delete button (A10)': function(browser, finished) {
 		global.browser = browser;
 		var testUtils = require('../../utils/testutils.js');
 		var passed = true;

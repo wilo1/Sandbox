@@ -99,6 +99,17 @@ module.exports.hookupUtils = function(browser) {
         	cb(null, jqObj);
         });
 	});
+	browser.addCommand("$keyup", function(cssSelector, key) {
+		var cb = arguments[arguments.length -1];
+        browser.execute(function(c, k) {
+			var e = $.Event("keyup");
+			e.which = e.keyCode = k.charCodeAt(0);
+        	return $(c).trigger(e);
+        }, cssSelector, key, function(err, jqObj)
+        {
+        	cb(null, jqObj);
+        });
+	});
 	browser.addCommand("saveDataBeforeUnload", function(){
 		var cb = arguments[arguments.length -1];
         browser.execute(function(){
@@ -164,8 +175,8 @@ module.exports.login = function(cb){
 };
 module.exports.loadBlankScene = function(cb) {
     browser
-        .url('http://localhost:3000/adl/sandbox/example_blank/?norender=true')
-        //.url('http://localhost:3000/adl/sandbox/example_blank/')
+        //.url('http://localhost:3000/adl/sandbox/example_blank/?norender=true')
+        .url('http://localhost:3000/adl/sandbox/example_blank/')
         .waitForExist('#preloadGUIBack', 60000)
         .waitForVisible('#preloadGUIBack', 60000, true)
         .pause(3000).then(cb);
