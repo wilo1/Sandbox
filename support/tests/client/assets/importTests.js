@@ -30,6 +30,8 @@ function runAssetTest(browser, finished, test){
 	var passed = true;
 	var i = test.i !== undefined ? test.i : tests.indexOf(test);
 	
+	var tmpArr = [];
+	
 	browser.loadBlankScene();
 
 	//do not run nonexistent test when loading glTF JSON (tests[3])
@@ -48,13 +50,14 @@ function runAssetTest(browser, finished, test){
 			.click("#alertify-ok");
 	}
 		
-	loadModel(test.model, test.base)		
+	loadModel(test.model, test.base)	
 		.pause(6000).then(function() {
 			testUtils.assertNodeExists(test.model, function(assertStatus, msg){
 				passed = passed && !!assertStatus;
 				outStr += msg + "; ";
 			});
 		})
+		.pause(2000)
 		.getProperty(test.model, "animationLength", function(err, obj){
 			var length = obj.value;
 			
@@ -66,6 +69,10 @@ function runAssetTest(browser, finished, test){
 				passed = passed && length===0;
 				outStr += "Animation: " + length + ", expected: 0; ";
 			}
+		})
+		.getConsoleLog(testUtils.SEVERE, function(err, arr){
+			tmpArr.push.apply(tmpArr, arr);
+			outStr += "Log error: " + JSON.stringify(err) + ", Log message: " + JSON.stringify(tmpArr) + " ";
 		})
 		.hasViewNode(test.model, function(err, exists){
 			passed = passed && exists;
