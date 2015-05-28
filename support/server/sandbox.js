@@ -231,22 +231,18 @@ function startVWF() {
 
 			function registerAssetServer(cb)
 			{
-				var liburl = require('url');
-				var parsedUrl = liburl.parse(global.configuration.assetServerPath);
-				if( !parsedUrl.host || (parsedUrl.hostname === 'localhost' && parsedUrl.port === global.configuration.port && parsedUrl.pathname) )
-				{
-					global.configuration._hostingAssets = true;
-
+				if( global.configuration.hostAssets ){
 					var assetServer = require('SandboxAssetServer');
-					app.use(global.configuration.assetServerPath, assetServer({
+					app.use('/adl/sas', assetServer({
 						dataDir: libpath.resolve(__dirname, '..','..', global.configuration.assetDataDir),
 						sessionCookieName: 'session',
 						sessionHeader: global.configuration.assetSessionHeader,
 						sessionSecret: global.configuration.sessionSecret
 					}));
+					logger.info('Hosting assets locally at /adl/sas');
 				}
 				else {
-					logger.info('Asset server URL is', global.configuration.assetServerPath);
+					logger.info('Hosting assets remotely at', global.configuration.remoteAssetServerURL);
 				}
 				cb();
 			},
