@@ -219,7 +219,12 @@ var assetRegistry = function() {
         }
 
         
-
+        if (childType == "subDriver/threejs/asset/vnd.rmx+json" && _assetLoader.getRMX(assetSource))
+        {
+            this.assets[assetSource].loaded = true;
+            this.assets[assetSource].pending = false;
+            this.assets[assetSource].node = _assetLoader.getRMX(assetSource).scene;
+        }
         if (childType == "subDriver/threejs/asset/vnd.three.js+json" && _assetLoader.getTHREEjs(assetSource))
         {
             this.assets[assetSource].loaded = true;
@@ -280,7 +285,6 @@ var assetRegistry = function() {
             reg.failcallbacks.push(failure);
         var assetLoaded = function(asset)
         {
-            
             //if a loader does not return a three.mesh
             if (asset instanceof THREE.Geometry) {
                 var shim;
@@ -301,7 +305,6 @@ var assetRegistry = function() {
 
                 asset = shim;
             }
-           
             if(asset.scene.animationHandle)
             {
                 cleanAnimation(asset.scene.animationHandle);
@@ -396,6 +399,38 @@ var assetRegistry = function() {
             {
                 source: assetSource
             }, assetLoaded, assetFailed);
+        }
+        if (childType == "subDriver/threejs/asset/vnd.rmx+json")
+        {
+            reg.loadStarted();
+            var jsonmodel, binarymodel, asset;
+
+            async.series([
+                    function loadone(cb){
+                        $.getJSON(assetSource,function(data)
+                        {
+                            jsonmodel = data;
+                            cb();
+                        });
+                    },
+                    function loadtwo(cb)
+                    {
+                        var src = assetSource.substr(0, assetSource.lastIndexOf(".")) + ".bin";
+
+                        var xhr = new XMLHttpRequest();
+                        xhr.onload = function(e)
+                        {
+                            binarymodel = xhr.response;
+                            cb();
+                        };
+                        xhr.open("GET", src, true);
+                        xhr.responseType = "arraybuffer";
+                        xhr.send();
+                    }],
+                function done(){
+                    var loader = new RMXModelLoader;
+                    loader.load(jsonmodel, binarymodel, assetLoaded);
+                })
         }
         if (childType == "subDriver/threejs/asset/vnd.three.js+json")
         {
