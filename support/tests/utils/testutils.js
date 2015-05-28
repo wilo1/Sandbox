@@ -142,6 +142,13 @@ module.exports.hookupUtils = function(browser) {
 			module.exports.getConsoleLog(level, '', cb);
 		}
 	});	
+	browser.addCommand("completeTest", function(status, message, finished) {
+		browser.getConsoleLog(module.exports.SEVERE, function(err, logs){
+			
+			finished(status, message);
+		});
+	});	
+	
 	
 }
 
