@@ -240,11 +240,11 @@ var assetRegistry = function() {
             this.assets[assetSource].animations = _assetLoader.getglTF(assetSource).animations;
             this.assets[assetSource].rawAnimationChannels = _assetLoader.getglTF(assetSource).rawAnimationChannels;
         }
-    /*    if(this.assets[assetSource] && this.assets[assetSource].node && this.assets[assetSource].node.animationHandle)
+        if(this.assets[assetSource] && this.assets[assetSource].node && this.assets[assetSource].node.animationHandle)
         {
 
             cleanAnimation(this.assets[assetSource].node.animationHandle);
-        }*/
+        }
     }
     this.newLoad = function(childType, assetSource, success, failure)
     {
@@ -280,6 +280,7 @@ var assetRegistry = function() {
             reg.failcallbacks.push(failure);
         var assetLoaded = function(asset)
         {
+            
             //if a loader does not return a three.mesh
             if (asset instanceof THREE.Geometry) {
                 var shim;
@@ -303,7 +304,6 @@ var assetRegistry = function() {
            
             if(asset.scene.animationHandle)
             {
-                debugger;
                 cleanAnimation(asset.scene.animationHandle);
             }
             //store this asset in the registry
