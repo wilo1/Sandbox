@@ -5,6 +5,23 @@ function clearCameraModeIcons() {
     $('#MenuCameraFreeicon').removeClass('iconselected');
 }
 
+/*
+define(vwf/view/modelupload],function(modelupload) { 
+	return {
+		initialize: function() {
+			modelupload.init();
+			$('asdflkj').click(funciton(){
+				modelupload.show(function(newurl){   
+					_Editor.loadMeshByUrld(new url)
+					_Editor.loadMesh(val, 'subDriver/threejs/asset/vnd.three.js+json');
+				});
+			)
+	...
+	}
+}
+*/
+
+
 define({
 
     initialize: function() {
