@@ -151,6 +151,10 @@ var defaultPrimMaterial = new THREE.MeshPhongMaterial();
             this.GetMesh().position.z = 0;
             this.GetMesh().updateMatrixWorld(true);
         }
+        this.childRemoved = function()
+        {
+            this.dirtyStack();
+        }
         this.Build = function(cache) {
             var mat;
             if (this.rootnode.children[0])
