@@ -1,0 +1,20 @@
+@import 'polyfill';
+
+#manageAssetsDialog
+{
+	@include display-flex();
+
+	#assetBrowser
+	{
+		width: 48%;
+		background-color: white;
+	}
+
+	#propertyBrowser
+	{
+		width: 49%;
+		background-color: grey;
+	}
+
+}
+
