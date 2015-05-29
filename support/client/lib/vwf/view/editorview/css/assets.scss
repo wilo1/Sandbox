@@ -3,18 +3,68 @@
 #manageAssetsDialog
 {
 	@include display-flex();
+	padding: 0;
 
+	& > *
+	{
+		width: 50%;
+		margin-top: 2px;
+	}
 	#assetBrowser
 	{
-		width: 48%;
-		background-color: white;
+		margin-right: 2px;
+		//background-color: white;
+
+		.asset
+		{
+			padding: 3px;
+			margin-bottom: 2px;
+			border-radius: 3px;
+
+			&:nth-child(even){
+				background-color: rgba(48,48,48,0.8);
+			}
+			&:nth-child(odd){
+				background-color: rgba(60,60,60,0.8);
+			}
+
+			.info {
+				@include flex-grow(1);
+			}
+
+			.nonbs-thumbnail
+			{
+				width: 45px; height: 45px;
+				background-color: whitesmoke;
+				border: solid grey 1px;
+				border-radius: 3px;
+
+				@include display-flex();
+				@include align-items(center);
+				@include justify-content(center);
+
+				img {
+					max-width: 100%;
+					max-height: 100%;
+					width: 100%;
+				}
+			}
+		}
 	}
 
 	#propertyBrowser
 	{
-		width: 49%;
+		margin-left: 2px;
 		background-color: grey;
 	}
 
 }
 
+.verticalLayout {
+	@include display-flex();
+	@include flex-direction(column);
+}
+.horizontalLayout {
+	@include display-flex();
+	@include flex-direction(row);
+}

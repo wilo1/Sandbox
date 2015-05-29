@@ -1,3 +1,5 @@
 var app = angular.module('ManageAssets', ['ngResource']);
 
-angular.bootstrap( $('#manageAssetsDialog')[0], 'ManageAssets' );
+$(document).ready(function(){
+	angular.bootstrap( $('#manageAssetsDialog')[0], 'ManageAssets' );
+});

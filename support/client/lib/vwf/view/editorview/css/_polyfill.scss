@@ -4,7 +4,7 @@
 	display: -webkit-box;
 	display: -moz-flex;
 	display: -ms-flexbox;
-	display: webkit-flex;
+	display: -webkit-flex;
 	display: flex;
 }
 
@@ -68,4 +68,61 @@
 	-ms-flex-align: $align;
 	-webkit-align-items: $align;
 	align-items: $align;
+}
+
+@mixin flex-shrink($factor)
+{
+	-moz-flex-shrink: $factor;
+	-ms-flex-shrink: $factor;
+	-webkit-flex-shrink: $factor;
+	flex-shrink: $factor;
+}
+
+@mixin flex-grow($factor)
+{
+	-moz-flex-grow: $factor;
+	-ms-flex: $factor $factor;
+	-webkit-flex-grow: $factor;
+	flex-grow: $factor;
+}
+
+@mixin flex-basis($factor)
+{
+	-moz-flex-basis: $factor;
+	-ms-flex: 0 1 $factor;
+	-webkit-flex-basis: $factor;
+	flex-basis: $factor;
+}
+
+@mixin user-select($select)
+{
+	-webkit-touch-callout: $select;
+    -webkit-user-select: $select;
+    -khtml-user-select: $select;
+    -moz-user-select: $select;
+    -ms-user-select: $select;
+    user-select: $select;
+}
+
+@mixin keyframes($animation-name)
+{
+	@-webkit-keyframes $animation-name {
+		@content;
+	}
+	@keyframes $animation-name {
+		@content;
+	}
+}
+
+@mixin animation($str)
+{
+	-webkit-animation: #{$str};
+	animation: #{$str};
+}
+
+@mixin transform($op)
+{
+	-webkit-transform: $op;
+	-ms-transform: $op;
+	transform: $op;
 }
