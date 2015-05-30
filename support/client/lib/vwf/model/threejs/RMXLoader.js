@@ -187,7 +187,7 @@ var ThreejsModel = (function () {
                     bone.quaternion.x = this.skeleton.bones[i].rot[0];
                     bone.quaternion.y = this.skeleton.bones[i].rot[1];
                     bone.quaternion.z = this.skeleton.bones[i].rot[2];
-                    bone.quaternion.w = this.skeleton.bones[i].rot[2];
+                    bone.quaternion.w = this.skeleton.bones[i].rot[3];
 
                     bone.scale.x = this.skeleton.bones[i].scl[0];
                     bone.scale.y = this.skeleton.bones[i].scl[1];
@@ -197,13 +197,16 @@ var ThreejsModel = (function () {
                     invmat.fromArray(this.skeleton.bones[i]['inv_bind_mat']) 
 
                     threeBones.push(bone)
+                    if(this.skeleton.bones[i].parent > -1)
+                    threeBones[this.skeleton.bones[i].parent].add(bone)
                     inverseMats.push(invmat);
 
                 }
                 debugger;
                 var threeSkeleton = new THREE.Skeleton(threeBones,inverseMats,true);
-
+                
                 mesh = new THREE.SkinnedMesh(chunk.geometry, chunk.material);
+                mesh.add(threeBones[0]);
                 mesh.bind(threeSkeleton,new THREE.Matrix4());
                 /*
                 mesh.userData = threejsSkeleton;
@@ -753,7 +756,7 @@ var ThreejsModelLoader = (function () {
         }
         else {
             var result = new THREE.MeshPhongMaterial();
-            result.skinning = false;//skinned;
+            result.skinning = skinned;
             result.color = new THREE.Color(0.8, 0.8, 0.8);
             // Disable textures. They won't work due to CORS for local files anyway.
             result.map = null; //this.createTexture(material.diffuse);
