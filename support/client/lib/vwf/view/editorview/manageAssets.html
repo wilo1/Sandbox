@@ -1,16 +1,19 @@
 <div id='manageAssetsDialog'>
-    <div id='assetBrowser' ng-controller='AssetListController'>
-    	<div ng-repeat='asset in data.matches' class='asset horizontalLayout'>
-    		<div class='info verticalLayout'>
-    			<p class='name'>{{asset.name || ' '}}</p>
-    			<p class='meta'>{{asset.type}} ({{asset.id}})</p>
-    		</div>
-    		<div class='nonbs-thumbnail'>
-    			<img ng-src='/adl/sas/assets/{{asset.id}}/meta/thumbnail'/>
-    		</div>
-    	</div>
-    </div>
+	<div id='assetBrowser' ng-controller='AssetListController'>
+		<div ng-repeat='asset in assets' class='asset horizontalLayout'>
+			<div class='info verticalLayout'>
+				<p class='name'>{{asset.name}}</p>
+				<p class='meta'>{{asset.type}} ({{asset.id}})</p>
+			</div>
+			<div class='nonbs-thumbnail'>
+				<img ng-src='/adl/sas/assets/{{asset.id}}/meta/thumbnail'/>
+			</div>
+		</div>
+		<div class='newAsset horizontalLayout'>
+			<span>+</span>
+		</div>
+	</div>
 
-    <div id='propertyBrowser'>
-    </div>
+	<div id='propertyBrowser'>
+	</div>
 </div>

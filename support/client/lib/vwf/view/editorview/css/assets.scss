@@ -60,6 +60,20 @@
 				}
 			}
 		}
+
+		.newAsset
+		{
+			@include align-items(center);
+			@include justify-content(center);
+
+			padding: 3px;
+			margin-bottom: 2px;
+			border-radius: 3px;
+			background-color: rgba(40,67,79,0.8);
+
+			font-size: 22px;
+			font-weight: bold;
+		}
 	}
 
 	#propertyBrowser

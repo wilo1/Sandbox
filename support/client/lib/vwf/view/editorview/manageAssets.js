@@ -1,4 +1,4 @@
-define(['vwf/view/editorview/lib/angular', 'vwf/view/editorview/lib/angular-resource'], function(angular)
+define(['vwf/view/editorview/lib/angular'], function(angular)
 {
 	return {
 		initialize: function()
@@ -6,28 +6,48 @@ define(['vwf/view/editorview/lib/angular', 'vwf/view/editorview/lib/angular-reso
 
 
 
-			var app = angular.module('ManageAssetsDialog', ['ngResource']);
+			var app = angular.module('ManageAssetsDialog', []);
 
-			app.factory('DataManager', ['$resource','$http', function($resource,$http)
+			app.factory('DataManager', ['$rootScope','$http', function($rootScope, $http)
 			{
-				var listResource = $resource('/adl/sas/assets/by-meta/all-of?user_name=:userId&isSandboxAsset=true');
-				var data = listResource.get({userId: 'vergenzs'}, function(list)
-				{
-					for(var id in list.matches)
+				$http.get('/adl/sas/assets/by-meta/all-of?user_name=vergenzs&isSandboxAsset=true').success(
+					function(list)
 					{
-						$http.get('/adl/sas/assets/'+id+'/meta/name').success(function(data){
-							list.matches[id].name = data;
-						});;
+						$rootScope.assets = list.matches;
+
+						for(var id in $rootScope.assets)
+						{
+							$http.get('/adl/sas/assets/'+id+'/meta/name').success(function(data){
+								$rootScope.assets[id].name = data;
+							});;
+						}
 					}
-				});
+				);
 
-
-				return data;
+				return null;
 			}]);
 
-			app.controller('AssetListController', ['$scope','$rootScope','DataManager', function($scope,$rootScope,DataManager)
+			app.filter('sortKeys', function(){
+				return function(input, field, reverse)
+				{
+					input = input || {};
+					field = field || 'last_modified';
+					var out = [];
+					for(var i in input){
+						out.push(input[i]);
+					}
+
+					out.sort(function(a,b){
+						if(a[field] < b[field]) return -1;
+						else if(a[field] == b[field]) return 0;
+						else return 1;
+					});
+				};
+			});
+
+			app.controller('AssetListController', ['$scope','$rootScope','DataManager', function($scope,$rootScope)
 			{
-				$scope.data = DataManager;
+				
 			}]);
 
 
