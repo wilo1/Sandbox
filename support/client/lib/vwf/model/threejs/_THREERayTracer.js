@@ -1939,7 +1939,7 @@ THREE.Object3D.prototype.CPUPick = function(origin, direction, options, ret) {
 
 
         }
-        if (this instanceof THREE.Line) {
+        if (this instanceof THREE.Line && this.geometry && this.geometry.vertices) {
             for (var i = 0; i < this.geometry.vertices.length - 1; i++) {
                 var hitdata = allocate_FaceIntersect();
 

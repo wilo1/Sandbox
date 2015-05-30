@@ -166,9 +166,46 @@ var ThreejsModel = (function () {
         }
         for (var i = 0; i < this.chunks.length; ++i) {
             var chunk = this.chunks[i];
-            var mesh = new THREE.Mesh(chunk.geometry, chunk.material);
+            var mesh;
             // Trick three.js into thinking this is a THREE.SkinnedMesh.
+
+
+
             if (this.skeleton) {
+
+
+                
+                var threeBones = [];
+                var inverseMats = [];
+                for(var i in this.skeleton.bones)
+                {
+                    var bone = new THREE.Bone();
+                    bone.position.x = this.skeleton.bones[i].pos[0];
+                    bone.position.y = this.skeleton.bones[i].pos[1];
+                    bone.position.z = this.skeleton.bones[i].pos[2];
+
+                    bone.quaternion.x = this.skeleton.bones[i].rot[0];
+                    bone.quaternion.y = this.skeleton.bones[i].rot[1];
+                    bone.quaternion.z = this.skeleton.bones[i].rot[2];
+                    bone.quaternion.w = this.skeleton.bones[i].rot[2];
+
+                    bone.scale.x = this.skeleton.bones[i].scl[0];
+                    bone.scale.y = this.skeleton.bones[i].scl[1];
+                    bone.scale.z = this.skeleton.bones[i].scl[2];
+                    
+                    var invmat = new THREE.Matrix4();
+                    invmat.fromArray(this.skeleton.bones[i]['inv_bind_mat']) 
+
+                    threeBones.push(bone)
+                    inverseMats.push(invmat);
+
+                }
+                debugger;
+                var threeSkeleton = new THREE.Skeleton(threeBones,inverseMats,true);
+
+                mesh = new THREE.SkinnedMesh(chunk.geometry, chunk.material);
+                mesh.bind(threeSkeleton,new THREE.Matrix4());
+                /*
                 mesh.userData = threejsSkeleton;
                 Object.defineProperty(mesh, "skeleton", { get: function () {
                     return this.userData;
@@ -178,7 +215,10 @@ var ThreejsModel = (function () {
                 } });
                 Object.defineProperty(mesh, "bindMatrixInverse", { get: function () {
                     return ThreejsModel.identityMatrix;
-                } });
+                } });*/
+            }else
+            {
+                mesh = new THREE.Mesh(chunk.geometry, chunk.material);
             }
             // Add the mesh to the container object.
             result.add(mesh);
@@ -713,7 +753,7 @@ var ThreejsModelLoader = (function () {
         }
         else {
             var result = new THREE.MeshPhongMaterial();
-            result.skinning = skinned;
+            result.skinning = false;//skinned;
             result.color = new THREE.Color(0.8, 0.8, 0.8);
             // Disable textures. They won't work due to CORS for local files anyway.
             result.map = null; //this.createTexture(material.diffuse);
