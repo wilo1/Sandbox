@@ -3,18 +3,14 @@ var outArr = [];
 module.exports = function(){ return outArr; };
 
 var modifiers = ["Bend", "Twist", "Taper", "PerlinNoise", "SimplexNoise", "Offset", "Stretch", "Push", "UVMap", "CenterPivot", "Extrude", "PathExtrude", "Lathe"];
-
-var tests = [
-	{ title: "Test modifier on prim", model: "firstPrim"},
-];
 		
-for(var i = 0; i < tests.length; i++){
+for(var i = 0; i < modifiers.length; i++){
 	outArr.push({
-		title: tests[i].title, 
+		title: "Test " + modifiers[i] + " modifier", 
 		test: 
 			function(i){
 				return function(browser, finished){
-					runAssetTest(browser, finished, tests[i]);
+					runAssetTest(browser, finished, modifiers[i]);
 				}
 			}(i)
 	});
@@ -25,15 +21,15 @@ function runAssetTest(browser, finished, test){
 	var testUtils = global.testUtils;
 	var outStr = "";
 	var passed = true;
-	var i = tests.indexOf(test);
+	var i = modifiers.indexOf(test);
 	
 	var tmpArr = [];
 	
 	browser.loadBlankScene();
 		
-	loadModel(test.model)	
+	loadModel(test)	
 		.pause(6000).then(function() {
-			testUtils.assertNodeExists(test.model, function(assertStatus, msg){
+			testUtils.assertNodeExists(test, function(assertStatus, msg){
 				passed = passed && !!assertStatus;
 				outStr += msg + "; ";
 			});
@@ -44,7 +40,16 @@ function runAssetTest(browser, finished, test){
 		.getConsoleLog(testUtils.SEVERE, function(err, arr){
 			outStr += "Log error: " + JSON.stringify(err) + ", Log message: " + JSON.stringify(arr) + " ";
 		})
-		.pause(30000).then(function(){
+		.pause(5000)
+		.getChildren(test, function(err, children){
+			if(children[0] && children[0].indexOf(modifiers[i].toLowerCase()) > -1){
+				outStr += modifiers[i] + " modifier found; ";
+			}
+			else{
+				passed = true;
+				outStr += modifiers[i] + " modifier NOT found; ";
+			}
+			
 			finished(passed, outStr);
 		});
 		

@@ -132,6 +132,15 @@ module.exports.hookupUtils = function(browser) {
         	cb(err, viewNode.value);
         });
 	});		
+	browser.addCommand("getChildren", function(nodeName) {
+		var cb = arguments[arguments.length -1];
+		browser.execute(function(name){
+			var id = vwf.find(vwf.application(), name)[0];
+			return vwf.children(id);
+		}, nodeName, function(err, children){
+			cb(err, children.value);
+		});
+	});	
 	browser.addCommand("getConsoleLog", function(level, contains) {
 		if(typeof contains === "string"){
 			var cb = arguments[arguments.length -1];
