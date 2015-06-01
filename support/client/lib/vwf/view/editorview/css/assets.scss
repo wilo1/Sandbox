@@ -15,12 +15,19 @@
 		margin-right: 2px;
 		//background-color: white;
 
-		.asset
+		.asset, .newAsset
 		{
 			padding: 3px;
 			margin-bottom: 2px;
 			border-radius: 3px;
+			
+			&.selected-asset {
+				background-color: rgba(62,134,215,0.8) !important;
+			}
+		}
 
+		.asset
+		{
 			&:nth-child(even){
 				background-color: rgba(48,48,48,0.8);
 			}
@@ -66,9 +73,6 @@
 			@include align-items(center);
 			@include justify-content(center);
 
-			padding: 3px;
-			margin-bottom: 2px;
-			border-radius: 3px;
 			background-color: rgba(40,67,79,0.8);
 
 			font-size: 22px;

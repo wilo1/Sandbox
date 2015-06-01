@@ -1,6 +1,8 @@
 <div id='manageAssetsDialog'>
+
 	<div id='assetBrowser' ng-controller='AssetListController'>
-		<div ng-repeat='asset in assets' class='asset horizontalLayout'>
+		<div class='asset horizontalLayout' ng-class='{"selected-asset": fields.selected === asset.id}'
+			ng-repeat='asset in assets | sortKeys' ng-click='setSelected(asset.id)'>
 			<div class='info verticalLayout'>
 				<p class='name'>{{asset.name}}</p>
 				<p class='meta'>{{asset.type}} ({{asset.id}})</p>
@@ -9,7 +11,7 @@
 				<img ng-src='/adl/sas/assets/{{asset.id}}/meta/thumbnail'/>
 			</div>
 		</div>
-		<div class='newAsset horizontalLayout'>
+		<div class='newAsset horizontalLayout' ng-class='{"selected-asset": fields.selected==="new"}' ng-click='setSelected("new")'>
 			<span>+</span>
 		</div>
 	</div>

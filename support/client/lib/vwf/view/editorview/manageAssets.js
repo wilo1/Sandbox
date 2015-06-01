@@ -19,10 +19,12 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 						{
 							$http.get('/adl/sas/assets/'+id+'/meta/name').success(function(data){
 								$rootScope.assets[id].name = data;
-							});;
+							});
 						}
 					}
 				);
+
+				$rootScope.fields = {selected: null};
 
 				return null;
 			}]);
@@ -38,16 +40,22 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 					}
 
 					out.sort(function(a,b){
-						if(a[field] < b[field]) return -1;
-						else if(a[field] == b[field]) return 0;
-						else return 1;
+						var ret = 0;
+						if(a[field] < b[field]) ret =  -1;
+						else if(a[field] == b[field]) ret =  0;
+						else ret =  1;
+						return reverse ? -ret : ret;
 					});
+
+					return out;
 				};
 			});
 
 			app.controller('AssetListController', ['$scope','$rootScope','DataManager', function($scope,$rootScope)
 			{
-				
+				$scope.setSelected = function(id){
+					$scope.fields.selected = id;
+				}
 			}]);
 
 
