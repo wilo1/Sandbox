@@ -80,6 +80,7 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
             this.colladaOptimized = {};
             this.glTF = {};
             this.THREEjs = {};
+            this.RMX = {};
 
             this.getOrLoadAsset = function(url, type, cb) {
 

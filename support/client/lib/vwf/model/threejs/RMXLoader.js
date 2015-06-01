@@ -69,7 +69,7 @@ var RMXAnimation = (function () {
         this.name = "";
         this.frames = 0;
         this.fps = 0;
-        this.tracks = [];
+        this.hierarchy = [];
     }
     return RMXAnimation;
 })();
@@ -79,10 +79,11 @@ var RMXAnimation = (function () {
  */
 var RMXAnimationTrack = (function () {
     function RMXAnimationTrack() {
-        this.bone = 0;
-        this.pos = null;
-        this.rot = null;
-        this.scl = null;
+        this.parent = 0;
+        this.keys = [];
+        //this.pos = null;
+        //this.rot = null;
+        //this.scl = null;
     }
     return RMXAnimationTrack;
 })();
@@ -167,14 +168,8 @@ var ThreejsModel = (function () {
         for (var i = 0; i < this.chunks.length; ++i) {
             var chunk = this.chunks[i];
             var mesh;
-            // Trick three.js into thinking this is a THREE.SkinnedMesh.
-
-
 
             if (this.skeleton) {
-
-
-                
                 var threeBones = [];
                 var inverseMats = [];
                 for(var i in this.skeleton.bones)
@@ -192,33 +187,37 @@ var ThreejsModel = (function () {
                     bone.scale.x = this.skeleton.bones[i].scl[0];
                     bone.scale.y = this.skeleton.bones[i].scl[1];
                     bone.scale.z = this.skeleton.bones[i].scl[2];
-                    
+
                     var invmat = new THREE.Matrix4();
-                    invmat.fromArray(this.skeleton.bones[i]['inv_bind_mat']) 
+                    invmat.fromArray(this.skeleton.bones[i]['inv_bind_mat'])
 
                     threeBones.push(bone)
                     if(this.skeleton.bones[i].parent > -1)
-                    threeBones[this.skeleton.bones[i].parent].add(bone)
+                        threeBones[this.skeleton.bones[i].parent].add(bone)
                     inverseMats.push(invmat);
 
                 }
-                debugger;
+
                 var threeSkeleton = new THREE.Skeleton(threeBones,inverseMats,true);
-                
+
                 mesh = new THREE.SkinnedMesh(chunk.geometry, chunk.material);
                 mesh.add(threeBones[0]);
                 mesh.bind(threeSkeleton,new THREE.Matrix4());
+
+
+
+
                 /*
-                mesh.userData = threejsSkeleton;
-                Object.defineProperty(mesh, "skeleton", { get: function () {
-                    return this.userData;
-                } });
-                Object.defineProperty(mesh, "bindMatrix", { get: function () {
-                    return ThreejsModel.identityMatrix;
-                } });
-                Object.defineProperty(mesh, "bindMatrixInverse", { get: function () {
-                    return ThreejsModel.identityMatrix;
-                } });*/
+                 mesh.userData = threejsSkeleton;
+                 Object.defineProperty(mesh, "skeleton", { get: function () {
+                 return this.userData;
+                 } });
+                 Object.defineProperty(mesh, "bindMatrix", { get: function () {
+                 return ThreejsModel.identityMatrix;
+                 } });
+                 Object.defineProperty(mesh, "bindMatrixInverse", { get: function () {
+                 return ThreejsModel.identityMatrix;
+                 } });*/
             }else
             {
                 mesh = new THREE.Mesh(chunk.geometry, chunk.material);
@@ -291,7 +290,6 @@ var RMXModelLoader = (function () {
         scene.add(threemodel.instanciate());
 
         var object = {};
-        object["threeanim"] = threemodel.threeanim;
         object["animations"] = threemodel.animations;
         object["chunks"] = threemodel.chunks;
         object["scene"] = scene;
@@ -301,6 +299,7 @@ var RMXModelLoader = (function () {
     };
     RMXModelLoader.prototype.loadModel = function (json, data) {
 
+        debugger;
         var _this = this;
         var result = new RMXModel;
         // Load geometry
@@ -308,11 +307,11 @@ var RMXModelLoader = (function () {
             return _this.loadModelChunk(chunk, data);
         });
         // Load skeleton
-        result.skeleton = this.loadSkeleton(json, data);
+     /*   result.skeleton = this.loadSkeleton(json, data);
         // Load animations
         result.animations = json.animations.map(function (animation) {
             return _this.loadAnimation(animation, data);
-        });
+        });*/
         // Load materials
         result.materials = json.materials.map(function (material) {
             return _this.loadMaterial(material, data);
@@ -371,10 +370,40 @@ var RMXModelLoader = (function () {
             return null;
         }
         var result = new RMXAnimationTrack;
-        result.bone = json.bone;
-        result.pos = this.loadFloatData(json.pos, data);
-        result.rot = this.loadFloatData(json.rot, data);
-        result.scl = this.loadFloatData(json.scl, data);
+        result.parent = json.bone;
+
+        var position = this.loadFloatData(json.pos, data);
+        var rotation = this.loadFloatData(json.rot, data);
+        var scale = this.loadFloatData(json.scl, data);
+
+        if (position != null) {
+            var posArray = {};
+            for (var i = 0; i < position.length/3; ++i) {
+                var pos = new THREE.Vector3(position[i*3+0], position[i*3+1], position[i*3+2]);
+                pos = [pos.x,pos.y,pos.z];
+                posArray[i] = pos;
+            }
+        }
+        if (scale != null) {
+            var sclArray = {};
+            for (var i = 0; i < scale.length/3; ++i) {
+                var scl = new THREE.Vector3(scale[i*3+0], scale[i*3+1], scale[i*3+2]);
+                scl = [scl.x,scl.y,scl.z];
+                sclArray[i] = scl;
+            }
+        }
+        if (rotation != null) {
+            var rotArray = {};
+            for (var i = 0; i < rotation.length/4; ++i) {
+                var rot = new THREE.Quaternion(rotation[i*4+0], rotation[i*4+1], rotation[i*4+2], rotation[i*4+3]);
+                rotArray[i] = rot;
+            }
+        }
+
+        result.keys.pos = posArray;
+        result.keys.rot = sclArray;
+        result.keys.scl = rotArray;
+
         return result;
     };
     RMXModelLoader.prototype.loadAnimation = function (json, data) {
@@ -383,10 +412,10 @@ var RMXModelLoader = (function () {
             return null;
         }
         var result = new RMXAnimation;
-        result.name = json.name;
+        result.name = json.name || "animation";
         result.fps = json.fps;
         result.frames = json.frames;
-        result.tracks = json.tracks.map(function (track) {
+        result.hierarchy = json.tracks.map(function (track) {
             return _this.loadAnimationTrack(track, data);
         });
         return result;
@@ -767,69 +796,69 @@ var ThreejsModelLoader = (function () {
         }
     };
 
-    ThreejsModelLoader.prototype.setupAnimation = function (rmxanim) {
-        var threeanimation = {
-            name: "animation",
-            fps: 30,
-            length: "",
-            hierarchy: []
-        };
-
-        var index = -1;
-
-        for (var i = 0; i < rmxanim.tracks.length; ++i) {
-            index = index +1;
-
-            threeanimation.hierarchy.push({
-                parent: index,
-                keys: []
-            });
-
-            if (rmxanim.tracks[i].pos) {
-                for (var j = 0; j < rmxanim.tracks[i].pos.length/3; j++) {
-                    var keys = rmxanim.tracks[i].pos;
-
-                    var position = new THREE.Vector3(keys[j*3+0], keys[j*3+1], keys[j*3+2]);
-
-                    if (!threeanimation.hierarchy[index].keys[j])
-                        threeanimation.hierarchy[index].keys[j] = {};
-
-                    threeanimation.hierarchy[index].keys[j].time = j/threeanimation.fps;
-                    threeanimation.hierarchy[index].keys[j].pos = position;
-                }
-            }
-
-            if (rmxanim.tracks[i].scl) {
-                for (var k = 0; k < rmxanim.tracks[i].scl.length/3; k++) {
-                    var keys = rmxanim.tracks[i].scl;
-
-                    var scale = new THREE.Vector3(keys[k*3+0], keys[k*3+1], keys[k*3+2]);
-
-                    if (!threeanimation.hierarchy[index].keys[k])
-                        threeanimation.hierarchy[index].keys[k] = {};
-
-                    threeanimation.hierarchy[index].keys[k].time = k/threeanimation.fps;
-                    threeanimation.hierarchy[index].keys[k].scl = scale;
-                }
-            }
-
-            if (rmxanim.tracks[i].rot) {
-                for (var l = 0; l < rmxanim.tracks[i].rot.length/4; l++) {
-                    var keys = rmxanim.tracks[i].rot;
-
-                    var rotation = new THREE.Quaternion(keys[l*4+0], keys[l*4+1], keys[l*4+2], keys[l*4+3]);
-
-                    if (!threeanimation.hierarchy[index].keys[l])
-                        threeanimation.hierarchy[index].keys[l] = {};
-
-                    threeanimation.hierarchy[index].keys[l].time = l/threeanimation.fps;
-                    threeanimation.hierarchy[index].keys[l].rot = rotation;
-                }
-            }
-        }
-        return threeanimation;
-
-    };
+    //ThreejsModelLoader.prototype.setupAnimation = function (rmxanim) {
+    //    var threeanimation = {
+    //        name: "animation",
+    //        fps: 30,
+    //        length: "",
+    //        hierarchy: []
+    //    };
+    //
+    //    var index = -1;
+    //
+    //    for (var i = 0; i < rmxanim.tracks.length; ++i) {
+    //        index = index +1;
+    //
+    //        threeanimation.hierarchy.push({
+    //            parent: index,
+    //            keys: []
+    //        });
+    //
+    //        if (rmxanim.tracks[i].pos) {
+    //            for (var j = 0; j < rmxanim.tracks[i].pos.length/3; j++) {
+    //                var keys = rmxanim.tracks[i].pos;
+    //
+    //                var position = new THREE.Vector3(keys[j*3+0], keys[j*3+1], keys[j*3+2]);
+    //
+    //                if (!threeanimation.hierarchy[index].keys[j])
+    //                    threeanimation.hierarchy[index].keys[j] = {};
+    //
+    //                threeanimation.hierarchy[index].keys[j].time = j/threeanimation.fps;
+    //                threeanimation.hierarchy[index].keys[j].pos = position;
+    //            }
+    //        }
+    //
+    //        if (rmxanim.tracks[i].scl) {
+    //            for (var k = 0; k < rmxanim.tracks[i].scl.length/3; k++) {
+    //                var keys = rmxanim.tracks[i].scl;
+    //
+    //                var scale = new THREE.Vector3(keys[k*3+0], keys[k*3+1], keys[k*3+2]);
+    //
+    //                if (!threeanimation.hierarchy[index].keys[k])
+    //                    threeanimation.hierarchy[index].keys[k] = {};
+    //
+    //                threeanimation.hierarchy[index].keys[k].time = k/threeanimation.fps;
+    //                threeanimation.hierarchy[index].keys[k].scl = scale;
+    //            }
+    //        }
+    //
+    //        if (rmxanim.tracks[i].rot) {
+    //            for (var l = 0; l < rmxanim.tracks[i].rot.length/4; l++) {
+    //                var keys = rmxanim.tracks[i].rot;
+    //
+    //                var rotation = new THREE.Quaternion(keys[l*4+0], keys[l*4+1], keys[l*4+2], keys[l*4+3]);
+    //
+    //                if (!threeanimation.hierarchy[index].keys[l])
+    //                    threeanimation.hierarchy[index].keys[l] = {};
+    //
+    //                threeanimation.hierarchy[index].keys[l].time = l/threeanimation.fps;
+    //                threeanimation.hierarchy[index].keys[l].rot = rotation;
+    //            }
+    //        }
+    //    }
+    //    return threeanimation;
+    //
+    //};
 
     ThreejsModelLoader.prototype.createModel = function (model) {
         var result = new ThreejsModel;
@@ -844,11 +873,8 @@ var ThreejsModelLoader = (function () {
         // Skeleton - use custom object
         result.skeleton = model.skeleton;
         // Animation - use custom object
-        if (model.animations && model.animations[0]) {
-            var threeanim = this.setupAnimation(model.animations[0])
-        }
+
         result.animations = model.animations;
-        result.threeanim = threeanim;
 
         return result;
     };
