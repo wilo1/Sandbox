@@ -162,14 +162,15 @@ var ThreejsModel = (function () {
         var result = new THREE.Object3D;
         // Create one custom skeleton object.
         var threejsSkeleton = null;
-        if (this.skeleton) {
+        var hasSkin = this.skeleton && this.skeleton.bones.length;
+        if (hasSkin) {
             threejsSkeleton = new ThreejsSkeleton(this.skeleton);
         }
         for (var i = 0; i < this.chunks.length; ++i) {
             var chunk = this.chunks[i];
             var mesh;
 
-            if (this.skeleton) {
+            if (hasSkin) {
                 var threeBones = [];
                 var inverseMats = [];
                 for(var i in this.skeleton.bones)
@@ -200,6 +201,7 @@ var ThreejsModel = (function () {
 
                 var threeSkeleton = new THREE.Skeleton(threeBones,inverseMats,true);
 
+                chunk.material.skinning = true;
                 mesh = new THREE.SkinnedMesh(chunk.geometry, chunk.material);
                 mesh.add(threeBones[0]);
                 mesh.bind(threeSkeleton,new THREE.Matrix4());
@@ -220,6 +222,7 @@ var ThreejsModel = (function () {
                  } });*/
             }else
             {
+                chunk.material.skinning = false;
                 mesh = new THREE.Mesh(chunk.geometry, chunk.material);
             }
             // Add the mesh to the container object.
@@ -299,7 +302,7 @@ var RMXModelLoader = (function () {
     };
     RMXModelLoader.prototype.loadModel = function (json, data) {
 
-        debugger;
+       debugger;
         var _this = this;
         var result = new RMXModel;
         // Load geometry
@@ -307,11 +310,11 @@ var RMXModelLoader = (function () {
             return _this.loadModelChunk(chunk, data);
         });
         // Load skeleton
-     /*   result.skeleton = this.loadSkeleton(json, data);
+        result.skeleton = this.loadSkeleton(json, data);
         // Load animations
         result.animations = json.animations.map(function (animation) {
             return _this.loadAnimation(animation, data);
-        });*/
+        });
         // Load materials
         result.materials = json.materials.map(function (material) {
             return _this.loadMaterial(material, data);

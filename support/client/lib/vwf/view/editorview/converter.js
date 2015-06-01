@@ -728,9 +728,10 @@ define(["vwf/view/editorview/RMXConverter"], function() {
             writeLog("converter", message, level);
         };
         converter.options = new COLLADA.Converter.Options();
+        converter.options.flattenHierarchy = false;
         converter.options.animationLabels.value = _AssetUpload.conversion_data.s0_animations;
         converter.options.useAnimationLabels.value = _AssetUpload.conversion_data.s0_animations != null;
-
+        converter.options.createSkeleton = false;
         // Convert
         timeStart("COLLADA conversion");
         _AssetUpload.conversion_data.s3_converted = converter.convert(_AssetUpload.conversion_data.s2_loaded);
@@ -819,131 +820,6 @@ define(["vwf/view/editorview/RMXConverter"], function() {
         $('#drop-target').append('<div id="drop-target-result" class="hidden"><p class="drop-target-title" id="input_file_size">File loaded (0 kB).</p><p class="drop-target-title" id="input_animations">Animations loaded (0).</p></div>');
 
 
-        /**
-         * Loads our custom file format
-         */
-        var RMXModelLoad = (function () {
-            function RMXModelLoad() {
-            }
-            RMXModelLoad.prototype.loadFloatData = function (json, data) {
-                if (json) {
-                    return new Float32Array(data, json.byte_offset, json.count * json.stride);
-                }
-                else {
-                    return null;
-                }
-            };
-            RMXModelLoad.prototype.loadUint8Data = function (json, data) {
-                if (json) {
-                    return new Uint8Array(data, json.byte_offset, json.count * json.stride);
-                }
-                else {
-                    return null;
-                }
-            };
-            RMXModelLoad.prototype.loadUint32Data = function (json, data) {
-                if (json) {
-                    return new Uint32Array(data, json.byte_offset, json.count * json.stride);
-                }
-                else {
-                    return null;
-                }
-            };
-            RMXModelLoad.prototype.loadModelChunk = function (json, data) {
-                var result = new RMXModelChunk;
-                result.name = json.name;
-                result.triangle_count = json.triangle_count;
-                result.material_index = json.material;
-                result.data_position = this.loadFloatData(json.position, data);
-                result.data_normal = this.loadFloatData(json.normal, data);
-                result.data_texcoord = this.loadFloatData(json.texcoord, data);
-                result.data_boneweight = this.loadFloatData(json.boneweight, data);
-                result.data_boneindex = this.loadUint8Data(json.boneindex, data);
-                result.data_indices = this.loadUint32Data(json.indices, data);
-                // Three.js wants float data
-                if (result.data_boneindex) {
-                    result.data_boneindex = new Float32Array(result.data_boneindex);
-                }
-                return result;
-            };
-            RMXModelLoad.prototype.loadModel = function (json, data) {
-                var _this = this;
-                var result = new RMXModel;
-                // Load geometry
-                result.chunks = json.chunks.map(function (chunk) {
-                    return _this.loadModelChunk(chunk, data);
-                });
-                // Load skeleton
-                result.skeleton = this.loadSkeleton(json, data);
-                // Load animations
-                result.animations = json.animations.map(function (animation) {
-                    return _this.loadAnimation(animation, data);
-                });
-                // Load materials
-                result.materials = json.materials.map(function (material) {
-                    return _this.loadMaterial(material, data);
-                });
-                return result;
-            };
-            RMXModelLoad.prototype.loadBone = function (json, data) {
-                if (json == null) {
-                    return null;
-                }
-                var result = new RMXBone;
-                result.name = json.name;
-                result.parent = json.parent;
-                result.skinned = json.skinned;
-                result.inv_bind_mat = new Float32Array(json.inv_bind_mat);
-                result.pos = vec3.clone(json.pos);
-                result.rot = quat.clone(json.rot);
-                result.scl = vec3.clone(json.scl);
-                return result;
-            };
-            RMXModelLoad.prototype.loadSkeleton = function (json, data) {
-                var _this = this;
-                if (json.bones == null || json.bones.length == 0) {
-                    return null;
-                }
-                var result = new RMXSkeleton;
-                result.bones = json.bones.map(function (bone) {
-                    return _this.loadBone(bone, data);
-                });
-                return result;
-            };
-            RMXModelLoad.prototype.loadAnimationTrack = function (json, data) {
-                if (json == null) {
-                    return null;
-                }
-                var result = new RMXAnimationTrack;
-                result.bone = json.bone;
-                result.pos = this.loadFloatData(json.pos, data);
-                result.rot = this.loadFloatData(json.rot, data);
-                result.scl = this.loadFloatData(json.scl, data);
-                return result;
-            };
-            RMXModelLoad.prototype.loadAnimation = function (json, data) {
-                var _this = this;
-                if (json == null) {
-                    return null;
-                }
-                var result = new RMXAnimation;
-                result.name = json.name;
-                result.fps = json.fps;
-                result.frames = json.frames;
-                result.tracks = json.tracks.map(function (track) {
-                    return _this.loadAnimationTrack(track, data);
-                });
-                return result;
-            };
-            RMXModelLoad.prototype.loadMaterial = function (json, data) {
-                var result = new RMXMaterial;
-                result.diffuse = json.diffuse;
-                result.specular = json.specular;
-                result.normal = json.normal;
-                return result;
-            };
-            return RMXModelLoad;
-        })();
 
 
         var ThreejsRenderer = (function () {
@@ -1131,7 +1007,7 @@ define(["vwf/view/editorview/RMXConverter"], function() {
                 if (!json || !data) {
                     return;
                 }
-                var loader = new RMXModelLoad();
+                var loader = new RMXModelLoader();
                 console.log(loader)
                 var model = loader.loadModel(json, data.buffer);
                 console.log(model)
@@ -1158,6 +1034,7 @@ define(["vwf/view/editorview/RMXConverter"], function() {
         var canvas = $("#canvas")[0];
         renderer = new ThreejsRenderer();
         renderer.init(canvas);
+        this.renderer = renderer;
         // Create option elements
         //var optionsForm = $("#form-options");
         //optionElements.push(new ColladaConverterOption(options.createSkeleton, optionsForm));

@@ -5292,7 +5292,8 @@ var COLLADA;
                             mat4.invert(mat, element.node.transformation_post);
                             mat4.multiply(world_matrix, world_matrix, mat);
                         }
-                        COLLADA.Converter.Geometry.transformGeometry(element.geometry, world_matrix, context);
+                        if(context.options.flattenHierarchy)
+                            COLLADA.Converter.Geometry.transformGeometry(element.geometry, world_matrix, context);
                     });
                 }
                 // Merge all geometries
@@ -5536,6 +5537,7 @@ var COLLADA;
                 this.worldTransformRotationAngle = new OptionFloat("World transform: rotation angle", 0, 0, 360, "Rotation angle (in degrees). See the 'worldTransform' option.");
                 this.truncateResampledAnimations = new OptionBool("Truncate resampled animations", true, "Enabled: animation durations are truncated in order to keep the requested FPS.<br/>" + "Disabled: requested FPS is slightly modified to keep the original duration.");
                 this.createSkeleton = new OptionBool("Generate skeleton", true, "Enabled: a skeleton is generated and all geometry is attached to skeleton bones.<br/>" + "Disabled: no skeleton is generated and all geometry is static.");
+                this.flattenHierarchy = new OptionBool("flattenHierarchy", true, "hierarchy is flattened");
             }
             return Options;
         })();
@@ -6172,6 +6174,7 @@ var COLLADA;
                         COLLADA.Converter.Geometry.computeBoundingBox(geometry, context);
                     });
                 });
+                debugger;
                 return result;
             };
             ColladaConverter.createScene = function(doc, context) {
