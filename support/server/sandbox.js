@@ -650,7 +650,7 @@ function startVWF() {
                     secret: global.configuration.sessionSecret ? global.configuration.sessionSecret : 'unsecure cookie secret',
                     cookie: {
                         maxAge: global.configuration.sessionTimeoutMs ? global.configuration.sessionTimeoutMs : 10000000,
-                        httpOnly: !global.configuration._hostingAssets
+                        httpOnly: !global.configuration.hostingAssets
                     },
                      cookieName: 'session', // cookie name dictates the key name added to the request object
   

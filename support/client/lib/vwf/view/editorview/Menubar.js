@@ -126,9 +126,10 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
     
     
             }
-   
-            manageAssets.initialize();
+
+			manageAssets.initialize();
             $('#MenuToolsManageAssets').click(function(e){
+				manageAssets.refreshData();
                 $('#manageAssetsDialog').dialog('open');
             });
 

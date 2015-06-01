@@ -9,6 +9,7 @@
     width: 50%;
     margin-top: 2px; }
   #manageAssetsDialog #assetBrowser {
+    border-right: solid grey 1px;
     margin-right: 2px; }
     #manageAssetsDialog #assetBrowser .asset, #manageAssetsDialog #assetBrowser .newAsset {
       padding: 3px;
@@ -71,8 +72,45 @@
       font-size: 22px;
       font-weight: bold; }
   #manageAssetsDialog #propertyBrowser {
-    margin-left: 2px;
-    background-color: grey; }
+    margin-left: 2px; }
+    #manageAssetsDialog #propertyBrowser > * {
+      margin: 2px 0; }
+    #manageAssetsDialog #propertyBrowser input {
+      color: black; }
+    #manageAssetsDialog #propertyBrowser #preview {
+      border: dashed whitesmoke 2px;
+      border-radius: 5px;
+      background-color: grey;
+      height: 175px;
+      -webkit-box-pack: distribute;
+      -moz-justify-content: space-around;
+      -ms-flex-pack: distribute;
+      -webkit-justify-content: space-around;
+      justify-content: space-around;
+      -webkit-box-align: center;
+      -moz-align-items: center;
+      -ms-flex-align: center;
+      -webkit-align-items: center;
+      align-items: center; }
+    #manageAssetsDialog #propertyBrowser #permissions {
+      -webkit-box-align: center;
+      -moz-align-items: center;
+      -ms-flex-align: center;
+      -webkit-align-items: center;
+      align-items: center;
+      -webkit-box-pack: justify;
+      -moz-justify-content: space-between;
+      -ms-flex-pack: justify;
+      -webkit-justify-content: space-between;
+      justify-content: space-between; }
+      #manageAssetsDialog #propertyBrowser #permissions label {
+        font-size: 11px; }
+      #manageAssetsDialog #propertyBrowser #permissions table {
+        width: 100px; }
+        #manageAssetsDialog #propertyBrowser #permissions table td {
+          text-align: center; }
+        #manageAssetsDialog #propertyBrowser #permissions table td:first-child {
+          text-align: right; }
 
 .verticalLayout {
   display: -webkit-box;

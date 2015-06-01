@@ -4,7 +4,7 @@
 		<div class='asset horizontalLayout' ng-class='{"selected-asset": fields.selected === asset.id}'
 			ng-repeat='asset in assets | sortKeys' ng-click='setSelected(asset.id)'>
 			<div class='info verticalLayout'>
-				<p class='name'>{{asset.name}}</p>
+				<p class='name' ng-style='{"font-weight": asset._dirty ? "bold" : "normal"}'>{{(asset._dirty ? '*' : '')+asset.name}}</p>
 				<p class='meta'>{{asset.type}} ({{asset.id}})</p>
 			</div>
 			<div class='nonbs-thumbnail'>
@@ -16,6 +16,55 @@
 		</div>
 	</div>
 
-	<div id='propertyBrowser'>
+	<div id='propertyBrowser' class='verticalLayout' ng-controller='AssetPropertiesController'>
+
+		<div id='preview' class='verticalLayout'>
+			<span>Drag Here</span>
+			<input type='file' value='Browse'/>
+		</div>
+
+		<hr/>
+
+		<input type='text' id='name' placeholder='Name' ng-model='selected.name' ng-change='markDirty(selected.id)'/>
+		<textarea id='description' placeholder='Description' ng-model='selected.description' ng-change='markDirty(selected.id)'></textarea>
+
+		<hr/>
+
+		<div id='permissions' class='horizontalLayout'>
+
+			<label>Permissions
+				<br/>
+				<input type='text' id='group' name='group' placeholder='Group' ng-model='selected.group_name'/>
+			</label>
+			<table>
+				<tr>
+					<td></td>
+					<td>R</td>
+					<td>W</td>
+					<td>D</td>
+				</tr>
+				<tr>
+					<td>User</td>
+					<td><input type='checkbox' title='User read' ng-model='selected.permissions.user.read'/></td>
+					<td><input type='checkbox' title='User write' ng-model='selected.permissions.user.write'/></td>
+					<td><input type='checkbox' title='User delete' ng-model='selected.permissions.user.delete'/></td>
+				</tr>
+				<tr>
+					<td>Group</td>
+					<td><input type='checkbox' title='Group read' ng-model='selected.permissions.group.read'/></td>
+					<td><input type='checkbox' title='Group write' ng-model='selected.permissions.group.write'/></td>
+					<td><input type='checkbox' title='Group delete' ng-model='selected.permissions.group.delete'/></td>
+				</tr>
+				<tr>
+					<td>Other</td>
+					<td><input type='checkbox' title='Other read' ng-model='selected.permissions.other.read'/></td>
+					<td><input type='checkbox' title='Other write' ng-model='selected.permissions.other.write'/></td>
+					<td><input type='checkbox' title='Other delete' ng-model='selected.permissions.other.delete'/></td>
+				</tr>
+			</table>
+
+		</div>
+
 	</div>
+
 </div>
