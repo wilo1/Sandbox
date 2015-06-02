@@ -867,30 +867,35 @@ define(function() {
                     $("#accordion").children().last().remove();
                     $("#accordion").children().last().remove();
                 }
-            $('#basicSettings' + nodeid).append('<div style="margin-top: 1em;" nodename="' + node.id + '" id="' + nodeid + 'deletebutton"/>');
-            $('#' + nodeid + 'deletebutton').button({
-                label: 'Delete'
-            });
-            $('#' + nodeid + 'deletebutton').click(this.deleteButtonClicked);
-            $('#basicSettings' + nodeid).append('<div style="margin-top: 1em;" nodename="' + node.id + '" id="' + nodeid + 'selectbutton"/>');
-            $('#' + nodeid + 'selectbutton').button({
-                label: 'Select'
-            });
-            $('#' + nodeid + 'selectbutton').click(this.selectButtonClicked);
-            //remove save button. too confusing
-            // $('#basicSettings' + nodeid).append('<div style="margin-top: 1em;" nodename="' + node.id + '" id="' + nodeid + 'savebutton"/>');
-            // $('#' + nodeid + 'savebutton').button(
-            // {
-            // label: 'Save'
-            // });
-            // $('#' + nodeid + 'savebutton').click(this.saveButtonClicked);
-            $('#basicSettings' + nodeid).append('<div style="margin-top: 1em;" nodename="' + node.id + '" id="' + nodeid + 'copybutton"/>');
-            $('#' + nodeid + 'copybutton').button({
-                label: 'Copy'
-            });
-            $('#' + nodeid + 'copybutton').click(this.copyButtonClicked);
+            if(addedWidget)
+            {   
+                var randomname = GUID();
+                $('#basicSettings' + nodeid).append('<div style="margin-top: 1em;" nodename="' + node.id + '" id="' + nodeid + randomname+ 'deletebutton"/>');
+                $('#' + nodeid +randomname+ 'deletebutton').button({
+                    label: 'Delete'
+                });
+                $('#' + nodeid + randomname+'deletebutton').click(this.deleteButtonClicked);
+                $('#basicSettings' + nodeid).append('<div style="margin-top: 1em;" nodename="' + node.id + '" id="' + nodeid +randomname+ 'selectbutton"/>');
+                $('#' + nodeid +randomname+ 'selectbutton').button({
+                    label: 'Select'
+                });
+                $('#' + nodeid +randomname+ 'selectbutton').click(this.selectButtonClicked);
+                //remove save button. too confusing
+                // $('#basicSettings' + nodeid).append('<div style="margin-top: 1em;" nodename="' + node.id + '" id="' + nodeid + 'savebutton"/>');
+                // $('#' + nodeid + 'savebutton').button(
+                // {
+                // label: 'Save'
+                // });
+                // $('#' + nodeid + 'savebutton').click(this.saveButtonClicked);
+                $('#basicSettings' + nodeid).append('<div style="margin-top: 1em;" nodename="' + node.id + '" id="' + nodeid + randomname+'copybutton"/>');
+                $('#' + nodeid +randomname+ 'copybutton').button({
+                    label: 'Copy'
+                });
+                $('#' + nodeid + randomname+'copybutton').click(this.copyButtonClicked);
+            }
         }
         this.deleteButtonClicked = function() {
+            
             if (document.PlayerNumber == null) {
                 _Notifier.notify('You must log in to participate');
                 return;
@@ -904,7 +909,7 @@ define(function() {
                 _Editor.DeleteSelection();
             } else {
                 vwf_view.kernel.deleteNode(id);
-                vwf_view.kernel.callMethod(_Editor.GetSelectedVWFNode().id, 'dirtyStack');
+                //vwf_view.kernel.callMethod(_Editor.GetSelectedVWFNode().id, 'dirtyStack');
                 window.setTimeout(function() {
                     _PrimitiveEditor.SelectionChanged(null, _Editor.GetSelectedVWFNode());
                 }, 500);
