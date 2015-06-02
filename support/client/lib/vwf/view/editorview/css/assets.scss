@@ -10,11 +10,24 @@
 		width: 50%;
 		margin-top: 2px;
 	}
+
+	label {
+		font-size: 11px;
+	}
+
 	#assetBrowser
 	{
 		border-right: solid grey 1px;
 		margin-right: 2px;
-		overflow-y: scroll;
+
+		#controls {
+			@include justify-content(space-between);
+		}
+
+		#assetList {
+			overflow-y: scroll;
+			@include flex-grow(1);
+		}
 
 		.asset, .newAsset
 		{
@@ -87,10 +100,6 @@
 			&:not([disabled]) {
 				color: black;
 			}
-		}
-
-		label {
-			font-size: 11px;
 		}
 
 		#preview

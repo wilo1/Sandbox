@@ -8,10 +8,23 @@
   #manageAssetsDialog > * {
     width: 50%;
     margin-top: 2px; }
+  #manageAssetsDialog label {
+    font-size: 11px; }
   #manageAssetsDialog #assetBrowser {
     border-right: solid grey 1px;
-    margin-right: 2px;
-    overflow-y: scroll; }
+    margin-right: 2px; }
+    #manageAssetsDialog #assetBrowser #controls {
+      -webkit-box-pack: justify;
+      -moz-justify-content: space-between;
+      -ms-flex-pack: justify;
+      -webkit-justify-content: space-between;
+      justify-content: space-between; }
+    #manageAssetsDialog #assetBrowser #assetList {
+      overflow-y: scroll;
+      -moz-flex-grow: 1;
+      -ms-flex: 1 1;
+      -webkit-flex-grow: 1;
+      flex-grow: 1; }
     #manageAssetsDialog #assetBrowser .asset, #manageAssetsDialog #assetBrowser .newAsset {
       padding: 3px;
       margin-bottom: 2px;
@@ -62,8 +75,6 @@
       margin: 2px 0; }
     #manageAssetsDialog #propertyBrowser input:not([disabled]), #manageAssetsDialog #propertyBrowser textarea:not([disabled]) {
       color: black; }
-    #manageAssetsDialog #propertyBrowser label {
-      font-size: 11px; }
     #manageAssetsDialog #propertyBrowser #preview {
       border: dashed whitesmoke 2px;
       border-radius: 5px;

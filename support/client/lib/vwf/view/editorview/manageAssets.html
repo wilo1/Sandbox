@@ -1,13 +1,22 @@
 <div id='manageAssetsDialog'>
 
-	<div id='assetBrowser' ng-controller='AssetListController'>
-		<div class='asset horizontalLayout' ng-class='{"selected-asset": fields.selected === asset.id}'
-			ng-repeat='asset in assets | sortKeys' ng-click='fields.selected = asset.id'>
-			<div class='info verticalLayout'>
-				<p class='name' ng-style='{"font-weight": asset._dirty ? "bold" : "normal"}'>{{(asset._dirty ? '*' : '')+asset.name}}</p>
-				<p class='meta'>{{asset.type}} ({{asset.id}})</p>
-			</div>
-			<div class='nonbs-thumbnail' ng-style='{"background-image": "url(/adl/sas/assets/"+asset.id+"/meta/thumbnail)"}'>
+	<div id='assetBrowser' class='verticalLayout' ng-controller='AssetListController'>
+		<div id='controls' class='horizontalLayout'>
+			<label>
+				<input type='checkbox' ng-model='showThumbs'/>
+				Show thumbnails
+			</label>
+			<input type='text' ng-model='mimeFilter' placeholder='model/*'/>
+		</div>
+		<div id='assetList' class='verticalLayout'>
+			<div class='asset horizontalLayout' ng-class='{"selected-asset": fields.selected === asset.id}'
+				ng-repeat='asset in assets | sortKeys' ng-click='fields.selected = asset.id'>
+				<div class='info verticalLayout'>
+					<p class='name' ng-style='{"font-weight": asset._dirty ? "bold" : "normal"}'>{{(asset._dirty ? '*' : '')+asset.name}}</p>
+					<p class='meta'>{{asset.type}} ({{asset.id}})</p>
+				</div>
+				<div class='nonbs-thumbnail' ng-style='{"background-image": "url(/adl/sas/assets/"+asset.id+"/meta/thumbnail)"}'>
+				</div>
 			</div>
 		</div>
 		<div class='newAsset horizontalLayout' ng-class='{"selected-asset": fields.selected==="new"}' ng-click='fields.selected = "new"'>
