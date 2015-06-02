@@ -6,13 +6,16 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 	app.factory('DataManager', ['$rootScope','$http', function($rootScope, $http)
 	{
 		dataRoot = $rootScope;
+		$rootScope.fields = {selected: 'new'};
+
 		$rootScope.refreshData = function()
 		{
 			$http.get('/adl/sas/assets/by-meta/all-of?user_name='+_UserManager.GetCurrentUserName()+'&isSandboxAsset=true').success(
 				function(list)
 				{
 					$rootScope.assets = list.matches;
-	
+					$rootScope.fields.selected = 'new';
+
 					for(var id in $rootScope.assets)
 					{
 						$http.get('/adl/sas/assets/'+id+'/meta/name+description+permissions?permFormat=json').success(function(data){
@@ -24,8 +27,6 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				}
 			);
 		}
-
-		$rootScope.fields = {selected: null};
 
 		return null;
 	}]);
@@ -59,7 +60,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		}
 	}]);
 
-	app.controller('AssetPropertiesController', ['$scope','$rootScope','DataManager', function($scope,$rootScope)
+	app.controller('AssetPropertiesController', ['$scope','$rootScope','$http','DataManager', function($scope,$rootScope,$http)
 	{
 		$scope.new = {};
 
@@ -71,9 +72,54 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 			$scope.assets[id]._dirty = true;
 		}
 
-		$scope.markClean = function(id){
-			$scope.assets[id]._dirty = false;
+		$scope.saveData = function()
+		{
+			var file = $('#preview input')[0].files[0];
+			
+			if( file && $scope.fields.selected === 'new' )
+			{
+				var fr = new FileReader( file );
+				fr.onload = function(evt){
+					$http.post('/adl/sas/assets/new', evt.target.result, {
+						params: {
+							name: $scope.selected.name,
+							description: $scope.selected.description,
+							group_name: $scope.selected.group_name,
+							isSandboxAsset: true
+						},
+						headers: {
+							'Content-Type': file.type
+						}
+					})
+					.success(function(data){
+						console.log(data);
+					});
+				};
+				fr.readAsBinaryString(file);
+			}
+
+			/*var fr = FileReader( $('#preview input')[0].files[0] );
+			fr.readAsBinaryString();
+
+			if( $scope.fields.selected === 'new' && )
+			{
+				$http.post('/adl/sas/assets/new', {
+					params: {
+						name: $scope.selected.name,
+						description: $scope.selected.description
+					},
+					headers: {
+						'Content-Type':
+					}
+				})
+				.success(function(data)
+				{
+					
+				});
+			}*/
 		}
+
+
 	}]);
 
 	return {

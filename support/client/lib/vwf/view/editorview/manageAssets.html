@@ -18,7 +18,7 @@
 
 	<div id='propertyBrowser' class='verticalLayout' ng-controller='AssetPropertiesController'>
 
-		<div id='preview' class='verticalLayout'>
+		<div id='preview' class='verticalLayout' ng-style='{"background-image": "url(/adl/sas/assets/"+selected.id+"/meta/thumbnail)"}'>
 			<span>Drag Here</span>
 			<input type='file' value='Browse'/>
 		</div>
@@ -34,7 +34,7 @@
 
 			<label>Permissions
 				<br/>
-				<input type='text' id='group' name='group' placeholder='Group' ng-model='selected.group_name'/>
+				<input type='text' id='group' name='group' placeholder='Group' ng-model='selected.group_name' ng-change='markDirty(selected.id)'/>
 			</label>
 			<table>
 				<tr>
@@ -45,24 +45,31 @@
 				</tr>
 				<tr>
 					<td>User</td>
-					<td><input type='checkbox' title='User read' ng-model='selected.permissions.user.read'/></td>
-					<td><input type='checkbox' title='User write' ng-model='selected.permissions.user.write'/></td>
-					<td><input type='checkbox' title='User delete' ng-model='selected.permissions.user.delete'/></td>
+					<td><input type='checkbox' title='User read' ng-model='selected.permissions.user.read' ng-change='markDirty(selected.id)'/></td>
+					<td><input type='checkbox' title='User write' ng-model='selected.permissions.user.write' ng-change='markDirty(selected.id)'/></td>
+					<td><input type='checkbox' title='User delete' ng-model='selected.permissions.user.delete' ng-change='markDirty(selected.id)'/></td>
 				</tr>
 				<tr>
 					<td>Group</td>
-					<td><input type='checkbox' title='Group read' ng-model='selected.permissions.group.read'/></td>
-					<td><input type='checkbox' title='Group write' ng-model='selected.permissions.group.write'/></td>
-					<td><input type='checkbox' title='Group delete' ng-model='selected.permissions.group.delete'/></td>
+					<td><input type='checkbox' title='Group read' ng-model='selected.permissions.group.read' ng-change='markDirty(selected.id)'/></td>
+					<td><input type='checkbox' title='Group write' ng-model='selected.permissions.group.write' ng-change='markDirty(selected.id)'/></td>
+					<td><input type='checkbox' title='Group delete' ng-model='selected.permissions.group.delete' ng-change='markDirty(selected.id)'/></td>
 				</tr>
 				<tr>
 					<td>Other</td>
-					<td><input type='checkbox' title='Other read' ng-model='selected.permissions.other.read'/></td>
-					<td><input type='checkbox' title='Other write' ng-model='selected.permissions.other.write'/></td>
-					<td><input type='checkbox' title='Other delete' ng-model='selected.permissions.other.delete'/></td>
+					<td><input type='checkbox' title='Other read' ng-model='selected.permissions.other.read' ng-change='markDirty(selected.id)'/></td>
+					<td><input type='checkbox' title='Other write' ng-model='selected.permissions.other.write' ng-change='markDirty(selected.id)'/></td>
+					<td><input type='checkbox' title='Other delete' ng-model='selected.permissions.other.delete' ng-change='markDirty(selected.id)'/></td>
 				</tr>
 			</table>
 
+		</div>
+
+		<hr/>
+
+		<div id='buttons' class='horizontalLayout'>
+			<input type='button' ng-click='saveData()' ng-value='fields.selected === "new" ? "Upload" : "Save"'/>
+			<input type='button' value='Delete' ng-disabled='!selected.permissions.user.delete'/>
 		</div>
 
 	</div>
