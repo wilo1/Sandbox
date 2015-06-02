@@ -127,8 +127,9 @@
 
 		#buttons input
 		{
-			@include flex-grow(1);
+			//@include flex-grow(1);
 			margin: 3px;
+			width: 50%;
 		}
 
 		.spacer {

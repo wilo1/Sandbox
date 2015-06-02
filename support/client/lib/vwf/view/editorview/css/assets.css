@@ -102,11 +102,8 @@
         #manageAssetsDialog #propertyBrowser #permissions table td:first-child {
           text-align: right; }
     #manageAssetsDialog #propertyBrowser #buttons input {
-      -moz-flex-grow: 1;
-      -ms-flex: 1 1;
-      -webkit-flex-grow: 1;
-      flex-grow: 1;
-      margin: 3px; }
+      margin: 3px;
+      width: 50%; }
     #manageAssetsDialog #propertyBrowser .spacer {
       -moz-flex-grow: 1;
       -ms-flex: 1 1;
