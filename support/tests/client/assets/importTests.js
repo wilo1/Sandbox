@@ -3,12 +3,10 @@ var outArr = [];
 module.exports = function(){ return outArr; };
 
 var tests = [
-	{ title: "Import unoptimized Collada without animation", model: "gameboard.DAE", base: globalBase + "examples/collada/"},
-	{ title: "Import optimized Collada without animation", model: "gameboard.DAE", base: globalBase + "examples/collada/"},
-	{ title: "Import unoptimized Collada with animation", model: "usmale.dae", animation: true,  i: 0},
-	{ title: "Import optimized Collada with animation", model: "usmale.dae", animation: true,    i: 1},
-	{ title: "Import 3DR JSON file", model: "house2.json", base: globalBase + "examples/3drjson/",     i: 2},
-	{ title: "Import glTF JSON file", model: "monster.json", base: globalBase + "examples/gltfAsset/", i: 3, animation: true}
+	{ title: "Import Collada without animation", model: "gameboard.DAE", base: globalBase + "examples/collada/"},
+	{ title: "Import Collada with animation", model: "usmale.dae", animation: true, i: 0},
+	{ title: "Import 3DR JSON file", model: "house2.json", base: globalBase + "examples/3drjson/", i: 1},
+	{ title: "Import glTF JSON file", model: "monster.json", base: globalBase + "examples/gltfAsset/", i: 2, animation: true}
 ];
 		
 for(var i = 0; i < tests.length; i++){
@@ -29,8 +27,6 @@ function runAssetTest(browser, finished, test){
 	var outStr = "";
 	var passed = true;
 	var i = test.i !== undefined ? test.i : tests.indexOf(test);
-	
-	var tmpArr = [];
 	
 	browser.loadBlankScene();
 
@@ -69,10 +65,6 @@ function runAssetTest(browser, finished, test){
 				passed = passed && length===0;
 				outStr += "Animation: " + length + ", expected: 0; ";
 			}
-		})
-		.getConsoleLog(testUtils.SEVERE, function(err, arr){
-			tmpArr.push.apply(tmpArr, arr);
-			outStr += "Log error: " + JSON.stringify(err) + ", Log message: " + JSON.stringify(tmpArr) + " ";
 		})
 		.hasViewNode(test.model, function(err, exists){
 			passed = passed && exists;
