@@ -7,8 +7,7 @@
 				<p class='name' ng-style='{"font-weight": asset._dirty ? "bold" : "normal"}'>{{(asset._dirty ? '*' : '')+asset.name}}</p>
 				<p class='meta'>{{asset.type}} ({{asset.id}})</p>
 			</div>
-			<div class='nonbs-thumbnail'>
-				<img ng-src='/adl/sas/assets/{{asset.id}}/meta/thumbnail'/>
+			<div class='nonbs-thumbnail' ng-style='{"background-image": "url(/adl/sas/assets/"+asset.id+"/meta/thumbnail)"}'>
 			</div>
 		</div>
 		<div class='newAsset horizontalLayout' ng-class='{"selected-asset": fields.selected==="new"}' ng-click='setSelected("new")'>
@@ -18,13 +17,16 @@
 
 	<div id='propertyBrowser' class='verticalLayout' ng-controller='AssetPropertiesController'>
 
+
 		<div id='preview' class='verticalLayout' ng-style='{"background-image": "url(/adl/sas/assets/"+selected.id+"/meta/thumbnail)"}'>
 			<span>Drag Here</span>
-			<input type='file' value='Browse'/>
+			<input type='file' id='fileInput' value='Browse' onchange='setMime(this.files)'/>
+			<input type='text' id='typeInput' placeholder='text/plain' ng-model='selected.type'/>
 		</div>
 
 		<hr/>
 
+		<p id='url'>{{fields.selected !== 'new' ? '/adl/sas/assets/'+selected.id : 'Un-uploaded Asset'}}</p>
 		<input type='text' id='name' placeholder='Name' ng-model='selected.name' ng-change='markDirty(selected.id)'/>
 		<textarea id='description' placeholder='Description' ng-model='selected.description' ng-change='markDirty(selected.id)'></textarea>
 
@@ -65,11 +67,14 @@
 
 		</div>
 
+		<div class='spacer'/>
+
 		<hr/>
 
 		<div id='buttons' class='horizontalLayout'>
 			<input type='button' ng-click='saveData()' ng-value='fields.selected === "new" ? "Upload" : "Save"'/>
-			<input type='button' value='Delete' ng-disabled='!selected.permissions.user.delete'/>
+			<input type='button' ng-click='deleteData(selected.id)' value='Delete'
+				ng-disabled='fields.selected === "new" || !selected.permissions.user.delete'/>
 		</div>
 
 	</div>
