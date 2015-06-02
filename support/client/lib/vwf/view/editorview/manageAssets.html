@@ -2,7 +2,7 @@
 
 	<div id='assetBrowser' ng-controller='AssetListController'>
 		<div class='asset horizontalLayout' ng-class='{"selected-asset": fields.selected === asset.id}'
-			ng-repeat='asset in assets | sortKeys' ng-click='setSelected(asset.id)'>
+			ng-repeat='asset in assets | sortKeys' ng-click='fields.selected = asset.id'>
 			<div class='info verticalLayout'>
 				<p class='name' ng-style='{"font-weight": asset._dirty ? "bold" : "normal"}'>{{(asset._dirty ? '*' : '')+asset.name}}</p>
 				<p class='meta'>{{asset.type}} ({{asset.id}})</p>
@@ -10,25 +10,25 @@
 			<div class='nonbs-thumbnail' ng-style='{"background-image": "url(/adl/sas/assets/"+asset.id+"/meta/thumbnail)"}'>
 			</div>
 		</div>
-		<div class='newAsset horizontalLayout' ng-class='{"selected-asset": fields.selected==="new"}' ng-click='setSelected("new")'>
+		<div class='newAsset horizontalLayout' ng-class='{"selected-asset": fields.selected==="new"}' ng-click='fields.selected = "new"'>
 			<span>+</span>
 		</div>
 	</div>
 
 	<div id='propertyBrowser' class='verticalLayout' ng-controller='AssetPropertiesController'>
 
-
-		<div id='preview' class='verticalLayout' ng-style='{"background-image": "url(/adl/sas/assets/"+selected.id+"/meta/thumbnail)"}'>
+		<div id='preview' class='verticalLayout'>
 			<span>Drag Here</span>
 			<input type='file' id='fileInput' value='Browse' onchange='setMime(this.files)'/>
-			<input type='text' id='typeInput' placeholder='text/plain' ng-model='selected.type'/>
+			<input type='text' id='typeInput' placeholder='text/plain' ng-model='selected.type' ng-disabled='!fields.selected'/>
 		</div>
 
 		<hr/>
 
-		<p id='url'>{{fields.selected !== 'new' ? '/adl/sas/assets/'+selected.id : 'Un-uploaded Asset'}}</p>
-		<input type='text' id='name' placeholder='Name' ng-model='selected.name' ng-change='markDirty(selected.id)'/>
-		<textarea id='description' placeholder='Description' ng-model='selected.description' ng-change='markDirty(selected.id)'></textarea>
+		<p id='url'>{{(fields.selected && fields.selected !== 'new') ? '/adl/sas/assets/'+selected.id : 'Un-uploaded Asset'}}</p>
+		<input type='text' id='name' placeholder='Name' ng-model='selected.name' ng-change='selected._basicDirty = true' ng-disabled='!fields.selected'/>
+		<textarea id='description' placeholder='Description' ng-model='selected.description' ng-change='selected._basicDirty = true' ng-disabled='!fields.selected'>
+		</textarea>
 
 		<hr/>
 
@@ -36,7 +36,7 @@
 
 			<label>Permissions
 				<br/>
-				<input type='text' id='group' name='group' placeholder='Group' ng-model='selected.group_name' ng-change='markDirty(selected.id)'/>
+				<input type='text' id='group' name='group' placeholder='Group' ng-model='selected.group_name' ng-change='selected._groupDirty = true' ng-disabled='!fields.selected'/>
 			</label>
 			<table>
 				<tr>
@@ -47,24 +47,41 @@
 				</tr>
 				<tr>
 					<td>User</td>
-					<td><input type='checkbox' title='User read' ng-model='selected.permissions.user.read' ng-change='markDirty(selected.id)'/></td>
-					<td><input type='checkbox' title='User write' ng-model='selected.permissions.user.write' ng-change='markDirty(selected.id)'/></td>
-					<td><input type='checkbox' title='User delete' ng-model='selected.permissions.user.delete' ng-change='markDirty(selected.id)'/></td>
+					<td><input type='checkbox' title='User read' ng-model='selected.permissions.user.read' 
+						ng-change='selected._permsDirty = true' ng-disabled='!fields.selected'/></td>
+					<td><input type='checkbox' title='User write' ng-model='selected.permissions.user.write' 
+						ng-change='selected._permsDirty = true' ng-disabled='!fields.selected'/></td>
+					<td><input type='checkbox' title='User delete' ng-model='selected.permissions.user.delete' 
+						ng-change='selected._permsDirty = true' ng-disabled='!fields.selected'/></td>
 				</tr>
 				<tr>
 					<td>Group</td>
-					<td><input type='checkbox' title='Group read' ng-model='selected.permissions.group.read' ng-change='markDirty(selected.id)'/></td>
-					<td><input type='checkbox' title='Group write' ng-model='selected.permissions.group.write' ng-change='markDirty(selected.id)'/></td>
-					<td><input type='checkbox' title='Group delete' ng-model='selected.permissions.group.delete' ng-change='markDirty(selected.id)'/></td>
+					<td><input type='checkbox' title='Group read' ng-model='selected.permissions.group.read' 
+						ng-change='selected._permsDirty = true' ng-disabled='!fields.selected'/></td>
+					<td><input type='checkbox' title='Group write' ng-model='selected.permissions.group.write' 
+						ng-change='selected._permsDirty = true' ng-disabled='!fields.selected'/></td>
+					<td><input type='checkbox' title='Group delete' ng-model='selected.permissions.group.delete' 
+						ng-change='selected._permsDirty = true' ng-disabled='!fields.selected'/></td>
 				</tr>
 				<tr>
 					<td>Other</td>
-					<td><input type='checkbox' title='Other read' ng-model='selected.permissions.other.read' ng-change='markDirty(selected.id)'/></td>
-					<td><input type='checkbox' title='Other write' ng-model='selected.permissions.other.write' ng-change='markDirty(selected.id)'/></td>
-					<td><input type='checkbox' title='Other delete' ng-model='selected.permissions.other.delete' ng-change='markDirty(selected.id)'/></td>
+					<td><input type='checkbox' title='Other read' ng-model='selected.permissions.other.read' 
+						ng-change='selected._permsDirty = true' ng-disabled='!fields.selected'/></td>
+					<td><input type='checkbox' title='Other write' ng-model='selected.permissions.other.write' 
+						ng-change='selected._permsDirty = true' ng-disabled='!fields.selected'/></td>
+					<td><input type='checkbox' title='Other delete' ng-model='selected.permissions.other.delete' 
+						ng-change='selected._permsDirty = true' ng-disabled='!fields.selected'/></td>
 				</tr>
 			</table>
 
+		</div>
+
+		<hr/>
+
+		<div id='thumbnailUpload' class='verticalLayout'>
+			<label>Upload thumbnail {{selected.thumbnail ? '('+selected.thumbnail+')' : ''}}
+				<input type='file' id='thumbnailInput' onchange='setThumbnailDirty()'/>
+			</label>
 		</div>
 
 		<div class='spacer'/>
@@ -72,9 +89,11 @@
 		<hr/>
 
 		<div id='buttons' class='horizontalLayout'>
-			<input type='button' ng-click='saveData()' ng-value='fields.selected === "new" ? "Upload" : "Save"'/>
+			<input type='button' ng-click='saveData(selected.id)' ng-value='fields.selected === "new" ? "Upload" : "Save"'
+				ng-disabled='!fields.selected || !selected._dirty'/>
 			<input type='button' ng-click='deleteData(selected.id)' value='Delete'
-				ng-disabled='fields.selected === "new" || !selected.permissions.user.delete'/>
+				ng-disabled='!fields.selected || fields.selected === "new"'/>
+			<input type='button' ng-click='refreshData(selected.id)' value='Reset' ng-disabled='!fields.selected'/>
 		</div>
 
 	</div>
