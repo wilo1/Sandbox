@@ -61,7 +61,6 @@ var defaultPrimMaterial = new THREE.MeshPhongMaterial();
             if (propertyName == 'type') {
                 return 'Primitive';
             }
-
         }
         this.hasModifiers = function() {
             var has = false;
