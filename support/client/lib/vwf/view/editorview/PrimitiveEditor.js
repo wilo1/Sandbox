@@ -533,8 +533,8 @@ define(function() {
                 var i = editordatanames[j];
                 //if multiple editorData properties up the prototype chain have the same editor objects, skip
                 
-                if(this.currentWidgets[i]) continue;
-                this.currentWidgets[i] = true;
+                if(this.currentWidgets[nodeid + i]) continue;
+                this.currentWidgets[nodeid + i] = true;
                 addedWidget = true;
                 if (editordata[i].type == 'sectionTitle') {
                     var inputstyle = "";
