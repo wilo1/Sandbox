@@ -150,7 +150,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				$scope.selected._thumbnailId = newval.slice(6);
 		});
 		$scope.$watch('selected._thumbnailId', function(newval){
-			if( $scope.selected ){
+			if( $scope.selected && newval !== undefined ){
 				if(newval)
 					$scope.selected.thumbnail = 'asset:'+newval;
 				else
@@ -163,6 +163,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		{
 			if(files[0])
 			{
+				console.log(files[0].name);
 				$scope.filename = files[0].name;
 
 				if(files[0].type){
@@ -190,7 +191,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		$scope.clearFileInput = function(){
 			var input = $('#manageAssetsDialog #fileInput');
 			input.replaceWith( input.val('').clone(true) );
-			$('#manageAssetsDialog #dragarea p').text('');
+			$scope.filename = '';
 		}
 
 

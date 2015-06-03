@@ -15,7 +15,7 @@
 					<p class='name' ng-style='{"font-weight": asset._dirty ? "bold" : "normal"}'>{{(asset._dirty ? '*' : '')+asset.name}}</p>
 					<p class='meta'>{{asset.type}} ({{asset.id}})</p>
 				</div>
-				<div class='nonbs-thumbnail' ng-if='!asset._dirty && asset.thumbnail' ng-style='{"background-image": "url(/adl/sas/assets/"+asset.id+"/meta/thumbnail)"}'>
+				<div class='nonbs-thumbnail' ng-if='!asset._basicDirty && asset.thumbnail' ng-style='{"background-image": "url(/adl/sas/assets/"+asset.id+"/meta/thumbnail)"}'>
 				</div>
 			</div>
 		</div>
