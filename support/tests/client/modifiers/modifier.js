@@ -10,13 +10,13 @@ for(var i = 0; i < modifiers.length; i++){
 		test: 
 			function(i){
 				return function(browser, finished){
-					runAssetTest(browser, finished, modifiers[i]);
+					runTest(browser, finished, modifiers[i]);
 				}
 			}(i)
 	});
 }
 
-function runAssetTest(browser, finished, nodeName){
+function runTest(browser, finished, nodeName){
 	global.browser = browser;
 	var testUtils = global.testUtils;
 	var outStr = "";
@@ -36,9 +36,6 @@ function runAssetTest(browser, finished, nodeName){
 		.pause(2000);
 		
 	addModifier(i)		
-		.getConsoleLog(testUtils.SEVERE, function(err, arr){
-			outStr += "Log error: " + JSON.stringify(err) + ", Log message: " + JSON.stringify(arr) + " ";
-		})
 		.pause(5000)
 		.getChildren(nodeName, function(err, children){
 			if(children[0] && children[0].indexOf(modifiers[i].toLowerCase()) > -1){
@@ -61,7 +58,8 @@ function runAssetTest(browser, finished, nodeName){
 			else{
 				outStr += modifiers[i] + " modifier successfully deleted; ";
 			}
-			finished(passed, outStr);
+			
+			browser.completeTest(passed, outStr, finished);
 		});
 		
 	function deleteModifier(){
@@ -86,7 +84,7 @@ function runAssetTest(browser, finished, nodeName){
 		
 	function loadModel(modelName){
 		return browser.nextGUID(modelName)
-			.click("#MenuCreateCylindericon")
+			.$click("#MenuCreateCylindericon")
 			.pause(500);
 	}
 }
