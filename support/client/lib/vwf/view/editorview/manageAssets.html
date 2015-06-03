@@ -10,12 +10,12 @@
 		</div>
 		<div id='assetList'>
 			<div class='asset horizontalLayout' ng-class='{"selected-asset": fields.selected === asset.id}' ng-click='fields.selected = asset.id'
-				ng-repeat='asset in assets | sortKeys:"last_modified":true | filterThumbs:hideThumbs | searchFor:search'>
+				ng-repeat='asset in assets | sortKeys:"name":true | filterThumbs:hideThumbs | searchFor:search'>
 				<div class='info verticalLayout'>
 					<p class='name' ng-style='{"font-weight": asset._dirty ? "bold" : "normal"}'>{{(asset._dirty ? '*' : '')+asset.name}}</p>
 					<p class='meta'>{{asset.type}} ({{asset.id}})</p>
 				</div>
-				<div class='nonbs-thumbnail' ng-if='asset.thumbnail' ng-style='{"background-image": "url(/adl/sas/assets/"+asset.id+"/meta/thumbnail)"}'>
+				<div class='nonbs-thumbnail' ng-if='!asset._dirty && asset.thumbnail' ng-style='{"background-image": "url(/adl/sas/assets/"+asset.id+"/meta/thumbnail)"}'>
 				</div>
 			</div>
 		</div>
@@ -26,10 +26,11 @@
 
 	<div id='propertyBrowser' class='verticalLayout' ng-controller='AssetPropertiesController'>
 
-		<div id='preview' class='verticalLayout'>
-			<span>Drag Here</span>
-			<input type='file' id='fileInput' value='Browse' onchange='setMime(this.files)'/>
+		<div id='dragarea' class='verticalLayout'>
+			<span>Choose File</span>
+			<p>{{filename}}</p>
 			<input type='text' id='typeInput' placeholder='application/octet-stream' ng-model='selected.type' ng-disabled='!fields.selected'/>
+			<input type='file' id='fileInput' value='Browse' onchange='setMime(this.files)'/>
 		</div>
 
 		<hr/>
@@ -46,7 +47,7 @@
 		</label>
 		<label id='thumbnail' class='horizontalLayout'>
 			<span>Thumbnail asset id: </span>
-			<input type='text' placeholder='1a2b3c4d' ng-model='selected.thumbnailId' ng-change='selected._basicDirty = true' ng-disabled='!fields.selected'/>
+			<input type='text' placeholder='1a2b3c4d' ng-model='selected._thumbnailId' ng-change='selected._basicDirty = true' ng-disabled='!fields.selected'/>
 		</label>
 
 		<hr/>
@@ -102,9 +103,10 @@
 		<div id='buttons' class='horizontalLayout'>
 			<input type='button' ng-click='saveData(selected.id)' ng-value='fields.selected === "new" ? "Upload" : "Save"'
 				ng-disabled='!fields.selected || !selected._dirty'/>
+			<input type='button' ng-click='refreshData(selected.id)' value='Clear Changes'
+				ng-disabled='!fields.selected || !selected._dirty'/>
 			<input type='button' ng-click='deleteData(selected.id)' value='Delete'
 				ng-disabled='!fields.selected || fields.selected === "new"'/>
-			<input type='button' ng-click='refreshData(selected.id)' value='Reset' ng-disabled='!fields.selected'/>
 		</div>
 
 	</div>

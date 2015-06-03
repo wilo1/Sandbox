@@ -147,9 +147,9 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		
 		$scope.$watch('selected.thumbnail', function(newval){
 			if($scope.selected && newval)
-				$scope.selected.thumbnailId = newval.slice(6);
+				$scope.selected._thumbnailId = newval.slice(6);
 		});
-		$scope.$watch('selected.thumbnailId', function(newval){
+		$scope.$watch('selected._thumbnailId', function(newval){
 			if( $scope.selected ){
 				if(newval)
 					$scope.selected.thumbnail = 'asset:'+newval;
@@ -163,6 +163,8 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		{
 			if(files[0])
 			{
+				$scope.filename = files[0].name;
+
 				if(files[0].type){
 					$scope.selected.type = files[0].type;
 				}
@@ -185,8 +187,10 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 
 
 		// since file inputs are read-only...
-		$scope.clearFileInput = function(input){
+		$scope.clearFileInput = function(){
+			var input = $('#manageAssetsDialog #fileInput');
 			input.replaceWith( input.val('').clone(true) );
+			$('#manageAssetsDialog #dragarea p').text('');
 		}
 
 
@@ -219,9 +223,9 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		// write asset data to the server
 		$scope.saveData = function(id)
 		{
-			var fileInput = $('#preview input#fileInput');
+			var fileInput = $('#dragarea input#fileInput');
 			var file = fileInput[0].files[0];
-			console.log(file);
+
 			if( !id || id === 'new' )
 			{
 				if( file )

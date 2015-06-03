@@ -12,7 +12,8 @@
     font-size: 11px; }
   #manageAssetsDialog #assetBrowser {
     border-right: solid grey 1px;
-    margin-right: 2px; }
+    margin-right: 2px;
+    padding-right: 2px; }
     #manageAssetsDialog #assetBrowser #controls {
       -webkit-box-pack: justify;
       -moz-justify-content: space-between;
@@ -96,24 +97,37 @@
       -ms-flex-align: center;
       -webkit-align-items: center;
       align-items: center; }
-    #manageAssetsDialog #propertyBrowser #preview {
+    #manageAssetsDialog #propertyBrowser #dragarea {
       border: dashed whitesmoke 2px;
       border-radius: 5px;
       background-color: grey;
-      /*background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;*/
+      position: relative;
       height: 175px;
-      -webkit-box-pack: distribute;
-      -moz-justify-content: space-around;
-      -ms-flex-pack: distribute;
-      -webkit-justify-content: space-around;
-      justify-content: space-around;
+      -webkit-box-pack: center;
+      -moz-justify-content: center;
+      -ms-flex-pack: center;
+      -webkit-justify-content: center;
+      justify-content: center;
       -webkit-box-align: center;
       -moz-align-items: center;
       -ms-flex-align: center;
       -webkit-align-items: center;
       align-items: center; }
+      #manageAssetsDialog #propertyBrowser #dragarea input#fileInput {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        cursor: pointer; }
+      #manageAssetsDialog #propertyBrowser #dragarea input#typeInput {
+        z-index: 1; }
+      #manageAssetsDialog #propertyBrowser #dragarea span {
+        margin: 20px;
+        font-size: 18px;
+        text-decoration: underline; }
     #manageAssetsDialog #propertyBrowser p#url {
       text-align: center;
       font-size: 18px; }
