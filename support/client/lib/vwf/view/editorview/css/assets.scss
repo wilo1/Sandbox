@@ -20,12 +20,22 @@
 		border-right: solid grey 1px;
 		margin-right: 2px;
 
-		#controls {
+		#controls
+		{
 			@include justify-content(space-between);
+			margin-bottom: 5px;
+
+			label#hideThumbs {
+				@include align-items(center);
+			}
+
+			input[type=search] {
+				color: black;
+			}
 		}
 
 		#assetList {
-			overflow-y: scroll;
+			overflow-y: auto;
 			@include flex-grow(1);
 		}
 
@@ -102,6 +112,13 @@
 			}
 		}
 
+		label#thumbnail
+		{
+			margin-top: 3px;
+			@include justify-content(space-between);
+			@include align-items(center);
+		}
+
 		#preview
 		{
 			border: dashed whitesmoke 2px;
@@ -134,11 +151,6 @@
 					text-align: right;
 				}
 			}
-		}
-
-		#thumbnailUpload input
-		{
-			color: white;
 		}
 
 		#buttons

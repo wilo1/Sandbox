@@ -2,20 +2,20 @@
 
 	<div id='assetBrowser' class='verticalLayout' ng-controller='AssetListController'>
 		<div id='controls' class='horizontalLayout'>
-			<label>
-				<input type='checkbox' ng-model='showThumbs'/>
-				Show thumbnails
+			<label id='hideThumbs' class='horizontalLayout'>
+				<input type='checkbox' ng-model='hideThumbs'/>
+				<span> Hide thumbnails</span>
 			</label>
-			<input type='text' ng-model='mimeFilter' placeholder='model/*'/>
+			<input type='search' ng-model='search' placeholder='Search'/>
 		</div>
-		<div id='assetList' class='verticalLayout'>
-			<div class='asset horizontalLayout' ng-class='{"selected-asset": fields.selected === asset.id}'
-				ng-repeat='asset in assets | sortKeys' ng-click='fields.selected = asset.id'>
+		<div id='assetList'>
+			<div class='asset horizontalLayout' ng-class='{"selected-asset": fields.selected === asset.id}' ng-click='fields.selected = asset.id'
+				ng-repeat='asset in assets | sortKeys:"last_modified":true | filterThumbs:hideThumbs | searchFor:search'>
 				<div class='info verticalLayout'>
 					<p class='name' ng-style='{"font-weight": asset._dirty ? "bold" : "normal"}'>{{(asset._dirty ? '*' : '')+asset.name}}</p>
 					<p class='meta'>{{asset.type}} ({{asset.id}})</p>
 				</div>
-				<div class='nonbs-thumbnail' ng-style='{"background-image": "url(/adl/sas/assets/"+asset.id+"/meta/thumbnail)"}'>
+				<div class='nonbs-thumbnail' ng-if='asset.thumbnail' ng-style='{"background-image": "url(/adl/sas/assets/"+asset.id+"/meta/thumbnail)"}'>
 				</div>
 			</div>
 		</div>
@@ -29,15 +29,25 @@
 		<div id='preview' class='verticalLayout'>
 			<span>Drag Here</span>
 			<input type='file' id='fileInput' value='Browse' onchange='setMime(this.files)'/>
-			<input type='text' id='typeInput' placeholder='text/plain' ng-model='selected.type' ng-disabled='!fields.selected'/>
+			<input type='text' id='typeInput' placeholder='application/octet-stream' ng-model='selected.type' ng-disabled='!fields.selected'/>
 		</div>
 
 		<hr/>
 
 		<p id='url'>{{(fields.selected && fields.selected !== 'new') ? '/adl/sas/assets/'+selected.id : 'Un-uploaded Asset'}}</p>
-		<input type='text' id='name' placeholder='Name' ng-model='selected.name' ng-change='selected._basicDirty = true' ng-disabled='!fields.selected'/>
-		<textarea id='description' placeholder='Description' ng-model='selected.description' ng-change='selected._basicDirty = true' ng-disabled='!fields.selected'>
-		</textarea>
+		<label id='name' class='verticalLayout'>Name
+			<br/>
+			<input type='text' placeholder='Name' ng-model='selected.name' ng-change='selected._basicDirty = true' ng-disabled='!fields.selected'/>
+		</label>
+		<label id='description' class='verticalLayout'>Description
+			<br/>
+			<textarea placeholder='Description' ng-model='selected.description' ng-change='selected._basicDirty = true' ng-disabled='!fields.selected'>
+			</textarea>
+		</label>
+		<label id='thumbnail' class='horizontalLayout'>
+			<span>Thumbnail asset id: </span>
+			<input type='text' placeholder='1a2b3c4d' ng-model='selected.thumbnailId' ng-change='selected._basicDirty = true' ng-disabled='!fields.selected'/>
+		</label>
 
 		<hr/>
 
@@ -83,14 +93,6 @@
 				</tr>
 			</table>
 
-		</div>
-
-		<hr/>
-
-		<div id='thumbnailUpload' class='verticalLayout'>
-			<label>Upload thumbnail {{selected.thumbnail ? '('+selected.thumbnail+')' : ''}}
-				<input type='file' id='thumbnailInput' onchange='setThumbnailDirty()'/>
-			</label>
 		</div>
 
 		<div class='spacer'/>

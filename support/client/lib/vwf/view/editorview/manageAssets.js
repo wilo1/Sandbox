@@ -16,6 +16,11 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				$http.get('/adl/sas/assets/'+id+'/meta?permFormat=json').success(function(data){
 					$rootScope.assets[id] = data;
 					$rootScope.assets[id].id = id;
+				})
+				.error(function(data,status){
+					if(status === 404){
+						delete $rootScope.assets[id];
+					}
 				});
 			}
 
@@ -23,10 +28,11 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				updateAsset(id);
 			}
 			else {
-				$http.get('/adl/sas/assets/by-meta/all-of?user_name='+_UserManager.GetCurrentUserName()+'&isSandboxAsset=true').success(
+				$http.get('/adl/sas/assets/by-user/'+_UserManager.GetCurrentUserName()).success(
 					function(list)
 					{
-						for(var id in list.matches){
+						$rootScope.assets = {};
+						for(var id in list.assets){
 							updateAsset(id);
 						}
 					}
@@ -42,6 +48,8 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		{
 			input = input || {};
 			field = field || 'last_modified';
+			reverse = reverse === undefined ? true : false;
+
 			var out = [];
 			for(var i in input){
 				out.push(input[i]);
@@ -59,11 +67,40 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		};
 	});
 
+	app.filter('filterThumbs', function(){
+		return function(input, enabled)
+		{
+			if(enabled)
+			{
+				var thumbs = [];
+
+				// gather list of thumbnails
+				for(var i=0; i<input.length; i++)
+				{
+					if(input[i].thumbnail && input[i].thumbnail !== 'asset:'+input[i].id){
+						thumbs.push(input[i].thumbnail.slice(6));
+					}
+				}
+
+				return input.filter(function(val){ return thumbs.indexOf(val.id) === -1; });
+			}
+			else return input;
+		};
+	});
+
+	app.filter('searchFor', function(){
+		return function(input,term)
+		{
+			var re = new RegExp(term, 'i');
+			return input.filter(function(item){
+				return re.test(item.id) || re.test(item.type) || re.test(item.name) || re.test(item.description)
+			});
+		};
+	});
+
 	app.controller('AssetListController', ['$scope','$rootScope','DataManager', function($scope,$rootScope)
 	{
-		$scope.setSelected = function(id){
-			$scope.fields.selected = id;
-		}
+		$scope.hideThumbs = true;
 	}]);
 
 	app.controller('AssetPropertiesController', ['$scope','$rootScope','$http','DataManager', function($scope,$rootScope,$http)
@@ -93,7 +130,6 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		$scope.$watchGroup(['fields.selected', 'assets[fields.selected]'], function(newvals)
 		{
 			$scope.clearFileInput( $('#manageAssetsDialog input#fileInput') );
-			$scope.clearFileInput( $('#manageAssetsDialog input#thumbnailInput') );
 
 			if( newvals[0] && newvals[0] !== 'new' )
 				$scope.selected = newvals[1];
@@ -104,29 +140,49 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 
 		// roll up the various dirty flags into an asset-level one
 		$scope.$watchGroup(['selected._basicDirty','selected._groupDirty','selected._permsDirty'], function(newvals){
-			$scope.selected._dirty = newvals[0] || newvals[1] || newvals[2];
+			if($scope.selected)
+				$scope.selected._dirty = newvals[0] || newvals[1] || newvals[2];
 		});
 
+		
+		$scope.$watch('selected.thumbnail', function(newval){
+			if($scope.selected && newval)
+				$scope.selected.thumbnailId = newval.slice(6);
+		});
+		$scope.$watch('selected.thumbnailId', function(newval){
+			if( $scope.selected ){
+				if(newval)
+					$scope.selected.thumbnail = 'asset:'+newval;
+				else
+					$scope.selected.thumbnail = null;
+			}
+		});
 
 		// auto-fill mime type field when file is selected
 		window.setMime = function(files)
 		{
-			var typeInput = $('#manageAssetsDialog input#typeInput');
-			if(files[0]){
-				typeInput.val( files[0].type );
+			if(files[0])
+			{
+				if(files[0].type){
+					$scope.selected.type = files[0].type;
+				}
+				else if(/\.dae$/i.test(files[0].name)){
+					$scope.selected.type = 'model/collada+xml';
+				}
+				else if(/\.json$/i.test(files[0].name)){
+					$scope.selected.type = 'application/json';
+				}
+				else {
+					$scope.selected.type = '';
+				}
 			}
 			else {
-				typeInput.val('');
+				$scope.selected.type = '';
 			}
-			$scope.selected._dirty = true;
-		}
-
-		
-		// hook up thumbnail detection
-		window.setThumbnailDirty = function(){
 			$scope.selected._dirty = true;
 			$scope.$apply();
 		}
+
 
 		// since file inputs are read-only...
 		$scope.clearFileInput = function(input){
@@ -165,22 +221,35 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		{
 			var fileInput = $('#preview input#fileInput');
 			var file = fileInput[0].files[0];
-			
+			console.log(file);
 			if( !id || id === 'new' )
 			{
 				if( file )
 				{
 					var perms = $scope.getPackedPermissions();
 
-					var url = '/adl/sas/assets/new?isSandboxAsset=true';
-					if( $scope.selected.name )
-						url += '&name='+ encodeURIComponent( $scope.selected.name );
-					if( $scope.selected.description )
-						url += '&description='+ encodeURIComponent( $scope.selected.description );
-					if( $scope.selected.group_name )
-						url += '&group_name='+ encodeURIComponent( $scope.selected.group_name );
-					if( perms )
-						url += '&permissions='+ perms.toString(8);
+					var url = '/adl/sas/assets/new';
+					var queryChar = '?';
+					if( $scope.selected.name ){
+						url += queryChar+'name='+ encodeURIComponent( $scope.selected.name );
+						queryChar = '&';
+					}
+					if( $scope.selected.description ){
+						url += queryChar+'description='+ encodeURIComponent( $scope.selected.description );
+						queryChar = '&';
+					}
+					if( $scope.selected.group_name ){
+						url += queryChar+'group_name='+ encodeURIComponent( $scope.selected.group_name );
+						queryChar = '&';
+					}
+					if( perms ){
+						url += queryChar+'permissions='+ perms.toString(8);
+						queryChar = '&';
+					}
+					if( $scope.selected.type.slice(0,6) === 'image/' && file.size < 30000 ){
+						url += queryChar+'thumbnail='+ encodeURIComponent(':self');
+						queryChar = '&';
+					}
 
 					var xhr = new XMLHttpRequest();
 					xhr.addEventListener('loadend', function(e)
@@ -189,7 +258,6 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 						{
 							$scope.refreshData(xhr.responseText);
 							$scope.fields.selected = xhr.responseText;
-							$scope.saveThumbnail();
 							$scope.resetNew();
 							$scope.clearFileInput(fileInput);
 						}
@@ -199,7 +267,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 					});
 
 					xhr.open('POST', url);
-					xhr.setRequestHeader('Content-Type', $('#manageAssetsDialog input#typeInput').val());
+					xhr.setRequestHeader('Content-Type', $scope.selected.type);
 					xhr.send(file);
 
 				}
@@ -241,7 +309,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				if($scope.selected._basicDirty)
 				{
 					toComplete += 1;
-					var meta = {name: $scope.selected.name, description: $scope.selected.description};
+					var meta = {name: $scope.selected.name, description: $scope.selected.description, thumbnail: $scope.selected.thumbnail};
 					$http.post('/adl/sas/assets/'+$scope.selected.id+'/meta', meta).success(checkRemaining)
 					.error(function(data,status){
 						alertify.alert('Failed to post metadata: '+data);
@@ -269,60 +337,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 						checkRemaining();
 					});
 				}
-
-				$scope.saveThumbnail();
 			}
-		}
-
-		$scope.saveThumbnail = function()
-		{
-			var thumbInput = $('#manageAssetsDialog input#thumbnailInput');
-			var thumb = thumbInput[0].files[0];
-			if(thumb)
-			{
-				if( $scope.selected.thumbnail )
-				{
-					var id = /^asset:([A-Fa-f0-9]{8})$/.exec($scope.selected.thumbnail)[1];
-					var xhr = new XMLHttpRequest();
-					xhr.addEventListener('loadend', function(e)
-					{
-						if( xhr.status !== 200 ){
-							alertify.alert('Thumbnail upload failed: '+xhr.responseText);
-						}
-						else {
-							$scope.clearFileInput( thumbInput );
-						}
-					});
-					xhr.open('POST', '/adl/sas/assets/'+id);
-					xhr.setRequestHeader('Content-Type', thumb.type);
-					xhr.send(thumb);
-
-				}
-				else
-				{
-					var xhr = new XMLHttpRequest();
-					xhr.addEventListener('loadend', function(e)
-					{
-						if( xhr.status !== 201 ){
-							alertify.alert('Thumbnail upload failed: '+xhr.responseText);
-						}
-						else {
-							$scope.clearFileInput( thumbInput );
-							$http.post('/adl/sas/assets/'+$scope.selected.id+'/meta/thumbnail', 'asset:'+xhr.responseText)
-							.success(function(data){
-								$scope.refreshData($scope.selected.id);
-							})
-							.error(function(data){
-								alertify.alert('Failed to upload thumbnail: '+data);
-							});
-						}
-					});
-					xhr.open('POST', '/adl/sas/assets/new?name='+encodeURIComponent($scope.selected.name+' thumbnail'));
-					xhr.setRequestHeader('Content-Type', thumb.type);
-					xhr.send(thumb);
-				}
-			}
-
 		}
 
 		$scope.deleteData = function(id)
