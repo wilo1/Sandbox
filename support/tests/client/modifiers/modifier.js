@@ -24,8 +24,6 @@ function runAssetTest(browser, finished, nodeName){
 	var i = modifiers.indexOf(nodeName);
 	var currentModifierID = "";
 	
-	var tmpArr = [];
-	
 	browser.loadBlankScene();
 		
 	loadModel(nodeName)	
@@ -72,7 +70,7 @@ function runAssetTest(browser, finished, nodeName){
 			.click("#editorPanelPrimitiveEditortitle")
 			.pause(500)
 			.then(function(){
-				return browser.$click("#" + currentModifierID + "deletebutton");
+				return browser.$click("#basicSettings" + currentModifierID + " span:contains(Delete)");
 			})
 			.pause(2000);
 	}
