@@ -446,7 +446,7 @@ define(function() {
 		}
 		this.calledMethod = function(id,method) {
 
-				if(method == 'ready')
+				if(method == 'ready' && this.isOpen())
 				{
 				window.setTimeout(function() {
 					this.BuildGUI();
