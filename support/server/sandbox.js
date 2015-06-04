@@ -229,6 +229,32 @@ function startVWF() {
                     cb();
             },
 
+			function registerAssetServer(cb)
+			{
+				if( global.configuration.hostAssets )
+				{
+					var datadir = libpath.resolve(__dirname, '..','..', global.configuration.assetDataDir);
+
+					fs.mkdirs(datadir, function()
+					{
+						global.configuration.assetAppPath = '/sas';
+
+						var assetServer = require('SandboxAssetServer');
+						app.use(global.configuration.assetAppPath, assetServer({
+							dataDir: libpath.resolve(__dirname, '..','..', global.configuration.assetDataDir),
+							sessionCookieName: 'session',
+							sessionHeader: global.configuration.assetSessionHeader,
+							sessionSecret: global.configuration.sessionSecret
+						}));
+						logger.info('Hosting assets locally at', global.configuration.assetAppPath);
+					});
+				}
+				else {
+					logger.info('Hosting assets remotely at', global.configuration.remoteAssetServerURL);
+				}
+				cb();
+			},
+
             function initLandingRoutes(cb)
             {
                     if(!global.configuration.branding)
@@ -631,7 +657,8 @@ function startVWF() {
                     
                     secret: global.configuration.sessionSecret ? global.configuration.sessionSecret : 'unsecure cookie secret',
                     cookie: {
-                        maxAge: global.configuration.sessionTimeoutMs ? global.configuration.sessionTimeoutMs : 10000000
+                        maxAge: global.configuration.sessionTimeoutMs ? global.configuration.sessionTimeoutMs : 10000000,
+                        httpOnly: !global.configuration.hostingAssets
                     },
                      cookieName: 'session', // cookie name dictates the key name added to the request object
   
