@@ -5,18 +5,27 @@ module.exports = function(){ return outArr; };
 var modifiers = ["Bend", "Twist", "Taper", "PerlinNoise", "SimplexNoise", "Offset", "Stretch", "Push", "UVMap", "CenterPivot", "Extrude", "PathExtrude", "Lathe"];
 		
 for(var i = 0; i < modifiers.length; i++){
-	outArr.push({
-		title: "Test creation and deletion of " + modifiers[i] + " modifier", 
+	//Generate a "test object" that uses prims
+	outArr.push(generateTestObj(true, i));
+	
+	//Generate a "test object" that does not use prims
+	outArr.push(generateTestObj(false, i));
+}
+
+function generateTestObj(usePrim, i){
+	var primOrShape = usePrim ? "Prim" : "2D shape";
+	return {
+		title: "Test creation and deletion of " + modifiers[i] + " modifier on " + primOrShape, 
 		test: 
 			function(i){
 				return function(browser, finished){
-					runTest(browser, finished, modifiers[i]);
+					runTest(browser, finished, modifiers[i], usePrim);
 				}
 			}(i)
-	});
+	}
 }
 
-function runTest(browser, finished, nodeName){
+function runTest(browser, finished, nodeName, usePrim){
 	global.browser = browser;
 	var testUtils = global.testUtils;
 	var outStr = "";
@@ -26,8 +35,10 @@ function runTest(browser, finished, nodeName){
 	
 	browser.loadBlankScene();
 		
-	loadModel(nodeName)	
-		.pause(6000).then(function() {
+	if(usePrim) loadPrim(nodeName)	
+	else loadShape(nodeName)	
+	
+		browser.pause(6000).then(function() {
 			testUtils.assertNodeExists(nodeName, function(assertStatus, msg){
 				passed = passed && !!assertStatus;
 				outStr += msg + "; ";
@@ -76,14 +87,25 @@ function runTest(browser, finished, nodeName){
 	function addModifier(i){
 		return browser.click("#MenuCreate")
 			.pause(500)
-			.click("#MenuModifiers")
+			.$click("#MenuModifiers")
 			.pause(500)
-			.click("#MenuCreate" + modifiers[i])
+			.$click("#MenuCreate" + modifiers[i])
 			.pause(500);
 	}
 		
-	function loadModel(modelName){
-		return browser.nextGUID(modelName)
+	function loadShape(name){
+		return browser.nextGUID(name)
+			.click("#MenuCreate")
+			.pause(500)
+			.click("#MenuShapes")
+			.pause(500)
+			.click("#MenuCreateStar")
+			.pause(500)
+			.click("#MenuCreate")
+			.pause(500);
+	}		
+	function loadPrim(name){
+		return browser.nextGUID(name)
 			.$click("#MenuCreateCylindericon")
 			.pause(500);
 	}
