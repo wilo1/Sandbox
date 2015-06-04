@@ -171,7 +171,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 					$scope.selected.type = files[0].type;
 				}
 				else if(/\.dae$/i.test(files[0].name)){
-					$scope.selected.type = 'model/collada+xml';
+					$scope.selected.type = 'model/vnd.collada+xml';
 				}
 				else if(/\.json$/i.test(files[0].name)){
 					$scope.selected.type = 'application/json';
