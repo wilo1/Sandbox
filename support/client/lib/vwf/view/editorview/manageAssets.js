@@ -251,7 +251,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 						url += queryChar+'permissions='+ perms.toString(8);
 						queryChar = '&';
 					}
-					if( $scope.selected.type.slice(0,6) === 'image/' && $scope.file.size < 30000 ){
+					if( $scope.selected.type.slice(0,6) === 'image/' && $scope.file.data.byteLength < 30000 ){
 						url += queryChar+'thumbnail='+ encodeURIComponent(':self');
 						queryChar = '&';
 					}
