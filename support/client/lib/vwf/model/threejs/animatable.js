@@ -176,9 +176,9 @@
                     //how does the bone relate to the skeleton?
 
                     //this is no longer necessary in threejs r68
-                    //for (var j = 0; j < skins[i].children.length; j++) {
-                    //  skins[i].children[j].updateMatrixWorld(true);
-                    //}
+                    for (var j = 0; j < skins[i].children.length; j++) {
+                      skins[i].children[j].updateMatrixWorld(true);
+                    }
                    
                     if (updateSceneManager) {
                         var allMeshes = getAllDrawables(skins[i]);

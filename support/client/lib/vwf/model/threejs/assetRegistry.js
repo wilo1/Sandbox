@@ -39,13 +39,13 @@ function MorphBinaryLoader()
 }
 function gltf2threejs(animation, root) {
    
-   debugger;
+   
     var hierarchy = THREE.AnimationHandler.parse( root );
 
     var threeanimation = {
         name: "animation",
         fps: 30,
-        length: "",
+        length: 0,
         hierarchy: []
     };
 
@@ -92,15 +92,17 @@ function gltf2threejs(animation, root) {
             }
         }
     }
+    threeanimation.length /= threeanimation.fps;
     console.log(threeanimation)
 
     var oldHierarchy = threeanimation.hierarchy;
+
     threeanimation.hierarchy = [];
     for(var i =0; i < hierarchy.length; i++)
     {
         for(var j=0; j < oldHierarchy.length; j++)
         {
-            if(hierarchy[i] == oldHierarchy[j].node)
+            if(oldHierarchy[j].node && hierarchy[i].name == oldHierarchy[j].node.name)
             threeanimation.hierarchy[i] = oldHierarchy[j];
         }
     }
