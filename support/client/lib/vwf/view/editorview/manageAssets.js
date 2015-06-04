@@ -2,18 +2,19 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 {
 	var app = angular.module('ManageAssetsDialog', []);
 	var dataRoot = null;
-
+	var appPath = '';
 
 	app.factory('DataManager', ['$rootScope','$http', function($rootScope, $http)
 	{
 		dataRoot = $rootScope;
+		$rootScope.appPath = appPath;
 		$rootScope.fields = {selected: null};
 		$rootScope.assets = {};
 
 		$rootScope.refreshData = function(id)
 		{
 			function updateAsset(id){
-				$http.get('/adl/sas/assets/'+id+'/meta?permFormat=json').success(function(data){
+				$http.get($rootScope.appPath+'/assets/'+id+'/meta?permFormat=json').success(function(data){
 					$rootScope.assets[id] = data;
 					$rootScope.assets[id].id = id;
 				})
@@ -28,7 +29,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				updateAsset(id);
 			}
 			else {
-				$http.get('/adl/sas/assets/by-user/'+_UserManager.GetCurrentUserName()).success(
+				$http.get($rootScope.appPath+'/assets/by-user/'+_UserManager.GetCurrentUserName()).success(
 					function(list)
 					{
 						$rootScope.assets = {};
@@ -233,7 +234,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				{
 					var perms = $scope.getPackedPermissions();
 
-					var url = '/adl/sas/assets/new';
+					var url = $scope.appPath+'/assets/new';
 					var queryChar = '?';
 					if( $scope.selected.name ){
 						url += queryChar+'name='+ encodeURIComponent( $scope.selected.name );
@@ -306,7 +307,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 						}
 						checkRemaining();
 					});
-					xhr.open('POST', '/adl/sas/assets/'+$scope.selected.id);
+					xhr.open('POST', $scope.appPath+'/assets/'+$scope.selected.id);
 					xhr.setRequestHeader('Content-Type', $('#manageAssetsDialog input#typeInput').val());
 					xhr.send(file);
 				}
@@ -315,7 +316,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				{
 					toComplete += 1;
 					var meta = {name: $scope.selected.name, description: $scope.selected.description, thumbnail: $scope.selected.thumbnail};
-					$http.post('/adl/sas/assets/'+$scope.selected.id+'/meta', meta).success(checkRemaining)
+					$http.post($scope.appPath+'/assets/'+$scope.selected.id+'/meta', meta).success(checkRemaining)
 					.error(function(data,status){
 						alertify.alert('Failed to post metadata: '+data);
 						checkRemaining();
@@ -325,7 +326,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				if($scope.selected._groupDirty)
 				{
 					toComplete += 1;
-					$http.post('/adl/sas/assets/'+$scope.selected.id+'/meta/group_name', $scope.selected.group_name).success(checkRemaining)
+					$http.post($scope.appPath+'/assets/'+$scope.selected.id+'/meta/group_name', $scope.selected.group_name).success(checkRemaining)
 					.error(function(data,status){
 						alertify.alert('Failed to change group: '+data);
 						checkRemaining();
@@ -336,7 +337,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				{
 					var perms = $scope.getPackedPermissions();
 					toComplete += 1;
-					$http.post('/adl/sas/assets/'+$scope.selected.id+'/meta/permissions', perms.toString(8)).success(checkRemaining)
+					$http.post($scope.appPath+'/assets/'+$scope.selected.id+'/meta/permissions', perms.toString(8)).success(checkRemaining)
 					.error(function(data,status){
 						alertify.alert('Failed to change permissions: '+data);
 						checkRemaining();
@@ -349,7 +350,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		{
 			alertify.confirm('Are you POSITIVE you want to delete this asset?', function()
 			{
-				$http.delete('/adl/sas/assets/'+id)
+				$http.delete($scope.appPath+'/assets/'+id)
 				.success(function(){
 					$scope.refreshData();
 					$scope.fields.selected = null;
@@ -380,7 +381,10 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 					autoOpen: false
 				});
 
-				angular.bootstrap($('#manageAssetsDialog')[0], ['ManageAssetsDialog']);
+				$.get('vwfDataManager.svc/saspath', function(data){
+					appPath = data;
+					angular.bootstrap($('#manageAssetsDialog')[0], ['ManageAssetsDialog']);
+				});
 			});
 		},
 

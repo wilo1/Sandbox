@@ -234,16 +234,19 @@ function startVWF() {
 				if( global.configuration.hostAssets )
 				{
 					var datadir = libpath.resolve(__dirname, '..','..', global.configuration.assetDataDir);
+
 					fs.mkdirs(datadir, function()
 					{
+						global.configuration.assetAppPath = '/sas';
+
 						var assetServer = require('SandboxAssetServer');
-						app.use('/adl/sas', assetServer({
+						app.use(global.configuration.assetAppPath, assetServer({
 							dataDir: libpath.resolve(__dirname, '..','..', global.configuration.assetDataDir),
 							sessionCookieName: 'session',
 							sessionHeader: global.configuration.assetSessionHeader,
 							sessionSecret: global.configuration.sessionSecret
 						}));
-						logger.info('Hosting assets locally at /adl/sas');
+						logger.info('Hosting assets locally at', global.configuration.assetAppPath);
 					});
 				}
 				else {

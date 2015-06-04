@@ -15,7 +15,7 @@
 					<p class='name' ng-style='{"font-weight": asset._dirty ? "bold" : "normal"}'>{{(asset._dirty ? '*' : '')+asset.name}}</p>
 					<p class='meta'>{{asset.type}} ({{asset.id}})</p>
 				</div>
-				<div class='nonbs-thumbnail' ng-if='!asset._basicDirty && asset.thumbnail' ng-style='{"background-image": "url(/adl/sas/assets/"+asset.id+"/meta/thumbnail)"}'>
+				<div class='nonbs-thumbnail' ng-if='!asset._basicDirty && asset.thumbnail' ng-style='{"background-image": "url("+appPath+"/assets/"+asset.id+"/meta/thumbnail)"}'>
 				</div>
 			</div>
 		</div>
@@ -35,7 +35,7 @@
 
 		<hr/>
 
-		<p id='url'>{{(fields.selected && fields.selected !== 'new') ? '/adl/sas/assets/'+selected.id : 'Un-uploaded Asset'}}</p>
+		<p id='url'>{{(fields.selected && fields.selected !== 'new') ? appPath+'/assets/'+selected.id : 'Un-uploaded Asset'}}</p>
 		<label id='name' class='verticalLayout'>Name
 			<br/>
 			<input type='text' placeholder='Name' ng-model='selected.name' ng-change='selected._basicDirty = true' ng-disabled='!fields.selected'/>
