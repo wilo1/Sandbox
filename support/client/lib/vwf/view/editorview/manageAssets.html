@@ -28,9 +28,9 @@
 
 		<div id='dragarea' class='verticalLayout'>
 			<span>Choose File</span>
-			<p>{{filename}}</p>
+			<p>{{file.name}}</p>
 			<input type='text' id='typeInput' placeholder='application/octet-stream' ng-model='selected.type' ng-disabled='!fields.selected'/>
-			<input type='file' id='fileInput' value='Browse' onchange='setMime(this.files)'/>
+			<input type='file' id='fileInput' value='Browse' onchange='getFileData(this.files)'/>
 		</div>
 
 		<hr/>

@@ -160,31 +160,33 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		});
 
 		// auto-fill mime type field when file is selected
-		window.setMime = function(files)
+		window.getFileData = function(files)
 		{
 			if(files[0])
 			{
-				console.log(files[0].name);
-				$scope.filename = files[0].name;
+				var fr = new FileReader();
+				fr.onloadend = function(evt)
+				{
+					$scope.file = files[0];
+					$scope.file.data = fr.result;
 
-				if(files[0].type){
-					$scope.selected.type = files[0].type;
-				}
-				else if(/\.dae$/i.test(files[0].name)){
-					$scope.selected.type = 'model/vnd.collada+xml';
-				}
-				else if(/\.json$/i.test(files[0].name)){
-					$scope.selected.type = 'application/json';
-				}
-				else {
-					$scope.selected.type = '';
-				}
+					if(files[0].type){
+						$scope.selected.type = files[0].type;
+					}
+					else if(/\.dae$/i.test(files[0].name)){
+						$scope.selected.type = 'model/vnd.collada+xml';
+					}
+					else if(/\.json$/i.test(files[0].name)){
+						$scope.selected.type = 'application/json';
+					}
+					else {
+						$scope.selected.type = '';
+					}
+					$scope.selected._dirty = true;
+					$scope.$apply();
+				};
+				fr.readAsArrayBuffer(files[0]);
 			}
-			else {
-				$scope.selected.type = '';
-			}
-			$scope.selected._dirty = true;
-			$scope.$apply();
 		}
 
 
@@ -192,7 +194,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		$scope.clearFileInput = function(){
 			var input = $('#manageAssetsDialog #fileInput');
 			input.replaceWith( input.val('').clone(true) );
-			$scope.filename = '';
+			$scope.file = null;
 		}
 
 
@@ -225,12 +227,9 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		// write asset data to the server
 		$scope.saveData = function(id)
 		{
-			var fileInput = $('#dragarea input#fileInput');
-			var file = fileInput[0].files[0];
-
 			if( !id || id === 'new' )
 			{
-				if( file )
+				if( $scope.file )
 				{
 					var perms = $scope.getPackedPermissions();
 
@@ -252,7 +251,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 						url += queryChar+'permissions='+ perms.toString(8);
 						queryChar = '&';
 					}
-					if( $scope.selected.type.slice(0,6) === 'image/' && file.size < 30000 ){
+					if( $scope.selected.type.slice(0,6) === 'image/' && $scope.file.size < 30000 ){
 						url += queryChar+'thumbnail='+ encodeURIComponent(':self');
 						queryChar = '&';
 					}
@@ -265,7 +264,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 							$scope.refreshData(xhr.responseText);
 							$scope.fields.selected = xhr.responseText;
 							$scope.resetNew();
-							$scope.clearFileInput(fileInput);
+							$scope.clearFileInput();
 						}
 						else {
 							alertify.alert('Upload failed: '+ xhr.responseText);
@@ -274,7 +273,9 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 
 					xhr.open('POST', url);
 					xhr.setRequestHeader('Content-Type', $scope.selected.type);
-					xhr.send(file);
+
+					var buffer = new Uint8Array($scope.file.data);
+					xhr.send(buffer);
 
 				}
 				else {
@@ -292,7 +293,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 					}
 				}
 
-				if(file)
+				if( $scope.file )
 				{
 					toComplete += 1;
 
@@ -303,13 +304,15 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 							alertify.alert('Upload failed: '+xhr.responseText);
 						}
 						else {
-							$scope.clearFileInput( fileInput );
+							$scope.clearFileInput();
 						}
 						checkRemaining();
 					});
 					xhr.open('POST', $scope.appPath+'/assets/'+$scope.selected.id);
 					xhr.setRequestHeader('Content-Type', $('#manageAssetsDialog input#typeInput').val());
-					xhr.send(file);
+
+					var buffer = new Uint8Array($scope.file.data);
+					xhr.send(buffer);
 				}
 
 				if($scope.selected._basicDirty)
