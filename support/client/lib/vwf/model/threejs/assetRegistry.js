@@ -199,15 +199,12 @@ function cleanAnimation(animation,root)
             }
         }
     }
-
-    
-
    // createTracksForBones(animation);
     cacheParentSpaceKeys(animation);
 }
 function createTracksForBones(animation)
 {
-   
+
     var bones = animation.root.skeleton.bones;
     for(var i =0 ; i < bones.length; i++)
     {
@@ -217,7 +214,7 @@ function createTracksForBones(animation)
             var newTrack = {
                 node:bones[i],
                 keys:[{time:0,pos:[0,0,0],rot:new THREE.Quaternion(),scl:[1,1,1]}]
-            }
+}
             var pos = new THREE.Vector3();
             var scl = new THREE.Vector3();
             bones[i].matrix.decompose(pos,newTrack.keys[0].rot,scl);
@@ -225,17 +222,6 @@ function createTracksForBones(animation)
             newTrack.keys[0].scl = [scl.x,scl.y,scl.z]
         }
     }
-}
-function findTrackParent(currentTrack,hierarchy)
-{
-            if(!currentTrack.node) return hierarchy[currentTrack.parent];
-        var parentNode = currentTrack.node.parent;
-        for(var i =0; i < hierarchy.length; i++)
-        {
-            if(hierarchy[i].node == parentNode)
-                return hierarchy[i]
-        }
-        return null;
 }
 function cacheParentSpaceKeys(animation)
 {
@@ -268,7 +254,7 @@ function cacheParentSpaceKeys(animation)
                     mats.push(mat);
                 }
                 
-                currentTrack = findTrackParent(currentTrack,animation.data.hierarchy);
+                currentTrack = animation.data.hierarchy[currentTrack.parent];
             }
             for(var k = 0; k <mats.length; k++)
             {
@@ -328,6 +314,14 @@ var assetRegistry = function() {
             this.assets[assetSource].loaded = true;
             this.assets[assetSource].pending = false;
             this.assets[assetSource].node = _assetLoader.getCollada(assetSource).scene;
+        }
+
+        
+        if (childType == "subDriver/threejs/asset/vnd.rmx+json" && _assetLoader.getRMX(assetSource))
+        {
+            this.assets[assetSource].loaded = true;
+            this.assets[assetSource].pending = false;
+            this.assets[assetSource].node = _assetLoader.getRMX(assetSource).scene;
         }
         if (childType == "subDriver/threejs/asset/vnd.three.js+json" && _assetLoader.getTHREEjs(assetSource))
         {
@@ -548,6 +542,38 @@ var assetRegistry = function() {
             {
                 source: assetSource
             }, assetLoaded, assetFailed);
+        }
+        if (childType == "subDriver/threejs/asset/vnd.rmx+json")
+        {
+            reg.loadStarted();
+            var jsonmodel, binarymodel, asset;
+
+            async.series([
+                    function loadone(cb){
+                        $.getJSON(assetSource,function(data)
+                        {
+                            jsonmodel = data;
+                            cb();
+                        });
+                    },
+                    function loadtwo(cb)
+                    {
+                        var src = assetSource.substr(0, assetSource.lastIndexOf(".")) + ".bin";
+
+                        var xhr = new XMLHttpRequest();
+                        xhr.onload = function(e)
+                        {
+                            binarymodel = xhr.response;
+                            cb();
+                        };
+                        xhr.open("GET", src, true);
+                        xhr.responseType = "arraybuffer";
+                        xhr.send();
+                    }],
+                function done(){
+                    var loader = new RMXModelLoader;
+                    loader.load(jsonmodel, binarymodel, assetLoaded);
+                })
         }
         if (childType == "subDriver/threejs/asset/vnd.three.js+json")
         {

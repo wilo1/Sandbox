@@ -158,6 +158,17 @@
                     var boneroot = skins[i].animationHandle.root;
                     boneroot.matrixWorld.multiplyMatrices(boneroot.parent.matrixWorld,boneroot.matrix);
                     skins[i].animationHandle.setKey(this.animationFrame,this.animationFPS);
+                    for(var j =0; j < skins[i].animationHandle.hierarchy.length; j++ )
+                    {
+                        var bone = skins[i].animationHandle.hierarchy[j];
+                        bone.matrixWorld.multiplyMatrices(bone.parent.matrixWorld,bone.matrix);
+                        for(var k = 0; k < bone.children.length; k++)
+                        {
+                            if(!(bone.children[k] instanceof THREE.Bone))
+                            bone.children[k].updateMatrixWorld();
+                        }
+                    }
+                    //skins[i].updateMatrixWorld();
                   
                     
                     
@@ -174,10 +185,8 @@
                         for (var k = 0; k < allMeshes.length; k++)
                             _SceneManager.setDirty(allMeshes[k]);
                     }
-
                 }
             }
-
         }
         this.settingProperty = function(propertyName, propertyValue) {
             if (propertyName == 'animationFrame') {
