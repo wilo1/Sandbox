@@ -29714,7 +29714,7 @@ THREE.Animation.prototype.setKey = function(keyf) {
 
 
             object.updateMatrix();
-            object.matrixWorld.multiplyMatrices(this.root.matrixWorld,object.matrix);
+            //object.matrixWorld.multiplyMatrices(this.root.matrixWorld,object.matrix);
 
 
 
@@ -29744,7 +29744,7 @@ THREE.Animation.prototype.setKey = function(keyf) {
             //the object matrix is now directly in the space of this.root. No need to walk whole tree updating 
             //matrix
 			object.updateMatrix();
-            object.matrixWorld.multiplyMatrices(this.root.matrixWorld,object.matrix);
+            //object.matrixWorld.multiplyMatrices(this.root.matrixWorld,object.matrix);
 
             
             if (object.debugobject) {

@@ -39,6 +39,7 @@ function MorphBinaryLoader()
 }
 function gltf2threejs(animation, root) {
    
+   debugger;
     var hierarchy = THREE.AnimationHandler.parse( root );
 
     var threeanimation = {
@@ -200,7 +201,7 @@ function cleanAnimation(animation,root)
         }
     }
    // createTracksForBones(animation);
-    cacheParentSpaceKeys(animation);
+   // cacheParentSpaceKeys(animation);
 }
 function createTracksForBones(animation)
 {

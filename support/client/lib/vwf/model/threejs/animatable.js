@@ -154,11 +154,11 @@
                 }*/
                 if (skins[i].animationHandle) {
                    
-                    skins[i].matrixWorld.multiplyMatrices(skins[i].parent.matrixWorld,skins[i].matrix);
-                    var boneroot = skins[i].animationHandle.root;
-                    boneroot.matrixWorld.multiplyMatrices(boneroot.parent.matrixWorld,boneroot.matrix);
+                  //  skins[i].matrixWorld.multiplyMatrices(skins[i].parent.matrixWorld,skins[i].matrix);
+                  //  var boneroot = skins[i].animationHandle.root;
+                  //  boneroot.matrixWorld.multiplyMatrices(boneroot.parent.matrixWorld,boneroot.matrix);
                     skins[i].animationHandle.setKey(this.animationFrame,this.animationFPS);
-                    for(var j =0; j < skins[i].animationHandle.hierarchy.length; j++ )
+                 /*   for(var j =0; j < skins[i].animationHandle.hierarchy.length; j++ )
                     {
                         var bone = skins[i].animationHandle.hierarchy[j];
                         bone.matrixWorld.multiplyMatrices(bone.parent.matrixWorld,bone.matrix);
@@ -167,8 +167,8 @@
                             if(!(bone.children[k] instanceof THREE.Bone))
                             bone.children[k].updateMatrixWorld();
                         }
-                    }
-                    //skins[i].updateMatrixWorld();
+                    }*/
+                    skins[i].updateMatrixWorld();
                   
                     
                     
