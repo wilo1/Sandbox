@@ -139,7 +139,7 @@ function run_one_test(test, nextTest) {
             browserName: 'firefox'
         }
     };
-    async.eachSeries(['firefox', 'chrome', 'ie11'], function(browserName, nextBrowser) {
+    async.eachSeries(['firefox', /*'chrome',*/ /*'ie11'*/], function(browserName, nextBrowser) {
         async.series([
             function initBrowser(cb) {
                 options.desiredCapabilities.browserName = browserName;
