@@ -204,39 +204,7 @@ function cleanAnimation(animation,root)
    // createTracksForBones(animation);
    // cacheParentSpaceKeys(animation);
 }
-function createTracksForBones(animation)
-{
 
-                var key = currentTrack.keys[j];
-                if(!key)
-                    key = currentTrack.keys[currentTrack.keys.length-1]
-                if(!key)
-                    mats.push(new THREE.Matrix4());
-                if(key)
-                {
-                    var mat = new THREE.Matrix4();
-                    mat.compose(new THREE.Vector3(key.pos[0],key.pos[1],key.pos[2]),key.rot,new THREE.Vector3(key.scl[0],key.scl[1],key.scl[2]))
-                    mats.push(mat);
-                }
-                
-                currentTrack = animation.data.hierarchy[currentTrack.parent];
-            }
-            for(var k = 0; k <mats.length; k++)
-            {
-                mats[k].multiplyMatrices(mats[k],mats[k-1] || new THREE.Matrix4());
-            }
-            parentMat = mats[mats.length-1];
-            var key = track.keys[j];
-            key.cachedRootMat = parentMat;
-            key.parentspacePos = new THREE.Vector3();
-            key.parentspaceScl = new THREE.Vector3();
-            key.parentspaceRot = new THREE.Quaternion();
-            key.cachedRootMat.decompose(key.parentspacePos,key.parentspaceRot,key.parentspaceScl);
-            key.parentspacePos = [key.parentspacePos.x,key.parentspacePos.y,key.parentspacePos.z];
-            key.parentspaceScl = [key.parentspaceScl.x,key.parentspaceScl.y,key.parentspaceScl.z];
-        }
-    }
-}
  var NOT_STARTED = 0;
     var PENDING = 1;
     var FAILED = 2;

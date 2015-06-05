@@ -4466,16 +4466,19 @@ THREE.Matrix4.prototype = {
         var te = this.elements;
         var me = temp_m.elements;
 
-        var scaleX = 1 / temp_v1.set(me[0], me[1], me[2]).length();
-        var scaleY = 1 / temp_v1.set(me[4], me[5], me[6]).length();
-        var scaleZ = 1 / temp_v1.set(me[8], me[9], me[10]).length();
+        
+
+        var scaleX = 1 / Math.sqrt(me[0] * me[0] + me[1] * me[1] + me[2] * me[2]);
+        var scaleY = 1 / Math.sqrt(me[4] * me[4] + me[5] * me[5] + me[6] * me[6]);
+        var scaleZ = 1 / Math.sqrt(me[8] * me[8] + me[9] * me[9] + me[10] * me[10]);
+
 
         if (p) {
             var pe = p.elements;
 
-            var px = temp_v1.set(pe[0], pe[1], pe[2]).length();
-            var py = temp_v1.set(pe[4], pe[5], pe[6]).length();
-            var pz = temp_v1.set(pe[8], pe[9], pe[10]).length();
+            var px = 1 / Math.sqrt(pe[0] * pe[0] + pe[1] * pe[1] + pe[2] * pe[2]);
+        	var py = 1 / Math.sqrt(pe[4] * pe[4] + pe[5] * pe[5] + pe[6] * pe[6]);
+        	var pz = 1 / Math.sqrt(pe[8] * pe[8] + pe[9] * pe[9] + pe[10] * pe[10]);
 
             te[0] = me[0] * scaleX * px;
             te[1] = me[1] * scaleX * px;
@@ -7801,7 +7804,7 @@ THREE.Object3D.prototype = {
             } else {
 
                 this.orthoMatrixWorld.orthogonalize();
-            }
+           }
 
             this.matrixWorldNeedsUpdate = false;
 
