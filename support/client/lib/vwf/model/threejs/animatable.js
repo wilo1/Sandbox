@@ -154,9 +154,10 @@
                 }*/
                 if (skins[i].animationHandle) {
                    
-                    skins[i].matrixWorld.multiplyMatrices(skins[i].parent.matrixWorld,skins[i].matrix);
+                   /* skins[i].matrixWorld.multiplyMatrices(skins[i].parent.matrixWorld,skins[i].matrix);
                     var boneroot = skins[i].animationHandle.root;
                     boneroot.matrixWorld.multiplyMatrices(boneroot.parent.matrixWorld,boneroot.matrix);
+                    */
                     skins[i].animationHandle.setKey(this.animationFrame,this.animationFPS);
                   
                     
