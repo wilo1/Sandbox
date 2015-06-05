@@ -39,12 +39,13 @@ function MorphBinaryLoader()
 }
 function gltf2threejs(animation, root) {
    
+   
     var hierarchy = THREE.AnimationHandler.parse( root );
 
     var threeanimation = {
         name: "animation",
         fps: 30,
-        length: "",
+        length: 0,
         hierarchy: []
     };
 
@@ -94,12 +95,13 @@ function gltf2threejs(animation, root) {
     
     threeanimation.length /= threeanimation.fps;
     var oldHierarchy = threeanimation.hierarchy;
+
     threeanimation.hierarchy = [];
     for(var i =0; i < hierarchy.length; i++)
     {
         for(var j=0; j < oldHierarchy.length; j++)
         {
-            if(hierarchy[i] == oldHierarchy[j].node)
+            if(oldHierarchy[j].node && hierarchy[i].name == oldHierarchy[j].node.name)
             threeanimation.hierarchy[i] = oldHierarchy[j];
         }
     }
@@ -200,58 +202,10 @@ function cleanAnimation(animation,root)
         }
     }    
    // createTracksForBones(animation);
-    cacheParentSpaceKeys(animation);
+   // cacheParentSpaceKeys(animation);
 }
 function createTracksForBones(animation)
 {
-   
-    var bones = animation.root.skeleton.bones;
-    for(var i =0 ; i < bones.length; i++)
-    {
-        if(animation.hierarchy.indexOf(bones[i]))
-        {
-            var parentTrack = animation.hierarchy.indexOf(bones[i].parent);
-            var newTrack = {
-                node:bones[i],
-                keys:[{time:0,pos:[0,0,0],rot:new THREE.Quaternion(),scl:[1,1,1]}]
-            }
-            var pos = new THREE.Vector3();
-            var scl = new THREE.Vector3();
-            bones[i].matrix.decompose(pos,newTrack.keys[0].rot,scl);
-            newTrack.keys[0].pos = [pos.x,pos.y,pos.z]
-            newTrack.keys[0].scl = [scl.x,scl.y,scl.z]
-        }
-    }
-}
-function findTrackParent(currentTrack,hierarchy)
-{
-            if(!currentTrack.node) return hierarchy[currentTrack.parent];
-        var parentNode = currentTrack.node.parent;
-        for(var i =0; i < hierarchy.length; i++)
-        {
-            if(hierarchy[i].node == parentNode)
-                return hierarchy[i]
-        }
-        return null;
-}
-function cacheParentSpaceKeys(animation)
-{
-    
-    for (var i = 0; i < animation.data.hierarchy.length; i++)
-    {
-        var track = animation.data.hierarchy[i];
-        var keys = track.keys;
-        var node = animation.hierarchy[i];
-        
-        
-
-        for(var j =0; j < keys.length; j++)
-        {
-            var currentTrack = track;
-            var mats = [];
-            var parentMat = new THREE.Matrix4();
-            while(currentTrack && currentTrack.keys)
-            {
 
                 var key = currentTrack.keys[j];
                 if(!key)
