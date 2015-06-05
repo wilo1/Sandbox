@@ -1,6 +1,12 @@
 "use strict";
 (function()
 {
+
+
+
+
+
+
     //enum to keep track of assets that fail to load
     function asset(childID, childSource, childName, childType, assetSource, asyncCallback)
         {
@@ -487,22 +493,22 @@
                 //you may be wondering why we are cloning again - this is so that the object in the scene is 
                 //never the same object as in the cache
                 var self = this;
-                if (childType !== 'subDriver/threejs/asset/vnd.gltf+json')
-                {
+               // if (childType !== 'subDriver/threejs/asset/vnd.gltf+json')
+                //{
                   
                     var clone = asset.clone();
                     clone.morphTarget = asset.morphTarget; //sort of hacky way to keep a reference to morphtarget
-                
+
                     this.getRoot().add(clone);
-                }
-                else
-                {
-                    glTFCloner.clone(asset, rawAnimationChannels, function(clone)
-                    {
-                        self.getRoot().add(clone);
-                        self.getRoot().GetBoundingBox();
-                    });
-                }
+                //}
+            //else
+           // {
+                //glTFCloner.clone(asset, rawAnimationChannels, function(clone)
+                //{
+                //    self.getRoot().add(clone);
+              //      self.getRoot().GetBoundingBox();
+                //});
+            //}
                 this.cleanTHREEJSnodes(this.getRoot());
                 //set some defaults now that the mesh is loaded
                 //the VWF should set some defaults as well

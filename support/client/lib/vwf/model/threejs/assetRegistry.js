@@ -37,12 +37,110 @@ function MorphBinaryLoader()
         }
     };
 }
+function gltf2threejs(animation, root) {
+   
+    var hierarchy = THREE.AnimationHandler.parse( root );
 
+    var threeanimation = {
+        name: "animation",
+        fps: 30,
+        length: "",
+        hierarchy: []
+    };
+
+    var index = -1;
+
+    for (var i in animation) {
+        index = index +1;
+
+        threeanimation.hierarchy.push({
+            parent: index,
+            keys: []
+        });
+
+        for (var j = 0; j < animation[i].length; j++) {
+            if (animation[i][j].path == "translation") {
+                for (var l = 0; l < animation[i][j].values.length/3; l++) {
+                    var keys = animation[i][j].values;
+                    var position = new THREE.Vector3(keys[l*3+0], keys[l*3+1], keys[l*3+2]);
+                    if (!threeanimation.hierarchy[index].keys[l])
+                        threeanimation.hierarchy[index].keys[l] = {};
+                    threeanimation.hierarchy[index].keys[l].time = l/threeanimation.fps;
+                    threeanimation.hierarchy[index].keys[l].pos = [position.x,position.y,position.z];
+                    threeanimation.hierarchy[index].node = animation[i][j].target;
+                    threeanimation.length = Math.max(threeanimation.length,l);
+                }
+            } else if (animation[i][j].path == "scale") {
+                for (var l = 0; l < animation[i][j].values.length/3; l++) {
+                    var keys = animation[i][j].values;
+                    var scale = new THREE.Vector3(keys[l*3+0], keys[l*3+1], keys[l*3+2]);
+                    if (!threeanimation.hierarchy[index].keys[l])
+                        threeanimation.hierarchy[index].keys[l] = {};
+                    threeanimation.hierarchy[index].keys[l].scl =  [scale.x,scale.y,scale.z];;
+                    threeanimation.length = Math.max(threeanimation.length,l);
+                }
+            } else if (animation[i][j].path == "rotation") {
+                for (var l = 0; l < animation[i][j].values.length/4; l++) {
+                    var keys = animation[i][j].values;
+                    var rotation = new THREE.Quaternion(keys[l*4+0],keys[l*4+1],keys[l*4+2],keys[l*4+3]);
+                    if (!threeanimation.hierarchy[index].keys[l])
+                        threeanimation.hierarchy[index].keys[l] = {};
+                    threeanimation.hierarchy[index].keys[l].rot = rotation;
+                    threeanimation.length = Math.max(threeanimation.length,l);
+                }
+            }
+        }
+    }
+    console.log(threeanimation)
+
+    var oldHierarchy = threeanimation.hierarchy;
+    threeanimation.hierarchy = [];
+    for(var i =0; i < hierarchy.length; i++)
+    {
+        for(var j=0; j < oldHierarchy.length; j++)
+        {
+            if(hierarchy[i] == oldHierarchy[j].node)
+            threeanimation.hierarchy[i] = oldHierarchy[j];
+        }
+    }
+    for (var i = 0; i < threeanimation.hierarchy.length; i++)
+    {
+        var track = threeanimation.hierarchy[i];
+        if (!track)
+        {
+            threeanimation.hierarchy[i] = {
+                parent: -1,
+                keys: [],
+                node: hierarchy[i]
+            }
+            for(var j = 0; j < threeanimation.length; j ++)
+            {
+                threeanimation.hierarchy[i].keys[j] = 
+                {
+                    pos :[threeanimation.hierarchy[i].node.position.x,threeanimation.hierarchy[i].node.position.y,threeanimation.hierarchy[i].node.position.z],
+                    rot : threeanimation.hierarchy[i].node.quaternion.clone(),
+                    scl : [threeanimation.hierarchy[i].node.scale.x,threeanimation.hierarchy[i].node.scale.y,threeanimation.hierarchy[i].node.scale.z],
+                    time: j/threeanimation.fps
+                }
+            }
+
+            continue;
+        }
+        track.parent = -1;
+        var parentNode = track.node.parent;
+        for (var j = 0; j < threeanimation.hierarchy.length; j++)
+        {
+            if (threeanimation.hierarchy[j] && threeanimation.hierarchy[j].node == parentNode)
+                track.parent = j;
+        }
+    }
+    return(threeanimation)
+};
 //when animation tracks don't contain a pos,rot,or scl for each key, add that value with a linear interp
-function cleanAnimation(animation)
+function cleanAnimation(animation,root)
 {
-    
-    for (var h = 0, hl = animation.hierarchy.length; h < hl; h++) {
+   
+    for (var h = 0, hl = animation.data.hierarchy.length; h < hl; h++) {
         var object = animation.hierarchy[h];
         var keys = animation.data.hierarchy[h].keys;
         for(var i =0; i < keys.length; i++)
@@ -124,6 +222,17 @@ function createTracksForBones(animation)
             newTrack.keys[0].scl = [scl.x,scl.y,scl.z]
         }
     }
+}
+function findTrackParent(currentTrack,hierarchy)
+{
+            if(!currentTrack.node) return hierarchy[currentTrack.parent];
+        var parentNode = currentTrack.node.parent;
+        for(var i =0; i < hierarchy.length; i++)
+        {
+            if(hierarchy[i].node == parentNode)
+                return hierarchy[i]
+        }
+        return null;
 }
 function cacheParentSpaceKeys(animation)
 {
@@ -244,12 +353,39 @@ var assetRegistry = function() {
             this.assets[assetSource].node = _assetLoader.getglTF(assetSource).scene;
             this.assets[assetSource].animations = _assetLoader.getglTF(assetSource).animations;
             this.assets[assetSource].rawAnimationChannels = _assetLoader.getglTF(assetSource).rawAnimationChannels;
+            var self = this;
+            
+            glTFCloner.clone(this.assets[assetSource].node, this.assets[assetSource].rawAnimationChannels, function(clone)
+            {
+                clone.traverse(function(o)
+                {
+                    if (o.animationHandle)
+                    {
+                        var ani = gltf2threejs(self.assets[assetSource].rawAnimationChannels,o);
+                        var animation = new THREE.Animation(
+                            o,
+                            ani
+                        );
+                        animation.data = ani;
+                        o.geometry.animation = ani;
+                        o.animationHandle = animation;
+                    }
+                })
+                self.assets[assetSource].node = clone;
+            })
         }
-        if(this.assets[assetSource] && this.assets[assetSource].node && this.assets[assetSource].node.animationHandle)
+        if (this.assets[assetSource] && this.assets[assetSource].loaded && this.assets[assetSource].node )
         {
+            this.assets[assetSource].node.traverse(function(o)
+                {
+                    if (o.animationHandle)
+                    {
+                        cleanAnimation(o.animationHandle,o);
+                    }
+                });
 
-            cleanAnimation(this.assets[assetSource].node.animationHandle);
         }
+        
     }
     this.newLoad = function(childType, assetSource, success, failure)
     {
@@ -305,9 +441,10 @@ var assetRegistry = function() {
 
                 asset = shim;
             }
+           
             if(asset.scene.animationHandle)
             {
-                cleanAnimation(asset.scene.animationHandle);
+                cleanAnimation(asset.scene.animationHandle,asset.scene);
             }
             //store this asset in the registry
             //get the entry from the asset registry
@@ -332,6 +469,23 @@ var assetRegistry = function() {
                 {
                     reg.node = clone;
                     reg.rawAnimationChannels = asset.rawAnimationChannels
+                    
+            var rawAnimationChannels = asset.rawAnimationChannels;
+                clone.traverse(function(o)
+                    {
+                        if (o.animationHandle)
+                        {
+                            
+                            var ani = gltf2threejs(rawAnimationChannels,o);
+                            var animation = new THREE.Animation(
+                                o,
+                                ani
+                            );
+                            animation.data = ani;
+                            o.animationHandle = animation;
+                        }
+                    })
+
                 });
             }
             for (var i = 0; i < reg.callbacks.length; i++)
