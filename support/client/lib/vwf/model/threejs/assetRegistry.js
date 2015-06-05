@@ -91,8 +91,8 @@ function gltf2threejs(animation, root) {
             }
         }
     }
-    console.log(threeanimation)
-
+    
+    threeanimation.length /= threeanimation.fps;
     var oldHierarchy = threeanimation.hierarchy;
     threeanimation.hierarchy = [];
     for(var i =0; i < hierarchy.length; i++)

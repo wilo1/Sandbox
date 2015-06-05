@@ -113,6 +113,17 @@ module.exports.hookupUtils = function(browser) {
         	cb(null, jqObj);
         });
 	});
+		browser.addCommand("$keypress", function(cssSelector, key) {
+		var cb = arguments[arguments.length -1];
+        browser.execute(function(c, k) {
+			var e = $.Event("keypress");
+			e.which = e.keyCode = k.charCodeAt(0);
+        	return $(c).trigger(e);
+        }, cssSelector, key, function(err, jqObj)
+        {
+        	cb(null, jqObj);
+        });
+	});
 	browser.addCommand("saveDataBeforeUnload", function(){
 		var cb = arguments[arguments.length -1];
         browser.execute(function(){
@@ -168,7 +179,23 @@ module.exports.hookupUtils = function(browser) {
 			finished(status, message);
 		});
 	});	
-	
+	browser.addCommand("isNodeSelected", function(nodename) {
+        
+        var cb = arguments[arguments.length -1]
+        browser.execute(function(a) {
+			
+			
+            var id = vwf.find(vwf.application(), a)[0];
+        	return _Editor.isSelected("" + id);
+			
+			
+			
+        }, nodename,function(err, r)
+        {
+        	
+        	cb(null,r.value)
+        });
+    });
 	
 }
 
@@ -264,6 +291,7 @@ module.exports.getDistance = function(arr1, arr2){
 		return a + b;
 	}));
 }
+
 
 function getNode(name) {
     try {
