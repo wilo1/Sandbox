@@ -165,6 +165,26 @@ module.exports.hookupUtils = function(browser) {
 	browser.addCommand("completeTest", function(status, message, finished) {
 		module.exports.completeTest(status, message, finished);
 	});	
+	
+	browser.addCommand("createWorld", function(){
+		var cb = arguments[arguments.length -1];
+		
+		//Create world
+		browser.url("http://localhost:3000/adl/sandbox/createNew2/noTemplate")
+			.waitForExist("#txtInstanceName", 5000)
+			.setValue("#txtInstanceName", "worldMultistep.Test.Title")
+			.click('input[type="submit"]').pause(1000)
+			
+			//Once created, get world id
+			.waitForExist("#content", 5000)
+			.url(function(err, url){
+				var tempArr = url.value.split('/');
+				worldId = tempArr[tempArr.length-1];
+				
+				if(worldId) cb(null, worldId);
+				else cb(true, worldId);
+			})
+	});	
 }
 
 module.exports.completeTest = function(status, message, finished) {

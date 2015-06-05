@@ -16,20 +16,15 @@ module.exports = {
 				else outStr += "Login successful; ";
 			})
 			
-			//Create world
-			.url("http://localhost:3000/adl/sandbox/createNew2/noTemplate")
-			.waitForExist("#txtInstanceName", 5000)
-			.setValue("#txtInstanceName", "worldMultistep.Test.Title")
-			.click('input[type="submit"]').pause(1000)
-			
-			//Once created, get world id
-			.waitForExist("#content", 5000)
-			.url(function(err, url){
-				var tempArr = url.value.split('/');
-				worldId = tempArr[tempArr.length-1];
-				
-				//navigate to newly created world using id
-				browser.url("http://localhost:3000/adl/sandbox/" + worldId + "?norender=true")
+			.createWorld(function(err, id){
+				if(err){
+					passed = false;
+					outStr += "Unable to create world; ";
+				}
+				else{
+					worldId = id;
+					return browser.url("http://localhost:3000/adl/sandbox/" + id + "?norender=true");
+				}
 			})
 			
 			.waitForExist('#preloadGUIBack', 60000)
