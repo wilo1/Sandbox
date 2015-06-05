@@ -516,6 +516,7 @@
                             );
                             animation.data = ani;
                             o.geometry.animation = ani;
+                            cleanAnimation(animation,o)
                             o.animationHandle = animation;
                         }
                     })

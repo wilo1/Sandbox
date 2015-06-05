@@ -168,17 +168,14 @@
                             bone.children[k].updateMatrixWorld();
                         }
                     }*/
-                    skins[i].updateMatrixWorld();
+                    //skins[i].updateMatrixWorld();
                   
                     
                     
                     //odd, does not seem to update matrix on first child bone. 
                     //how does the bone relate to the skeleton?
 
-                    //this is no longer necessary in threejs r68
-                    for (var j = 0; j < skins[i].children.length; j++) {
-                      skins[i].children[j].updateMatrixWorld(true);
-                    }
+                    
                    
                     if (updateSceneManager) {
                         var allMeshes = getAllDrawables(skins[i]);

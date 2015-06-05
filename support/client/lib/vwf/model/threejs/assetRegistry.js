@@ -201,11 +201,48 @@ function cleanAnimation(animation,root)
             }
         }
     }    
-   // createTracksForBones(animation);
-   // cacheParentSpaceKeys(animation);
+   createTracksForBones(animation);
+   cacheParentSpaceKeys(animation);
 }
 function createTracksForBones(animation)
 {
+
+    var bones = animation.root.skeleton.bones;
+    for(var i =0 ; i < bones.length; i++)
+    {
+        if(animation.hierarchy.indexOf(bones[i]))
+        {
+            var parentTrack = animation.hierarchy.indexOf(bones[i].parent);
+            var newTrack = {
+                node:bones[i],
+                keys:[{time:0,pos:[0,0,0],rot:new THREE.Quaternion(),scl:[1,1,1]}]
+}
+            var pos = new THREE.Vector3();
+            var scl = new THREE.Vector3();
+            bones[i].matrix.decompose(pos,newTrack.keys[0].rot,scl);
+            newTrack.keys[0].pos = [pos.x,pos.y,pos.z]
+            newTrack.keys[0].scl = [scl.x,scl.y,scl.z]
+        }
+    }
+}
+function cacheParentSpaceKeys(animation)
+{
+    
+    for (var i = 0; i < animation.data.hierarchy.length; i++)
+    {
+        var track = animation.data.hierarchy[i];
+        var keys = track.keys;
+        var node = animation.hierarchy[i];
+        
+        
+
+        for(var j =0; j < keys.length; j++)
+        {
+            var currentTrack = track;
+            var mats = [];
+            var parentMat = new THREE.Matrix4();
+            while(currentTrack && currentTrack.keys)
+            {
 
                 var key = currentTrack.keys[j];
                 if(!key)
@@ -322,6 +359,7 @@ var assetRegistry = function() {
                         );
                         animation.data = ani;
                         o.geometry.animation = ani;
+                        cleanAnimation(animation,o)
                         o.animationHandle = animation;
                     }
                 })
@@ -436,6 +474,7 @@ var assetRegistry = function() {
                                 ani
                             );
                             animation.data = ani;
+                            cleanAnimation(animation,o)
                             o.animationHandle = animation;
                         }
                     })
