@@ -22,10 +22,14 @@ var sessions = require('./sessions');
 var mailTools = require('./mailTools');
 var xapi = require('./xapi');
 var logger = require('./logger');
+var libraryFormatter = require('./libraryFormatter.js');
+
 // default path to data. over written by setup flags
 //generate a random id.
 var GUID = require('node-uuid')
 	.v4;
+
+
 //simple functio to write a response
 function respond(response, status, message)
 	{
@@ -1731,6 +1735,11 @@ function serve(request, response)
 						else {
 							response.send(global.configuration.remoteAssetServerURL);
 						}
+					}
+					break;
+				case "library/my-assets":
+					{
+						library.assetsToLibrary(UID, response);
 					}
 					break;
 				default:
