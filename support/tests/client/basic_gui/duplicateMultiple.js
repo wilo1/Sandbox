@@ -73,6 +73,7 @@ module.exports = {
 		// .$click('.ui-dialog .ui-button:contains(Select)')
 		
 		// Okay for selecting one node - not multiple
+		//OH NO we can do multiple now!!!!!!
 		.selectNodes(["Sphere", "Cylinder"], function(err, r) {
 			if(!err && r) {
 				outStr += "Nodes are selected. ";
