@@ -185,6 +185,26 @@ module.exports.hookupUtils = function(browser) {
 				else cb(true, worldId);
 			})
 	});	
+	
+	browser.addCommand("deleteWorld", function(worldId){
+		var cb = arguments[arguments.length -1];
+		
+		//Create world
+		browser.url("http://localhost:3000/adl/sandbox/remove?id=" + worldId)
+			.waitForExist("input[value='Delete']", 5000)
+			.click("input[value='Delete']")
+			.pause(1000)
+			
+			//World should be deleted, attempt to navigate to deleted world page
+			.url("http://localhost:3000/adl/sandbox/world/" + worldId)
+			
+			.pause(2000)
+			.url(function(err, url){
+				//if worldId is in the url, we were not redirected to homepage
+				var err = url.value.indexOf(worldId) >= 0;
+				cb(err);
+			});	
+	});	
 }
 
 module.exports.completeTest = function(status, message, finished) {
