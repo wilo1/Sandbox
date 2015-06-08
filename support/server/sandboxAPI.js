@@ -1739,7 +1739,6 @@ function serve(request, response)
 					break;
 				case "library":
 					{
-						console.log('Got to library stuff!', pathAfterCommand);
 						if(pathAfterCommand === '/my-entities')
 							libraryFormatter.entitiesToLibrary(UID, 'entity', response);
 						else if(pathAfterCommand === '/my-materials')

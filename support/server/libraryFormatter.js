@@ -72,7 +72,7 @@ function entitiesToLibrary(user, type, res)
 								url: baseUrl+'/assets/'+id,
 								preview: data.thumbnail ?
 									baseUrl+'/assets/'+id+'/meta/thumbnail'
-									: "./contentlibraries/materials/thumbs/white.jpg",
+									: "./img/VWS_Logo.png",
 								type: 'asset'
 							};
 
