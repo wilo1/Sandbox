@@ -207,23 +207,25 @@ module.exports.hookupUtils = function(browser) {
 	});	
 }
 
-module.exports.completeTest = function(status, message, finished) {
-	browser.getConsoleLog(module.exports.SEVERE, function(err, logs){
-		var regex = /4[0-9][0-9] \([a-zA-Z ]+\)/;
-		for(var i = logs.length - 1; i >= 0; i--){
-			if(regex.test(logs[i])){
-				//this is very likely a status code... remove it and continue
-				logs.splice(i, 1);
+module.exports.completeTest = function(finished) {
+	return function(status, message){
+		browser.getConsoleLog(module.exports.SEVERE, function(err, logs){
+			var regex = /4[0-9][0-9] \([a-zA-Z ]+\)/;
+			for(var i = logs.length - 1; i >= 0; i--){
+				if(regex.test(logs[i])){
+					//this is very likely a status code... remove it and continue
+					logs.splice(i, 1);
+				}
 			}
-		}
-		
-		if(logs.length > 0){
-			message += "Severe error(s) found in browser log: " + JSON.stringify(logs);
-			status = false;
-		}
-		
-		finished(status, message);
-	});
+			
+			if(logs.length > 0){
+				message += "Severe error(s) found in browser log: " + JSON.stringify(logs);
+				status = false;
+			}
+			
+			finished(status, message);
+		});
+	}
 }
 
 module.exports.getConsoleLog = function(level, contains, cb){

@@ -247,7 +247,7 @@ function run_one_test_one_browser(thistest, browsername, next) {
         //    timeoutID = global.setTimeout(timeout, 60 * 1000)
     process.on('uncaughtException', handler);
     //the actual test
-    domain.bind(thistest.test)(global.browser, function(success, message) {
+    domain.bind(thistest.test)(global.browser, global.testUtils.completeTest(function(success, message) {
         //should return false or true
         logger.log("SUCCESS")
 
@@ -265,7 +265,7 @@ function run_one_test_one_browser(thistest, browsername, next) {
             next();
         }, 500)
 
-    })
+    }));
 
 
 }
