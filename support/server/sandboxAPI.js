@@ -1737,9 +1737,17 @@ function serve(request, response)
 						}
 					}
 					break;
-				case "library/my-assets":
+				case "library":
 					{
-						library.assetsToLibrary(UID, response);
+						console.log('Got to library stuff!', pathAfterCommand);
+						if(pathAfterCommand === '/my-entities')
+							libraryFormatter.entitiesToLibrary(UID, 'entity', response);
+						else if(pathAfterCommand === '/my-materials')
+							libraryFormatter.entitiesToLibrary(UID, 'material', response);
+						else if(pathAfterCommand === '/my-behaviors')
+							libraryFormatter.entitiesToLibrary(UID, 'behavior', response);
+						else
+							_404(response);
 					}
 					break;
 				default:

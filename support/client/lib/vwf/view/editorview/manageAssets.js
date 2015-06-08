@@ -102,6 +102,13 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 	app.controller('AssetListController', ['$scope','$rootScope','DataManager', function($scope,$rootScope)
 	{
 		$scope.hideThumbs = true;
+
+		$scope.prettifyType = function(type){
+			if( type === 'application/vnd.vws-entity+json' )
+				return 'Sandbox Entity';
+			else
+				return type;
+		}
 	}]);
 
 	app.controller('AssetPropertiesController', ['$scope','$rootScope','$http','DataManager', function($scope,$rootScope,$http)
@@ -169,6 +176,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				{
 					$scope.file = files[0];
 					$scope.file.data = fr.result;
+
 
 					if(files[0].type){
 						$scope.selected.type = files[0].type;
