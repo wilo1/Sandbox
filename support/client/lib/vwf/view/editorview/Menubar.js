@@ -128,7 +128,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
             }
 
 			manageAssets.initialize();
-            $('#MenuToolsManageAssets').click(function(e){
+            $('#MenuManageAssets').click(function(e){
 				manageAssets.refreshData();
                 $('#manageAssetsDialog').dialog('open');
             });
@@ -238,9 +238,9 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
             $('#MenuMulti').click(function(e) {
                 _Editor.SetGizmoMode(_Editor.Multi);
             });
-            $('#MenuSaveCopy').click(function(e) {
+            /*$('#MenuSaveCopy').click(function(e) {
                 _InventoryManager.Take();
-            });
+            });*/
             $('#MenuShare').click(function(e) {
                 _PermissionsManager.show();
             });
@@ -273,16 +273,16 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
             $('#MenuDelete').click(function(e) {
                 _Editor.DeleteSelection();
             });
-            $('#MenuPublish').click(function(e) {
+            /*$('#MenuPublish').click(function(e) {
                 _InventoryManager.Publish();
-            });
+            });*/
             $('#MenuChat').click(function(e) {
                 $('#ChatWindow').dialog('open');
             });
             $('#MenuUsers').click(function(e) {
                _UserManager.showPlayers();
             });
-            $('#MenuModels').click(function(e) {
+            $('#MenuAssets3DRBrowse').click(function(e) {
                 _ModelLibrary.show();
             });
             $('#MenuSnapLarge').click(function(e) {
@@ -310,7 +310,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
                 else
                     _ScriptEditor.show();
             });
-            $('#MenuInventory').click(function(e) {
+            /*$('#MenuInventory').click(function(e) {
                 if (_InventoryManager.isOpen())
                     _InventoryManager.hide();
                 else {
@@ -319,7 +319,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
                 }
     
     
-            });
+            });*/
     
     
     
@@ -338,7 +338,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
                 else
                     _PrimitiveEditor.show();
             });
-            $('#MenuGlobalInventory').click(function(e) {
+            /*$('#MenuGlobalInventory').click(function(e) {
                 if (_InventoryManager.isOpen())
                     _InventoryManager.hide();
                 else {
@@ -346,7 +346,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
                     $("#InventoryTypeChoiceGlobal").click()
                 }
     
-            });
+            });*/
             $('#MenuLatencyTest').click(function(e) {
                 var e = {};
                 e.time = new Date();
@@ -775,7 +775,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
                 }
             });
     
-            $('#MenuCreateUploadMesh').click(function(e) {
+            $('#MenuAssets3DRUpload').click(function(e) {
                 _ModelLibrary.showUpload();
             });
     
@@ -787,7 +787,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
                 _UndoManager.redo();
             });
     
-            $('#MenuCreateLoadMeshURL').click(function(e) {
+            /*$('#MenuCreateLoadMeshURL').click(function(e) {
                 alertify.choice("Choose the mesh format", function(ok, type) {
     
                     if (ok) {
@@ -809,7 +809,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
     
                 }, ["Collada", "3DR JSON (http://3dr.adlnet.gov)", "glTF (v0.6) JSON", 'Three.js Native JSON'])
     
-            });
+            });*/
     
     
             $('#MenuCreateSphere').click(function(e) {
