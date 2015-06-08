@@ -13,9 +13,9 @@ for(var i = 0; i < modifiers.length; i++){
 }
 
 function generateTestObj(usePrim, i){
-	var primOrShape = usePrim ? "Prim" : "2D shape";
+	var primOrShape = usePrim ? "(prim)" : "(2D)";
 	return {
-		title: "Test creation and deletion of " + modifiers[i] + " modifier on " + primOrShape, 
+		title: "Create and delete " + modifiers[i] + " modifier " + primOrShape, 
 		test: 
 			function(i){
 				return function(browser, finished){

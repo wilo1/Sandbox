@@ -1,5 +1,5 @@
 module.exports = {
-    'Tests creating and deleting world and verifying persistence': function(browser, finished) {
+    'Create and delete a world and verify persistence': function(browser, finished) {
         global.browser = browser;
         var testUtils = global.testUtils;
 		var passed = true;
