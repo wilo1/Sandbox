@@ -27,7 +27,7 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 				});
 			}
 
-			if(id){
+			if(id && typeof(id) === 'string'){
 				updateAsset(id);
 			}
 			else {
@@ -211,17 +211,32 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 			}
 		}
 
-		uploadVWFObject = function(name, data, type, cb)
+		uploadVWFObject = function(name, data, type, existingId, cb)
 		{
 			var cleanObj = _DataManager.getCleanNodePrototype(data);
-			$scope.resetNew();
-			$scope.fields.selected = 'new';
 
-			$scope.new.filedata = strToBytes( JSON.stringify(cleanObj) );
-			$scope.new.filename = name;
-			$scope.new.type = type;
-			$scope.new._dirty = true;
-			$scope.new._uploadCallback = cb;
+			if(!existingId)
+			{
+				$scope.resetNew();
+				$scope.fields.selected = 'new';
+				$scope.new.filedata = strToBytes( JSON.stringify(cleanObj) );
+				$scope.new.filename = name;
+				$scope.new.type = type;
+				$scope.new._dirty = true;
+				$scope.new._uploadCallback = cb;
+			}
+			else
+			{
+				console.log(existingId);
+				console.log($scope.assets);
+				$scope.fields.selected = existingId;
+				$scope.assets[existingId].filedata = strToBytes( JSON.stringify(cleanObj) );
+				$scope.assets[existingId].filename = name;
+				$scope.assets[existingId].type = type;
+				$scope.assets[existingId]._dirty = true;
+				$scope.assets[existingId]._uploadCallback = cb;
+			}
+
 			$scope.$apply();
 		}
 
@@ -439,38 +454,56 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 			dataRoot.refreshData();
 		},
 
-		uploadSelectedEntity: function()
+		uploadSelectedEntity: function(overwrite)
 		{
 			var nodeId = _Editor.GetSelectedVWFID();
 			var node = vwf.getNode(nodeId);
 			if(node){
-				uploadVWFObject(node.properties.DisplayName, node, 'application/vnd.vws-entity+json', function(id){
-					vwf_view.kernel.setProperty(nodeId, 'sourceAssetId', id);
-				});
+				uploadVWFObject(
+					node.properties.DisplayName,
+					node,
+					'application/vnd.vws-entity+json',
+					overwrite ? node.properties.sourceAssetId : null,
+					function(id){
+						vwf_view.kernel.setProperty(nodeId, 'sourceAssetId', id);
+					}
+				);
 			}
 		},
 
-		uploadSelectedMaterial: function()
+		uploadSelectedMaterial: function(overwrite)
 		{
 			var nodeId = _Editor.GetSelectedVWFID();
 			var node = vwf.getNode(nodeId);
 			if(node && node.properties.materialDef){
-				uploadVWFObject(node.properties.DisplayName+' material', node.properties.materialDef, 'application/vnd.vws-material+json', function(id){
-					var materialDef = node.properties.materialDef;
-					materialDef.sourceAssetId = id;
-					vwf_view.kernel.setProperty(nodeId, 'materialDef', materialDef);
-				});
+				uploadVWFObject(
+					node.properties.DisplayName+' material',
+					node.properties.materialDef,
+					'application/vnd.vws-material+json',
+					overwrite ? node.properties.materialDef.sourceAssetId : null,
+					function(id){
+						var materialDef = node.properties.materialDef;
+						materialDef.sourceAssetId = id;
+						vwf_view.kernel.setProperty(nodeId, 'materialDef', materialDef);
+					}
+				);
 			}
 		},
 
-		uploadSelectedBehavior: function()
+		uploadSelectedBehavior: function(overwrite)
 		{
 			var nodeId = _Editor.GetSelectedVWFID();
 			var node = vwf.getNode(nodeId);
 			if(nodeId && nodeInherits(nodeId, 'http://vwf.example.com/behavior.vwf')){
-				uploadVWFObject(node.properties.DisplayName, node, 'application/vnd.vws-behavior+json', function(id){
-					vwf_view.kernel.setProperty(nodeId, 'sourceAssetId', id);
-				});
+				uploadVWFObject(
+					node.properties.DisplayName,
+					node,
+					'application/vnd.vws-behavior+json',
+					overwrite ? node.properties.sourceAssetId : null,
+					function(id){
+						vwf_view.kernel.setProperty(nodeId, 'sourceAssetId', id);
+					}
+				);
 			}
 		}
 	};
