@@ -370,6 +370,8 @@ define(function() {
                         proto.properties.transform = transform.elements;
                     }
 
+					// maintain reference to asset server, if applicable
+					proto.properties.sourceAssetId = data.sourceAssetId;
                    
                     _Editor.createChild('index-vwf', newname, proto);
                     _Editor.SelectOnNextCreate([newname]);

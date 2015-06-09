@@ -138,6 +138,16 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 				manageAssets.uploadSelectedEntity();
                 $('#manageAssetsDialog').dialog('open');
 			});
+			$('#MenuAssetsSaveAsMaterial').click(function(e){
+				manageAssets.refreshData();
+				manageAssets.uploadSelectedMaterial();
+                $('#manageAssetsDialog').dialog('open');
+			});
+			$('#MenuAssetsSaveAsBehavior').click(function(e){
+				manageAssets.refreshData();
+				manageAssets.uploadSelectedBehavior();
+                $('#manageAssetsDialog').dialog('open');
+			});
 
             $('#SetThumbnail').click(function(e) {
                 window.setThumbnail(false);

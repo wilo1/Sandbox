@@ -14,15 +14,18 @@ function entitiesToLibrary(user, type, res)
 	}
 
 	// set up type aliases
+	var mimetype = type;
 	switch(type){
 		case 'entity':
-			type = 'application/vnd.vws-entity+json';
+			mimetype = 'application/vnd.vws-entity+json';
+			type = 'asset';
 			break;
 		case 'material':
-			type = 'application/vnd.vws-material+json';
+			mimetype = 'application/vnd.vws-material+json';
 			break;
 		case 'behavior':
-			type = 'application/vnd.vws-behavior+json';
+			mimetype = 'application/vnd.vws-behavior+json';
+			type = 'child';
 			break;
 	}
 
@@ -30,7 +33,7 @@ function entitiesToLibrary(user, type, res)
 		uri: baseUrl+'/assets/by-meta/all-of',
 		qs: {
 			'user_name': user,
-			'type': type
+			'type': mimetype
 		},
 		json: true
 	}, handleIndex);
@@ -73,7 +76,8 @@ function entitiesToLibrary(user, type, res)
 								preview: data.thumbnail ?
 									baseUrl+'/assets/'+id+'/meta/thumbnail'
 									: "./img/VWS_Logo.png",
-								type: 'asset'
+								type: type,
+								sourceAssetId: id
 							};
 
 							metaToGet--;

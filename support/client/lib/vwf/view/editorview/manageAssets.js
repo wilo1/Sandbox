@@ -106,10 +106,16 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 		$scope.hideThumbs = true;
 
 		$scope.prettifyType = function(type){
-			if( type === 'application/vnd.vws-entity+json' )
-				return 'Sandbox Entity';
-			else
-				return type;
+			switch(type){
+				case 'application/vnd.vws-entity+json':
+					return 'Sandbox Entity';
+				case 'application/vnd.vws-material+json':
+					return 'Sandbox Material';
+				case 'application/vnd.vws-behavior+json':
+					return 'Sandbox Behavior';
+				default:
+					return type;
+			}
 		}
 	}]);
 
@@ -144,10 +150,14 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 		{
 			$scope.clearFileInput();
 
-			if( newvals[0] && newvals[0] !== 'new' )
-				$scope.selected = newvals[1];
+			if( newvals[0] ){
+				if(newvals[0] !== 'new')
+					$scope.selected = newvals[1];
+				else
+					$scope.selected = $scope.new;
+			}
 			else
-				$scope.selected = $scope.new;
+				$scope.selected = {};
 		});
 
 
@@ -201,21 +211,17 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 			}
 		}
 
-		uploadVWFObject = function(data, type)
+		uploadVWFObject = function(name, data, type, cb)
 		{
 			var cleanObj = _DataManager.getCleanNodePrototype(data);
 			$scope.resetNew();
 			$scope.fields.selected = 'new';
 
 			$scope.new.filedata = strToBytes( JSON.stringify(cleanObj) );
-
-			try {
-				$scope.new.filename = data.properties.DisplayName;
-			}
-			catch(e){ console.log(e); }
-
+			$scope.new.filename = name;
 			$scope.new.type = type;
 			$scope.new._dirty = true;
+			$scope.new._uploadCallback = cb;
 			$scope.$apply();
 		}
 
@@ -289,6 +295,9 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 					{
 						if(xhr.status === 201)
 						{
+							if($scope.selected._uploadCallback)
+								$scope.selected._uploadCallback(xhr.responseText);
+
 							$scope.refreshData(xhr.responseText);
 							$scope.fields.selected = xhr.responseText;
 							$scope.resetNew();
@@ -393,6 +402,16 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 
 	}]);
 
+	function nodeInherits(node, ancestor)
+	{
+		if(!node)
+			return false;
+		else if(node == ancestor)
+			return true;
+		else
+			return nodeInherits( vwf.prototype(node), ancestor );
+	}
+
 	return {
 
 		initialize: function()
@@ -422,9 +441,36 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 
 		uploadSelectedEntity: function()
 		{
-			var node = _Editor.GetSelectedVWFNode();
+			var nodeId = _Editor.GetSelectedVWFID();
+			var node = vwf.getNode(nodeId);
 			if(node){
-				uploadVWFObject(node, 'application/vnd.vws-entity+json');
+				uploadVWFObject(node.properties.DisplayName, node, 'application/vnd.vws-entity+json', function(id){
+					vwf_view.kernel.setProperty(nodeId, 'sourceAssetId', id);
+				});
+			}
+		},
+
+		uploadSelectedMaterial: function()
+		{
+			var nodeId = _Editor.GetSelectedVWFID();
+			var node = vwf.getNode(nodeId);
+			if(node && node.properties.materialDef){
+				uploadVWFObject(node.properties.DisplayName+' material', node.properties.materialDef, 'application/vnd.vws-material+json', function(id){
+					var materialDef = node.properties.materialDef;
+					materialDef.sourceAssetId = id;
+					vwf_view.kernel.setProperty(nodeId, 'materialDef', materialDef);
+				});
+			}
+		},
+
+		uploadSelectedBehavior: function()
+		{
+			var nodeId = _Editor.GetSelectedVWFID();
+			var node = vwf.getNode(nodeId);
+			if(nodeId && nodeInherits(nodeId, 'http://vwf.example.com/behavior.vwf')){
+				uploadVWFObject(node.properties.DisplayName, node, 'application/vnd.vws-behavior+json', function(id){
+					vwf_view.kernel.setProperty(nodeId, 'sourceAssetId', id);
+				});
 			}
 		}
 	};
