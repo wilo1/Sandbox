@@ -71,7 +71,7 @@ function runTest(browser, finished, test){
 			outStr += test.model + ": " + exists + ", expected: true; ";
 			console.log('test finished');
 			
-			browser.completeTest(passed, outStr, finished);
+			finished(passed, outStr);
 		});
 		
 	function loadModel(modelName, base){

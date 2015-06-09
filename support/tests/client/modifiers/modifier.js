@@ -53,7 +53,7 @@ function runTest(browser, finished, nodeName, usePrim){
 				outStr += modifiers[i] + " (" + children[0] + ") modifier found; ";
 			}
 			else{
-				passed = true;
+				passed = false;
 				outStr += modifiers[i] + " modifier NOT found; ";
 			}
 			
@@ -70,7 +70,7 @@ function runTest(browser, finished, nodeName, usePrim){
 				outStr += modifiers[i] + " modifier successfully deleted; ";
 			}
 			
-			browser.completeTest(passed, outStr, finished);
+			finished(passed, outStr);
 		});
 		
 	function deleteModifier(){

@@ -189,7 +189,6 @@ module.exports.hookupUtils = function(browser) {
 	browser.addCommand("deleteWorld", function(worldId){
 		var cb = arguments[arguments.length -1];
 		
-		//Create world
 		browser.url("http://localhost:3000/adl/sandbox/remove?id=" + worldId)
 			.waitForExist("input[value='Delete']", 5000)
 			.click("input[value='Delete']")

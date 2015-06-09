@@ -103,7 +103,6 @@ module.exports = {
 					}
 					
 					finished(passed, outStr);
-					//testUtils.completeTest(passed, outStr, finished);
 				});
 			});
     }
