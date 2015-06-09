@@ -1,8 +1,10 @@
-define(['vwf/view/editorview/lib/angular'], function(angular)
+define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], function(angular, strToBytes)
 {
 	var app = angular.module('ManageAssetsDialog', []);
 	var dataRoot = null;
 	var appPath = '';
+
+	var uploadVWFObject;
 
 	app.factory('DataManager', ['$rootScope','$http', function($rootScope, $http)
 	{
@@ -130,6 +132,9 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 					}
 				}
 			};
+
+			if($scope.fields.selected === 'new')
+				$scope.selected = $scope.new;
 		}
 		$scope.resetNew();
 
@@ -137,7 +142,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		// keep 'selected' in sync with currently selected asset
 		$scope.$watchGroup(['fields.selected', 'assets[fields.selected]'], function(newvals)
 		{
-			$scope.clearFileInput( $('#manageAssetsDialog input#fileInput') );
+			$scope.clearFileInput();
 
 			if( newvals[0] && newvals[0] !== 'new' )
 				$scope.selected = newvals[1];
@@ -174,9 +179,8 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				var fr = new FileReader();
 				fr.onloadend = function(evt)
 				{
-					$scope.file = files[0];
-					$scope.file.data = fr.result;
-
+					$scope.selected.filename = files[0].name;
+					$scope.selected.filedata = new Uint8Array(fr.result);
 
 					if(files[0].type){
 						$scope.selected.type = files[0].type;
@@ -197,12 +201,28 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 			}
 		}
 
+		uploadVWFObject = function(data, type)
+		{
+			var cleanObj = _DataManager.getCleanNodePrototype(data);
+			$scope.resetNew();
+			$scope.fields.selected = 'new';
+
+			$scope.new.filedata = strToBytes( JSON.stringify(cleanObj) );
+
+			try {
+				$scope.new.filename = data.properties.DisplayName;
+			}
+			catch(e){ console.log(e); }
+
+			$scope.new.type = type;
+			$scope.new._dirty = true;
+			$scope.$apply();
+		}
 
 		// since file inputs are read-only...
 		$scope.clearFileInput = function(){
 			var input = $('#manageAssetsDialog #fileInput');
 			input.replaceWith( input.val('').clone(true) );
-			$scope.file = null;
 		}
 
 
@@ -237,7 +257,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		{
 			if( !id || id === 'new' )
 			{
-				if( $scope.file )
+				if( $scope.selected.filedata )
 				{
 					var perms = $scope.getPackedPermissions();
 
@@ -259,7 +279,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 						url += queryChar+'permissions='+ perms.toString(8);
 						queryChar = '&';
 					}
-					if( $scope.selected.type.slice(0,6) === 'image/' && $scope.file.data.byteLength < 30000 ){
+					if( $scope.selected.type.slice(0,6) === 'image/' && $scope.selected.filedata.byteLength < 30000 ){
 						url += queryChar+'thumbnail='+ encodeURIComponent(':self');
 						queryChar = '&';
 					}
@@ -281,9 +301,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 
 					xhr.open('POST', url);
 					xhr.setRequestHeader('Content-Type', $scope.selected.type);
-
-					var buffer = new Uint8Array($scope.file.data);
-					xhr.send(buffer);
+					xhr.send($scope.selected.filedata);
 
 				}
 				else {
@@ -301,7 +319,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 					}
 				}
 
-				if( $scope.file )
+				if( $scope.selected.filedata )
 				{
 					toComplete += 1;
 
@@ -319,8 +337,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 					xhr.open('POST', $scope.appPath+'/assets/'+$scope.selected.id);
 					xhr.setRequestHeader('Content-Type', $('#manageAssetsDialog input#typeInput').val());
 
-					var buffer = new Uint8Array($scope.file.data);
-					xhr.send(buffer);
+					xhr.send($scope.selected.filedata);
 				}
 
 				if($scope.selected._basicDirty)
@@ -363,12 +380,12 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 			{
 				$http.delete($scope.appPath+'/assets/'+id)
 				.success(function(){
-					$scope.refreshData();
+					$scope.refreshData(id);
 					$scope.fields.selected = null;
 				})
 				.error(function(data){
 					alertify.alert('Delete failed: '+data);
-					$scope.refreshData();
+					$scope.refreshData(id);
 					$scope.fields.selected = null;
 				});
 			});
@@ -401,6 +418,14 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 
 		refreshData: function(){
 			dataRoot.refreshData();
+		},
+
+		uploadSelectedEntity: function()
+		{
+			var node = _Editor.GetSelectedVWFNode();
+			if(node){
+				uploadVWFObject(node, 'application/vnd.vws-entity+json');
+			}
 		}
 	};
 	

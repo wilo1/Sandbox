@@ -127,11 +127,17 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
     
             }
 
+			// load asset manager
 			manageAssets.initialize();
             $('#MenuManageAssets').click(function(e){
 				manageAssets.refreshData();
                 $('#manageAssetsDialog').dialog('open');
             });
+			$('#MenuAssetsSaveAsEntity').click(function(e){
+				manageAssets.refreshData();
+				manageAssets.uploadSelectedEntity();
+                $('#manageAssetsDialog').dialog('open');
+			});
 
             $('#SetThumbnail').click(function(e) {
                 window.setThumbnail(false);
@@ -787,7 +793,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
                 _UndoManager.redo();
             });
     
-            /*$('#MenuCreateLoadMeshURL').click(function(e) {
+            $('#MenuCreateLoadMeshURL').click(function(e) {
                 alertify.choice("Choose the mesh format", function(ok, type) {
     
                     if (ok) {
@@ -809,7 +815,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
     
                 }, ["Collada", "3DR JSON (http://3dr.adlnet.gov)", "glTF (v0.6) JSON", 'Three.js Native JSON'])
     
-            });*/
+            });
     
     
             $('#MenuCreateSphere').click(function(e) {

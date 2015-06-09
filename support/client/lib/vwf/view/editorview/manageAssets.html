@@ -28,7 +28,7 @@
 
 		<div id='dragarea' class='verticalLayout'>
 			<span>Choose File</span>
-			<p>{{file.name}}</p>
+			<p>{{selected.filename}}</p>
 			<input type='text' id='typeInput' placeholder='application/octet-stream' ng-model='selected.type' ng-disabled='!fields.selected'/>
 			<input type='file' id='fileInput' value='Browse' onchange='getFileData(this.files)'/>
 		</div>
@@ -103,7 +103,7 @@
 		<div id='buttons' class='horizontalLayout'>
 			<input type='button' ng-click='saveData(selected.id)' ng-value='fields.selected === "new" ? "Upload" : "Save"'
 				ng-disabled='!fields.selected || !selected._dirty'/>
-			<input type='button' ng-click='refreshData(selected.id)' value='Clear Changes'
+			<input type='button' ng-click='fields.selected === "new" ? resetNew() : refreshData(selected.id)' value='Clear Changes'
 				ng-disabled='!fields.selected || !selected._dirty'/>
 			<input type='button' ng-click='deleteData(selected.id)' value='Delete'
 				ng-disabled='!fields.selected || fields.selected === "new"'/>
