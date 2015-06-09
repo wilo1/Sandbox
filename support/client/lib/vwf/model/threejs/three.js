@@ -29723,6 +29723,7 @@ THREE.Animation.prototype.setKey = function(keyf) {
 
             tempAniMatrix.compose(tempAniPos,tempAniQuat,tempAniScale);
             object.matrix.copy(tempAniMatrix);
+            object.matrixWorldNeedsUpdate = true;
             //object.matrixWorld.multiplyMatrices(this.root.matrixWorld,object.matrix);
 
 
