@@ -50,7 +50,7 @@
                 {
                     if(!skins[i].animationHandle.cache)
                         skins[i].animationHandle.cache = [];
-                    for(var j in skins[i].animationHandle.hierarchy)
+                    for(var j =0; j< skins[i].animationHandle.hierarchy.length; j++)
                     {
                         var o  = skins[i].animationHandle.hierarchy[j];
                        

@@ -379,6 +379,8 @@ var assetRegistry = function() {
                 this.assetFailed();
                 return;
             }
+
+          
             reg.loadSucceded();
             reg.pending = false;
             reg.loaded = true;
@@ -410,6 +412,14 @@ var assetRegistry = function() {
 
                 });
             }
+
+              reg.node.traverse(function(o)
+            {
+                if(o.geometry)
+                    o.geometry.dynamic = false;
+
+            });
+
             for (var i = 0; i < reg.callbacks.length; i++)
                 reg.callbacks[i](reg.node, reg.rawAnimationChannels);
             //nothing should be waiting on callbacks now.
