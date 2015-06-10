@@ -293,6 +293,7 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 				$scope.new.filedata = strToBytes( JSON.stringify(cleanObj) );
 				$scope.new.filename = name;
 				$scope.new.type = type;
+				$scope.new._added = true;
 				$scope.new._dirty = true;
 				$scope.new._uploadCallback = cb;
 			}
