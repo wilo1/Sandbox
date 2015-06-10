@@ -33,6 +33,7 @@ function entitiesToLibrary(user, type, res)
 		uri: baseUrl+'/assets/by-meta/all-of',
 		qs: {
 			'user_name': user,
+			'permissions!hasPerms': '004',
 			'type': mimetype
 		},
 		json: true
