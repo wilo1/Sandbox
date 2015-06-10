@@ -276,7 +276,7 @@ module.exports.hookupUtils = function(browser) {
 }
 
 module.exports.completeTest = function(finished) {
-	return function(status, message){
+	return function(status, message, debug){
 		browser.getConsoleLog(module.exports.SEVERE, function(err, logs){
 			var regex = /4[0-9][0-9] \([a-zA-Z ]+\)/;
 			for(var i = logs.length - 1; i >= 0; i--){
@@ -286,7 +286,8 @@ module.exports.completeTest = function(finished) {
 				}
 			}
 			
-			if(logs.length > 0){
+			//Dont' modify the message and status if in debug mode
+			if(logs.length > 0 && !debug){
 				message += "Severe error(s) found in browser log: " + JSON.stringify(logs);
 				status = false;
 			}
