@@ -100,6 +100,7 @@
                             if (skin.children[i] instanceof THREE.Bone)
                                 skin.remove(skin.children[i]);
                         }
+                        skin.animationHandle = null;
                     }
                 }
                 if (childType === "subDriver/threejs/asset/vnd.raw-morphttarget")

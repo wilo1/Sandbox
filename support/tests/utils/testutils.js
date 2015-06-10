@@ -173,11 +173,48 @@ module.exports.hookupUtils = function(browser) {
 		}
 	});
 	browser.addCommand("completeTest", function(status, message, finished) {
-		browser.getConsoleLog(module.exports.SEVERE, function(err, logs){
+		module.exports.completeTest(status, message, finished);
+	});	
+	
+	browser.addCommand("createWorld", function(){
+		var cb = arguments[arguments.length -1];
+		
+		//Create world
+		browser.url("http://localhost:3000/adl/sandbox/createNew2/noTemplate")
+			.waitForExist("#txtInstanceName", 5000)
+			.setValue("#txtInstanceName", "worldMultistep.Test.Title")
+			.click('input[type="submit"]').pause(1000)
 			
-			finished(status, message);
-		});
-	});
+			//Once created, get world id
+			.waitForExist("#content", 5000)
+			.url(function(err, url){
+				var tempArr = url.value.split('/');
+				worldId = tempArr[tempArr.length-1];
+				
+				if(worldId) cb(null, worldId);
+				else cb(true, worldId);
+			})
+	});	
+	
+	browser.addCommand("deleteWorld", function(worldId){
+		var cb = arguments[arguments.length -1];
+		
+		browser.url("http://localhost:3000/adl/sandbox/remove?id=" + worldId)
+			.waitForExist("input[value='Delete']", 5000)
+			.click("input[value='Delete']")
+			.pause(1000)
+			
+			//World should be deleted, attempt to navigate to deleted world page
+			.url("http://localhost:3000/adl/sandbox/world/" + worldId)
+			
+			.pause(2000)
+			.url(function(err, url){
+				//if worldId is in the url, we were not redirected to homepage
+				var err = url.value.indexOf(worldId) >= 0;
+				cb(err);
+			});	
+	});	
+	
 	browser.addCommand("isNodeSelected", function(nodename) {
         var cb = arguments[arguments.length -1]
         browser.execute(function(a) {
@@ -236,7 +273,27 @@ module.exports.hookupUtils = function(browser) {
         	cb(null,r.value)
         });
     });
-	
+}
+
+module.exports.completeTest = function(finished) {
+	return function(status, message){
+		browser.getConsoleLog(module.exports.SEVERE, function(err, logs){
+			var regex = /4[0-9][0-9] \([a-zA-Z ]+\)/;
+			for(var i = logs.length - 1; i >= 0; i--){
+				if(regex.test(logs[i])){
+					//this is very likely a status code... remove it and continue
+					logs.splice(i, 1);
+				}
+			}
+			
+			if(logs.length > 0){
+				message += "Severe error(s) found in browser log: " + JSON.stringify(logs);
+				status = false;
+			}
+			
+			finished(status, message);
+		});
+	}
 }
 
 module.exports.getConsoleLog = function(level, contains, cb){
