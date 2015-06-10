@@ -11,7 +11,7 @@ module.exports = {
 
 		//Create box from button
 		.nextGUID('testBox')
-		.click('#MenuCreateBoxicon')
+		.$click('#MenuCreateBoxicon')
 		//Verify box
 		.pause(6000).then(function() {
 			testUtils.assertNodeExists("testBox", function(assertStatus, msg){
