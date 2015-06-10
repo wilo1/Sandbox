@@ -153,20 +153,23 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 			});
 
 			$('#MenuAssetsSaveEntity').click(function(e){
-				manageAssets.refreshData();
-				manageAssets.uploadSelectedEntity(true);
+				manageAssets.refreshData(function(){
+					manageAssets.uploadSelectedEntity(true);
+				});
                 $('#manageAssetsDialog').dialog('open');
 			});
 
 			$('#MenuAssetsSaveMaterial').click(function(e){
-				manageAssets.refreshData();
-				manageAssets.uploadSelectedMaterial(true);
+				manageAssets.refreshData(function(){
+					manageAssets.uploadSelectedMaterial(true);
+				});
                 $('#manageAssetsDialog').dialog('open');
 			});
 
 			$('#MenuAssetsSaveBehavior').click(function(e){
-				manageAssets.refreshData();
-				manageAssets.uploadSelectedBehavior(true);
+				manageAssets.refreshData(function(){
+					manageAssets.uploadSelectedBehavior(true);
+				});
                 $('#manageAssetsDialog').dialog('open');
 			});
 
