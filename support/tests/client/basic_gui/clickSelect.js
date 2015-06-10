@@ -49,7 +49,7 @@ module.exports = {
 		// .pause(1000).click('#index-vwf')	//unnecessary
 		
 		//Verify that the box is selected and we go home
-		.pause(3000)
+		.pause(10000)
 		.isNodeSelected('testBox', function(err,r) {
 			if (!err && r) {
 				passed = passed && true;

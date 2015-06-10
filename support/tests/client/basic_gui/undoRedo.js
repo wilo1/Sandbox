@@ -1,6 +1,12 @@
 //Test Undo and Redo
+
+//Not working in chrome, but working fine in firefox, so I'm leaving it alone
+//The message in chrome is that the cone when first tested does not exist, that
+//seems more like a chrome problem than this programs problem, especially since
+//the rest of the test is fine. As of 6/10/2015
+
 module.exports = {
-    'Test Undo and Redo (A13)': function(browser, finished) {
+    'Undo and Redo (A13)': function(browser, finished) {
 	    global.browser = browser;
 		var testUtils = require('../../utils/testutils.js')
 			passed = true,
@@ -9,20 +15,19 @@ module.exports = {
 		browser.loadBlankScene()
 		
 		//Create and verify a box and a cone with buttons
-		.nextGUID('testBox')
+		.nextGUID('Box')
 		.$click('#MenuCreateBoxicon')
 		.pause(3000).then(function() {
-			testUtils.assertNodeExists("testBox", function(assertStatus, msg) {
+			testUtils.assertNodeExists("Box", function(assertStatus, msg) {
 				passed = passed && !!assertStatus;
 				outStr += "Box exists: " + msg + "; ";
 				
 			});
 		})
-		
-		.nextGUID('testCone')
+		.nextGUID('Cone')
 		.$click('#MenuCreateConeicon')
 		.pause(3000).then(function() {
-			testUtils.assertNodeExists("testCone", function(assertStatus, msg) {
+			testUtils.assertNodeExists("Cone", function(assertStatus, msg) {
 				passed = passed && !!assertStatus;
 				outStr += "Cone first time (exists): " + msg + "; ";
 				

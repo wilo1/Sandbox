@@ -59,7 +59,6 @@ module.exports.hookupUtils = function(browser) {
         	cb(null,r)
         });
     });
-
     browser.addCommand("setProperty", function(newnodename, propname, value) {
         
         var cb = arguments[arguments.length -1]
@@ -113,7 +112,7 @@ module.exports.hookupUtils = function(browser) {
         	cb(null, jqObj);
         });
 	});
-		browser.addCommand("$keypress", function(cssSelector, key) {
+	browser.addCommand("$keypress", function(cssSelector, key) {
 		var cb = arguments[arguments.length -1];
         browser.execute(function(c, k) {
 			var e = $.Event("keypress");
@@ -332,7 +331,6 @@ module.exports.getDistance = function(arr1, arr2){
 		return a + b;
 	}));
 }
-
 
 function getNode(name) {
     try {
