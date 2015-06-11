@@ -93,8 +93,10 @@
       margin: 2px 0; }
     #manageAssetsDialog #propertyBrowser input:not([disabled]), #manageAssetsDialog #propertyBrowser textarea:not([disabled]) {
       color: black; }
+    #manageAssetsDialog #propertyBrowser input:not([type=button]):disabled, #manageAssetsDialog #propertyBrowser textarea:not([type=button]):disabled {
+      background-color: #ccc; }
     #manageAssetsDialog #propertyBrowser p.fixed-height, #manageAssetsDialog #propertyBrowser span.fixed-height, #manageAssetsDialog #propertyBrowser label.fixed-height {
-      height: 1ex; }
+      height: 1.2em; }
     #manageAssetsDialog #propertyBrowser label#thumbnail {
       margin-top: 3px;
       -webkit-box-pack: justify;
@@ -123,6 +125,8 @@
       -ms-flex-align: center;
       -webkit-align-items: center;
       align-items: center; }
+      #manageAssetsDialog #propertyBrowser #dragarea p#filename {
+        font-size: 16px; }
       #manageAssetsDialog #propertyBrowser #dragarea input#fileInput {
         position: absolute;
         width: 100%;
