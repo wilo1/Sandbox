@@ -20,7 +20,8 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
         }
 
         function initialize() {
-            this.load = function(stateData, cb) {
+            this.loadList = function(stateData, cb) {
+                
                 var regExp = new RegExp(window.appPath + ".*\/");
                 $.ajax({
                     url: '../vwfdatamanager.svc/getAssets?SID=' + ((regExp).exec(window.location.toString()).toString()),
@@ -70,110 +71,34 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
 
 
             }
-            this.morphs = {},
-            this.collada = {},
-                this.utf8Json = {},
-                this.subDriver = {},
-                this.unknown = {};
-            this.terrain = {};
-            this.utf8JsonOptimized = {};
-            this.colladaOptimized = {};
-            this.glTF = {};
-            this.THREEjs = {};
+            this.cache = {};
+            this.types = [];
+            this.loaders = {};
+            this.addType = function(type, loaderFunc) {
+                this.loaders[type] = loaderFunc;
+                this.types.push(type);
+                this.cache[type] = {};
+            }
+           
 
             this.getOrLoadAsset = function(url, type, cb) {
 
-                if (type == 'subDriver/threejs/asset/vnd.collada+xml') {
-                    if (assetLoader.getCollada(url)) {
-                        cb(assetLoader.getCollada(url));
-                        return;
-                    }
-                    assetLoader.loadCollada(url, function() {
-
-                        cb(assetLoader.getCollada(url));
-
-                    });
-                } else if (type == 'subDriver/threejs/asset/vnd.collada+xml+optimized') {
-                    if (assetLoader.getColladaOptimized(url)) {
-                        cb(assetLoader.getColladaOptimized(url));
-                        return;
-                    }
-                    assetLoader.loadColladaOptimized(url, function() {
-
-                        cb(assetLoader.getColladaOptimized(url));
-
-                    });
-                } else if (type == 'subDriver/threejs/asset/vnd.osgjs+json+compressed') {
-                    if (assetLoader.getUtf8Json(url)) {
-                        cb(assetLoader.getUtf8Json(url));
-                        return;
-                    }
-                    assetLoader.loadUTf8Json(url, function() {
-
-                        cb(assetLoader.getUtf8Json(url));
-
-                    });
-                } 
-                else if (type == "subDriver/threejs/asset/vnd.rmx+json") {
-                    if (assetLoader.getRMX(url)) {
-                        cb(assetLoader.getRMX(url));
-                        return;
-                    }
-                    assetLoader.loadRMX(url, function() {
-
-                        cb(assetLoader.getRMX(url));
-
-                    });
+                if (assetLoader.cache[type][url]) {
+                    cb(assetLoader.cache[type][url]);
+                    return;
                 }
-                else if (type == "subDriver/threejs/asset/vnd.three.js+json") {
-                    if (assetLoader.getTHREEjs(url)) {
-                        cb(assetLoader.getTHREEjs(url));
-                        return;
-                    }
-                    assetLoader.loadTHREEJS(url, function() {
-
-                        cb(assetLoader.getTHREEjs(url));
-
-                    });
-                }
-                else if (type == 'subDriver/threejs/asset/vnd.gltf+json') {
-                    if (assetLoader.getglTF(url)) {
-                        cb(assetLoader.getglTF(url));
-                        return;
-                    }
-                    assetLoader.loadglTF(url, function() {
-
-                        cb(assetLoader.getglTF(url));
-
-                    });
-                } else if (type == 'subDriver/threejs/asset/vnd.raw-animation') {
-                    if (assetLoader.getglTF(url)) {
-                        cb(assetLoader.getglTF(url));
-                        return;
-                    }
-                    assetLoader.loadglTF(url, function() {
-                        cb(assetLoader.getglTF(url));
-                    }, true)
-                } else if (type == 'subDriver/threejs/asset/vnd.osgjs+json+compressed+optimized') {
-                    if (assetLoader.getUtf8JsonOptimized(url)) {
-                        cb(assetLoader.getUtf8JsonOptimized(url));
-                        return;
-                    }
-                    assetLoader.loadUTf8JsonOptimized(url, function() {
-
-                        cb(assetLoader.getUtf8JsonOptimized(url));
-
-                    });
-                }
-
+                assetLoader.load(type, url, function() {
+                    cb(assetLoader.cache[type][url]);
+                });
             }
+
             this.BuildCollisionData = function(root, cb3) {
                 var self = this;
                 if (root instanceof THREE.Geometry || root instanceof THREE.BufferGeometry) {
                     root.GenerateBounds();
                     root.BuildRayTraceAccelerationStructure();
                     $('#preloadguiText').text($('#preloadguiText').text() + '.');
-                   
+
                 }
                 if (root.children) {
                     //for(var i =0;i < root.children.length; i++)
@@ -189,233 +114,207 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                 }
 
             }
-            this.getCollada = function(url) {
-                    return this.collada[url];
-                },
-                this.getColladaOptimized = function(url) {
-                    return this.colladaOptimized[url];
-                },
-                this.getUtf8JsonOptimized = function(url) {
-                    return this.utf8JsonOptimized[url];
-                },
-                this.getglTF = function(url) {
-                    return this.glTF[url];
-                },
-                this.getTerrain = function(url) {
-                    return this.terrain[url];
-                },
-                this.getUnknown = function(url) {
-                    return this.unknown[url];
-                },
-                this.getUtf8Json = function(url) {
-                    return this.utf8Json[url];
-                },
-                this.getSubDriver = function(url) {
-                    return this.subDriver[url];
-                },
-                this.getMorphs = function(url) {
-                    return this.morphs[url];
-                },
-                this.getTHREEjs = function(url)
-                {
-                    return this.THREEjs[url];
-                },
-                this.getRMX = function(url)
-                {
-                    return this.RMX[url];
-                },
+            this.get = function(url, type) {
+                if (this.cache[type])
+                    return this.cache[type][url]
+                return null;
+            }
+            this.load = function(url, type, cb) {
+                if (assetLoader.loaders[type])
+                    assetLoader.loaders[type](url, cb)
+                else
+                    cb(null);
+            }
+
+            this.loadCollada = function(url, cb2) {
+                var loader = new THREE.ColladaLoader();
+
+                var time = performance.now();
+                loader.load(url, function(asset) {
+                    //console.log(url, performance.now() - time);
 
 
-                this.loadCollada = function(url, cb2) {
-                    var loader = new THREE.ColladaLoader();
-
-                    var time = performance.now();
-                    loader.load(url, function(asset) {
-                        //console.log(url, performance.now() - time);
-
-                        assetLoader.collada[url] = asset;
-                        assetLoader.BuildCollisionData(asset.scene, function(cb3) {
-                            delete asset.dae;
-                            cb2();
-                            loader.cleanup();
-                        });
-
-                    }, function(progress) {
-                        //it's really failed
-                        if (!progress) {
-                            cb2();
-                            loader.cleanup();
-                        }
+                    assetLoader.BuildCollisionData(asset.scene, function(cb3) {
+                        delete asset.dae;
+                        cb2(asset);
+                        loader.cleanup();
                     });
-                },
-                this.loadTHREEJS = function(url,cb2)
-                {
-                    var loader = new THREE.JSONLoader()
-                    loader.load(url,function(asset) {
-                        //console.log(url, performance.now() - time);
 
-                        //if a loader does not return a three.mesh
-                        if (asset instanceof THREE.Geometry) {
-                            var shim;
-                            if (asset.skinIndices && asset.skinIndices.length > 0)
-                            {
-                                shim = { scene: new THREE.SkinnedMesh(asset, new THREE.MeshPhongMaterial())} 
+                }, function(progress) {
+                    //it's really failed
+                    if (!progress) {
+                        cb2();
+                        loader.cleanup();
+                    }
+                });
+            },
+            this.loadTHREEJS = function(url, cb2) {
+                var loader = new THREE.JSONLoader()
+                loader.load(url, function(asset) {
+                    //console.log(url, performance.now() - time);
 
-                            }
-                            else
-                                shim = {scene: new THREE.Mesh(asset, new THREE.MeshPhongMaterial())}
-
-                            if (asset.animation) {
-                                shim.scene.animationHandle = new THREE.Animation(
-                                    shim.scene,
-                                    asset.animation
-                                );
+                    //if a loader does not return a three.mesh
+                    if (asset instanceof THREE.Geometry) {
+                        var shim;
+                        if (asset.skinIndices && asset.skinIndices.length > 0) {
+                            shim = {
+                                scene: new THREE.SkinnedMesh(asset, new THREE.MeshPhongMaterial())
                             }
 
-                            asset = shim;
-                        }
-                       
+                        } else
+                            shim = {
+                                scene: new THREE.Mesh(asset, new THREE.MeshPhongMaterial())
+                            }
 
-                        assetLoader.THREEjs[url] = asset;
-                        assetLoader.BuildCollisionData(asset.scene, function(cb3) {
-                            
-                            cb2();
-                            
-                        });
+                        if (asset.animation) {
+                            shim.scene.animationHandle = new THREE.Animation(
+                                shim.scene,
+                                asset.animation
+                            );
+                        }
+
+                        asset = shim;
+                    }
+
+
+                    assetLoader.BuildCollisionData(asset.scene, function(cb3) {
+
+                        cb2(asset);
 
                     });
-                },
-                this.loadRMX = function(url, cb2) {
 
-                    var jsonmodel, binarymodel, asset;
+                });
+            },
+            this.loadRMX = function(url, cb2) {
 
-                    async.series([
-                            function loadone(cb)
-                            {
-                                $.getJSON(url,function(data)
-                                {
-                                    jsonmodel = data;
-                                    cb();
-                                });
-                            },
-                            function loadtwo(cb)
-                            {
-                                var src = url.substr(0, url.lastIndexOf(".")) + ".bin";
+                var jsonmodel, binarymodel, asset;
 
-                                var xhr = new XMLHttpRequest();
-                                xhr.onload = function(e)
-                                {
-                                    binarymodel = xhr.response;
-                                    cb();
-                                };
-                                xhr.open("GET", src, true);
-                                xhr.responseType = "arraybuffer";
-                                xhr.send();
-                            },
-                            function load_from_data(cb)
-                            {
-                                var loader = new RMXModelLoader;
+                async.series([
 
-                                loader.load(jsonmodel, binarymodel, function(model) {
-                                    console.log(model);
-                                    asset = model;
-                                    assetLoader.RMX[url] = asset;
-                                    cb();
-                                });
-                            }],
-                        function done(){
-                            assetLoader.BuildCollisionData(asset.scene, function(cb3) {
-                                cb2();
+                        function loadone(cb) {
+                            $.getJSON(url, function(data) {
+                                jsonmodel = data;
+                                cb();
                             });
-                        })
-                },
-                this.loadColladaOptimized = function(url, cb2) {
-                    var loader = new ColladaLoaderOptimized();
-
-                    var time = performance.now();
-                    loader.load(url, function(asset) {
-
-
-                        assetLoader.colladaOptimized[url] = asset;
-                        assetLoader.BuildCollisionData(asset.scene, function(cb3) {
-                            delete asset.dae;
-                            cb2();
-                            loader.cleanup();
-                        });
-
-
-                    }, function(progress) {
-                        //it's really failed
-                        if (!progress) {
-                            cb2();
-                            loader.cleanup();
-                        }
-                    });
-                },
-                this.loadUTf8Json = function(url, cb2) {
-                    var time = performance.now();
-
-                    this.loader = new UTF8JsonLoader({
-                        source: url
-                    }, function(asset) {
-                        //console.log(url, performance.now() - time);
-                        assetLoader.utf8Json[url] = asset;
-                        assetLoader.BuildCollisionData(asset.scene, function(cb3) {
-                            //console.log(url, performance.now() - time);
-                            cb2();
-                        });
-                    }, function(err) {
-                        cb2();
-                    });
-                },
-                this.loadUTf8JsonOptimized = function(url, cb2) {
-                    var time = performance.now();
-
-                    this.loader = new UTF8JsonLoader_Optimized({
-                        source: url
-                    }, function(asset) {
-                        //console.log(url, performance.now() - time);
-                        assetLoader.utf8JsonOptimized[url] = asset;
-                        assetLoader.BuildCollisionData(asset.scene, function(cb3) {
-                            //console.log(url, performance.now() - time);
-                            cb2();
-                        });
-                    }, function(err) {
-                        cb2();
-                    });
-                },
-                this.loadglTF = function(url, cb2, animOnly) {
-                    var time = performance.now();
-
-
-                    this.loader = new THREE.glTFLoader();
-                    this.loader.useBufferGeometry = true;
-                    this.loader.load(url, function(asset) {
-                        //console.log(url, performance.now() - time);
-                        assetLoader.glTF[url] = asset;
-
-                        if (animOnly) {
-                            console.log(url, performance.now() - time);
-                            return cb2();
-                        }
-                        assetLoader.BuildCollisionData(asset.scene, function(cb3) {
-                            // console.log(url, performance.now() - time);
-                            cb2();
-                        });
-                    }, animOnly || false);
-                },
-                this.loadUnknown = function(url, cb2) {
-                    $.ajax({
-                        url: url,
-                        success: function(data2, status2, xhr2) {
-                            assetLoader.unknown[url] = xhr2;
-                            cb2();
                         },
-                        error: function() {
-                            cb2();
+                        function loadtwo(cb) {
+                            var src = url.substr(0, url.lastIndexOf(".")) + ".bin";
+
+                            var xhr = new XMLHttpRequest();
+                            xhr.onload = function(e) {
+                                binarymodel = xhr.response;
+                                cb();
+                            };
+                            xhr.open("GET", src, true);
+                            xhr.responseType = "arraybuffer";
+                            xhr.send();
+                        },
+                        function load_from_data(cb) {
+                            var loader = new RMXModelLoader;
+
+                            loader.load(jsonmodel, binarymodel, function(model) {
+                                console.log(model);
+                                asset = model;
+
+                                cb();
+                            });
                         }
+                    ],
+                    function done() {
+                        assetLoader.BuildCollisionData(asset.scene, function(cb3) {
+                            cb2(asset);
+                        });
+                    })
+            },
+            this.loadColladaOptimized = function(url, cb2) {
+                var loader = new ColladaLoaderOptimized();
+
+                var time = performance.now();
+                loader.load(url, function(asset) {
+
+
+                    assetLoader.BuildCollisionData(asset.scene, function(cb3) {
+                        delete asset.dae;
+                        cb2(asset);
+                        loader.cleanup();
                     });
-                };
+
+
+                }, function(progress) {
+                    //it's really failed
+                    if (!progress) {
+                        cb2();
+                        loader.cleanup();
+                    }
+                });
+            },
+            this.loadUTf8Json = function(url, cb2) {
+                var time = performance.now();
+
+                this.loader = new UTF8JsonLoader({
+                    source: url
+                }, function(asset) {
+                    //console.log(url, performance.now() - time);
+
+                    assetLoader.BuildCollisionData(asset.scene, function(cb3) {
+                        //console.log(url, performance.now() - time);
+                        cb2(asset);
+                    });
+                }, function(err) {
+                    cb2();
+                });
+            },
+            this.loadUTf8JsonOptimized = function(url, cb2) {
+                var time = performance.now();
+
+                this.loader = new UTF8JsonLoader_Optimized({
+                    source: url
+                }, function(asset) {
+                    //console.log(url, performance.now() - time);
+
+                    assetLoader.BuildCollisionData(asset.scene, function(cb3) {
+                        //console.log(url, performance.now() - time);
+                        cb2(asset);
+                    });
+                }, function(err) {
+                    cb2();
+                });
+            },
+            this.loadglTFAnimation = function(url, cb2) {
+                assetLoader.loadglTF(url, cb2, true);
+            }
+            this.loadglTF = function(url, cb2, animOnly) {
+                var time = performance.now();
+
+
+                this.loader = new THREE.glTFLoader();
+                this.loader.useBufferGeometry = true;
+                this.loader.load(url, function(asset) {
+                    //console.log(url, performance.now() - time);
+
+
+                    if (animOnly) {
+                        console.log(url, performance.now() - time);
+                        return cb2(asset);
+                    }
+                    assetLoader.BuildCollisionData(asset.scene, function(cb3) {
+                        // console.log(url, performance.now() - time);
+                        cb2(asset);
+                    });
+                }, animOnly || false);
+            },
+            this.loadUnknown = function(url, cb2) {
+                $.ajax({
+                    url: url,
+                    success: function(data2, status2, xhr2) {
+
+                        cb2(xhr2);
+                    },
+                    error: function() {
+                        cb2();
+                    }
+                });
+            };
             this.loadImgTerrain = function(url, cb2) {
 
                 canvas = document.createElement('canvas');
@@ -450,8 +349,8 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                         min: 0,
                         data: data
                     };
-                    assetLoader.terrain[url] = terraindata;
-                    cb2();
+
+                    cb2(terraindata);
                 }
                 img.onerror = function() {
                     cb2();
@@ -467,8 +366,8 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
 
 
                         var terraindata = assetLoader.parseBT(buff);
-                        assetLoader.terrain[url] = terraindata;
-                        cb2();
+
+                        cb2(terraindata);
                     } else {
                         cb2();
                     }
@@ -508,42 +407,89 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                     data: data
                 }
             };
-            this.loadSubDriver = function(url, cb2) {
-                    cb2();
-                },
-                this.startProgressGui = function(total) {
-                    $(document.body).append('<div id = "preloadGUIBack" class=""><span id="fullscreenlink">Please enter full screen mode. Click here or hit F11.</span><img id="loadingSplash" /><div id = "preloadGUI" class=""><div class="preloadCenter"><div id="preloadprogress"><p class="progress-label">Loading...</p></div></div><div class=""><div class="" id="preloadguiText">Loading...</div></div></div></div>');
-                    $('#preloadprogress').progressbar();
-                    $('#preloadprogress').progressbar("value", 0);
-                    $('#preloadprogress .progress-label').text("0%");
-
-                    var regExp = new RegExp(window.appPath + ".*\/");
-                    var sid = regExp.exec(window.location.pathname.toString()).toString();
-
-                    $('#loadingSplash').attr('src', "../vwfdatamanager.svc/thumbnail?SID=" + sid);
-                    $('#loadingSplash').attr('onerror', " this.src = '/adl/sandbox/img/thumbnotfound.png'");
-
-                    $('#fullscreenlink').click(function() {
-                        RunPrefixMethod(document.body, "RequestFullScreen", 1);
-                    })
-
-
-                },
-                this.updateProgressGui = function(count, data) {
-                    $('#preloadprogress').progressbar("value", count * 100);
-                    $('#preloadguiText').text((data.name ? data.name + ": " : "") + data.url);
-                    $('#preloadprogress .progress-label').text("Loading Assets: " + parseInt(count * 100) + "%");
-                },
-                this.closeProgressGui = function() {
-
-                    window.setTimeout(function() {
-                        $('#preloadGUIBack').fadeOut();
-                    }, 1000);
+            this.loadMorph = function(url, cb2) {
+                function MorphRawJSONLoader() {
+                    this.load = function(url, callback) {
+                        $.get(url, function(data) {
+                            var dummyNode = new THREE.Object3D();
+                            dummyNode.morphTarget = JSON.parse(data);
+                            callback({
+                                scene: dummyNode
+                            });
+                        });
+                    }
                 }
+                loader = new MorphRawJSONLoader();
+                loader.load(url, function(data) {
+                    cb2(data)
+                })
+            }
+            this.loadTexture = function(url, cb2) {
+                //because of the way texture loads are handled in the scenemanager, we can actually go ahead and continue immediately here
+                //though we might as well let the scenemanager know to set started
+
+                _SceneManager.getTexture(url);
+                cb2();
+            }
+            this.loadTerrain = function(url, cb2) {
+                var type = url.substr(url.lastIndexOf('.') + 1).toLowerCase();
+                if (type == 'bt') {
+                    assetLoader.loadBTTerrain(url, cb2);
+                } else {
+                    assetLoader.loadImgTerrain(url, cb2);
+                }
+            }
+            this.loadSubDriver = function(url, cb2) {
+                cb2();
+            }
+
+            this.addType('subDriver/threejs/asset/vnd.collada+xml', this.loadCollada);
+            this.addType('subDriver/threejs/asset/vnd.collada+xml+optimized', this.loadColladaOptimized);
+            this.addType('subDriver/threejs/asset/vnd.osgjs+json+compressed', this.loadUTf8Json);
+            this.addType("subDriver/threejs/asset/vnd.rmx+json", this.loadRMX);
+            this.addType("subDriver/threejs/asset/vnd.three.js+json", this.loadTHREEJS);
+            this.addType('subDriver/threejs/asset/vnd.gltf+json', this.loadglTF);
+            this.addType('subDriver/threejs/asset/vnd.raw-animation', this.loadglTFAnimation);
+            this.addType('subDriver/threejs/asset/vnd.osgjs+json+compressed+optimized', this.loadUTf8JsonOptimized);
+           
+            this.addType('subDriver/threejs/asset/vnd.raw-morphttarget', this.loadMorph);
+            this.addType('terrain', this.loadTerrain);
+            this.addType('texture', this.loadTexture);
+            this.addType('subDriver/threejs', this.loadSubDriver);
+            this.addType('unknown', this.loadUnknown);
+
+            this.startProgressGui = function(total) {
+                $(document.body).append('<div id = "preloadGUIBack" class=""><span id="fullscreenlink">Please enter full screen mode. Click here or hit F11.</span><img id="loadingSplash" /><div id = "preloadGUI" class=""><div class="preloadCenter"><div id="preloadprogress"><p class="progress-label">Loading...</p></div></div><div class=""><div class="" id="preloadguiText">Loading...</div></div></div></div>');
+                $('#preloadprogress').progressbar();
+                $('#preloadprogress').progressbar("value", 0);
+                $('#preloadprogress .progress-label').text("0%");
+
+                var regExp = new RegExp(window.appPath + ".*\/");
+                var sid = regExp.exec(window.location.pathname.toString()).toString();
+
+                $('#loadingSplash').attr('src', "../vwfdatamanager.svc/thumbnail?SID=" + sid);
+                $('#loadingSplash').attr('onerror', " this.src = '/adl/sandbox/img/thumbnotfound.png'");
+
+                $('#fullscreenlink').click(function() {
+                    RunPrefixMethod(document.body, "RequestFullScreen", 1);
+                })
+
+
+            },
+            this.updateProgressGui = function(count, data) {
+                $('#preloadprogress').progressbar("value", count * 100);
+                $('#preloadguiText').text((data.name ? data.name + ": " : "") + data.url);
+                $('#preloadprogress .progress-label').text("Loading Assets: " + parseInt(count * 100) + "%");
+            },
+            this.closeProgressGui = function() {
+
+                window.setTimeout(function() {
+                    $('#preloadGUIBack').fadeOut();
+                }, 1000);
+            }
             this.loadAssets = function(assets, cb, noProgressbar) {
 
 
-                
                 var total = assets.length;
                 if (!noProgressbar)
                     assetLoader.startProgressGui(total);
@@ -555,59 +501,13 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                     var type = i.type;
                     var url = i.url;
                     if (url) {
-                        if (type == 'texture') {
-                            //because of the way texture loads are handled in the scenemanager, we can actually go ahead and continue immediately here
-                            //though we might as well let the scenemanager know to set started
 
-                            _SceneManager.getTexture(url);
-                            cb2();
-                        } else if (type == 'subDriver/threejs') {
-                            assetLoader.loadSubDriver(url, cb2);
-                        } else if (type == 'subDriver/threejs/asset/vnd.raw-morphttarget') {
-
-                            function MorphRawJSONLoader() {
-                                this.load = function(url,callback)
-                                {
-                                    $.get(url,function(data)
-                                    {
-                                        var dummyNode = new THREE.Object3D();
-                                        dummyNode.morphTarget = JSON.parse(data);
-                                        callback({scene:dummyNode});
-                                    });
-                                }
+                        if (assetLoader.loaders[type]) {
+                            function loaded(results) {
+                                assetLoader.cache[type][url] = results;
+                                cb2();
                             }
-                            loader = new MorphRawJSONLoader();
-                            loader.load(url,function(data){
-                                assetLoader.morphs[url] = data; cb2()
-                            })
-                        } else if (type == 'subDriver/threejs/asset/vnd.collada+xml') {
-                            assetLoader.loadCollada(url, cb2);
-                        } else if (type == 'subDriver/threejs/asset/vnd.collada+xml+optimized') {
-                            assetLoader.loadColladaOptimized(url, cb2);
-                        } else if (type == 'subDriver/threejs/asset/vnd.osgjs+json+compressed') {
-                            assetLoader.loadUTf8Json(url, cb2);
-                        } else if (type == 'subDriver/threejs/asset/vnd.gltf+json') {
-                            assetLoader.loadglTF(url, cb2);
-                        } else if (type == 'subDriver/threejs/asset/vnd.raw-animation') {
-                            assetLoader.loadglTF(url, cb2, true);
-                        } else if (type == 'subDriver/threejs/asset/vnd.osgjs+json+compressed+optimized') {
-                            assetLoader.loadUTf8JsonOptimized(url, cb2);
-                        } 
-                        else if (type == "subDriver/threejs/asset/vnd.three.js+json") {
-                            assetLoader.loadTHREEJS(url, cb2);
-                        } 
-                        else if (type == "subDriver/threejs/asset/vnd.rmx+json") {
-                            assetLoader.loadRMX(url, cb2);
-                        }
-                        else if (type == 'unknown') {
-                            assetLoader.loadUnknown(url, cb2);
-                        } else if (type == 'terrain') {
-                            var type = url.substr(url.lastIndexOf('.') + 1).toLowerCase();
-                            if (type == 'bt') {
-                                assetLoader.loadBTTerrain(url, cb2);
-                            } else {
-                                assetLoader.loadImgTerrain(url, cb2);
-                            }
+                            assetLoader.loaders[type](url, loaded)
                         } else {
                             cb2();
                         }

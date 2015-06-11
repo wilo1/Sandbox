@@ -221,38 +221,7 @@ var assetRegistry = function()
     {
         var asset = null;
         //see if it was preloaded
-        if (childType == 'subDriver/threejs/asset/vnd.raw-morphttarget' && _assetLoader.getMorphs(assetSource))
-        {
-            asset = _assetLoader.getMorphs(assetSource);
-        }
-        if (childType == 'subDriver/threejs/asset/vnd.osgjs+json+compressed' && _assetLoader.getUtf8Json(assetSource))
-        {
-            asset = _assetLoader.getUtf8Json(assetSource);
-        }
-        if (childType == 'subDriver/threejs/asset/vnd.osgjs+json+compressed+optimized' && _assetLoader.getUtf8JsonOptimized(assetSource))
-        {
-            asset = _assetLoader.getUtf8JsonOptimized(assetSource);
-        }
-        if (childType == 'subDriver/threejs/asset/vnd.collada+xml' && _assetLoader.getCollada(assetSource))
-        {
-            asset = _assetLoader.getCollada(assetSource);
-        }
-        if (childType == "subDriver/threejs/asset/vnd.rmx+json" && _assetLoader.getRMX(assetSource))
-        {
-            asset = _assetLoader.getRMX(assetSource);
-        }
-        if (childType == "subDriver/threejs/asset/vnd.three.js+json" && _assetLoader.getTHREEjs(assetSource))
-        {
-            asset = _assetLoader.getTHREEjs(assetSource);
-        }
-        if (childType == 'subDriver/threejs/asset/vnd.collada+xml+optimized' && _assetLoader.getColladaOptimized(assetSource))
-        {
-            asset = _assetLoader.getColladaOptimized(assetSource);
-        }
-        if ((childType == 'subDriver/threejs/asset/vnd.gltf+json' || childType == 'subDriver/threejs/asset/vnd.raw-animation') && _assetLoader.getglTF(assetSource))
-        {
-            asset = _assetLoader.getglTF(assetSource);
-        }
+        asset = _assetLoader.get(assetSource,childType);
         if (asset)
         {
             reg.loadStarted();
@@ -386,7 +355,7 @@ var assetRegistry = function()
             {
                 if (window._Notifier)
                 {
-                    _Notifier.alert('error loading asset ' + this.assetSource);
+                    _Notifier.alert('error loading asset ' + assetSource);
                 }
                 //get the entry from the asset registry
                 reg = assetRegistry.assets[assetSource];
@@ -418,122 +387,19 @@ var assetRegistry = function()
         //now that all the callbacks are hooked up to reg, try to get from the preloader. 
         //it's important to note that the callbacks on reg are executed the same if loading from preloader or not
         //therefore the preloader does not need to do it's own duplicate clean and optimize steps
+        debugger;
         if (!this.initFromPreloader(childType, assetSource, reg))
         {
-            if (childType == 'subDriver/threejs/asset/vnd.collada+xml')
+            ;
+            function complete(data)
             {
-                reg.loadStarted();
-                var loader = new THREE.ColladaLoader();
-                loader.load(assetSource, assetLoaded, assetFailed);
+                if(data)
+                    assetLoaded(data)
+                else
+                    assetFailed();
             }
-            if (childType == 'subDriver/threejs/asset/vnd.collada+xml+optimized')
-            {
-                reg.loadStarted();
-                var loader = new ColladaLoaderOptimized();
-                loader.load(assetSource, assetLoaded, assetFailed);
-            }
-            if (childType == 'subDriver/threejs/asset/vnd.osgjs+json+compressed+optimized')
-            {
-                reg.loadStarted();
-                var loader = new UTF8JsonLoader_Optimized(
-                {
-                    source: assetSource
-                }, assetLoaded, assetFailed);
-            }
-            if (childType == "subDriver/threejs/asset/vnd.rmx+json")
-            {
-                reg.loadStarted();
-                var jsonmodel, binarymodel, asset;
-                async.series([
-                        function loadone(cb)
-                        {
-                            $.getJSON(assetSource, function(data)
-                            {
-                                jsonmodel = data;
-                                cb();
-                            });
-                        },
-                        function loadtwo(cb)
-                        {
-                            var src = assetSource.substr(0, assetSource.lastIndexOf(".")) + ".bin";
-                            var xhr = new XMLHttpRequest();
-                            xhr.onload = function(e)
-                            {
-                                binarymodel = xhr.response;
-                                cb();
-                            };
-                            xhr.open("GET", src, true);
-                            xhr.responseType = "arraybuffer";
-                            xhr.send();
-                        }
-                    ],
-                    function done()
-                    {
-                        var loader = new RMXModelLoader;
-                        loader.load(jsonmodel, binarymodel, assetLoaded);
-                    })
-            }
-            if (childType == "subDriver/threejs/asset/vnd.three.js+json")
-            {
-                reg.loadStarted();
-                var loader = new THREE.JSONLoader()
-                loader.load(assetSource, assetLoaded);
-            }
-            if (childType == 'subDriver/threejs/asset/vnd.osgjs+json+compressed')
-            {
-                reg.loadStarted();
-                var loader = new UTF8JsonLoader(
-                {
-                    source: assetSource
-                }, assetLoaded, assetFailed);
-            }
-            if (childType == 'subDriver/threejs/asset/vnd.gltf+json' || childType == 'subDriver/threejs/asset/vnd.raw-animation')
-            {
-                var loader = new THREE.glTFLoader()
-                loader.useBufferGeometry = true;
-                var source = assetSource;
-                var animOnly = childType === 'subDriver/threejs/asset/vnd.raw-animation'
-                    //create a queue to hold requests to the loader, since the loader cannot be re-entered for parallel loads
-                if (!THREE.glTFLoader.queue)
-                {
-                    //task is an object that olds the info about what to load
-                    //nexttask is supplied by async to trigger the next in the queue;
-                    //note the timeout does not account for the fact that the load has not really started because of the queue
-                    THREE.glTFLoader.queue = new async.queue(function(task, nextTask)
-                    {
-                        var node = task.node;
-                        var cb = task.cb;
-                        //call the actual load function
-                        //signature of callback dictated by loader
-                        node.loader.load(node.source, function(geometry, materials)
-                        {
-                            //do whatever it was (asset loaded) that this load was going to do when complete
-                            cb(geometry, materials);
-                            //ok, this model loaded, we can start the next load
-                            nextTask();
-                        }, animOnly);
-                    }, 1);
-                }
-                reg.loadStarted();
-                //we need to queue up our entry to this module, since it cannot handle re-entry. This means that while it 
-                //is an async function, it cannot be entered again before it completes
-                THREE.glTFLoader.queue.push(
-                {
-                    node:
-                    {
-                        source: source,
-                        loader: loader
-                    },
-                    cb: assetLoaded
-                })
-            }
-            //load as a normal gltf file TODO:add this to the preloader, since it should work normally
-            if (childType == 'subDriver/threejs/asset/vnd.raw-morphttarget')
-            {
-                reg.loadStarted();
-                var loader = new MorphRawJSONLoader();
-                loader.load(assetSource, assetLoaded);
-            }
+            reg.loadStarted();
+            _assetLoader.load(assetSource,childType,complete);
         }
     }
     this.get = function(childType, assetSource, success, failure)

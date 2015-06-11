@@ -139,7 +139,11 @@
                    
                     skins[i].animationHandle.setKey(this.animationFrame,this.animationFPS);
                 
-                    skins[i].animationHandle.hierarchy[0].updateMatrixWorld(true)
+                    for(var j = 0; j<skins[i].skeleton.bones.length; j++)
+                    {
+                        if(skins[i].skeleton.bones[j].parent == skins[i])
+                            skins[i].skeleton.bones[j].updateMatrixWorld(true);
+                    }
 
                     if (updateSceneManager) {
                         var allMeshes = getAllDrawables(skins[i]);
