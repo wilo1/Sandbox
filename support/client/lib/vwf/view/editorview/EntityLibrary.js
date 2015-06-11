@@ -370,6 +370,8 @@ define(function() {
                         proto.properties.transform = transform.elements;
                     }
 
+					// maintain reference to asset server, if applicable
+					proto.properties.sourceAssetId = data.sourceAssetId;
                    
                     _Editor.createChild('index-vwf', newname, proto);
                     _Editor.SelectOnNextCreate([newname]);
@@ -393,6 +395,9 @@ define(function() {
                         if (!proto.properties.transform)
                             proto.properties.transform = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
                        
+						// maintain reference to asset server, if applicable
+						proto.properties.sourceAssetId = data.sourceAssetId;
+                   
                         _Editor.createChild(ID, newname, proto);
                         _Editor.SelectOnNextCreate([newname]);
 
@@ -405,6 +410,7 @@ define(function() {
                 var ID = EntityLibrary.GetPick(evt);
                 if (ID) {
                     $.getJSON(data.url, function(proto) {
+						proto.sourceAssetId = data.sourceAssetId;
                         _PrimitiveEditor.setProperty(ID, 'materialDef', proto);
                     })
                 }

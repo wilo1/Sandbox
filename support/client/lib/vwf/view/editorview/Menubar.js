@@ -127,11 +127,51 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
     
             }
 
+			// load asset manager
 			manageAssets.initialize();
-            $('#MenuToolsManageAssets').click(function(e){
+            $('#MenuManageAssets').click(function(e){
 				manageAssets.refreshData();
                 $('#manageAssetsDialog').dialog('open');
             });
+
+			$('#MenuAssetsSaveAsEntity').click(function(e){
+				manageAssets.refreshData();
+				manageAssets.uploadSelectedEntity();
+                $('#manageAssetsDialog').dialog('open');
+			});
+
+			$('#MenuAssetsSaveAsMaterial').click(function(e){
+				manageAssets.refreshData();
+				manageAssets.uploadSelectedMaterial();
+                $('#manageAssetsDialog').dialog('open');
+			});
+
+			$('#MenuAssetsSaveAsBehavior').click(function(e){
+				manageAssets.refreshData();
+				manageAssets.uploadSelectedBehavior();
+                $('#manageAssetsDialog').dialog('open');
+			});
+
+			$('#MenuAssetsSaveEntity').click(function(e){
+				manageAssets.refreshData(function(){
+					manageAssets.uploadSelectedEntity(true);
+				});
+                $('#manageAssetsDialog').dialog('open');
+			});
+
+			$('#MenuAssetsSaveMaterial').click(function(e){
+				manageAssets.refreshData(function(){
+					manageAssets.uploadSelectedMaterial(true);
+				});
+                $('#manageAssetsDialog').dialog('open');
+			});
+
+			$('#MenuAssetsSaveBehavior').click(function(e){
+				manageAssets.refreshData(function(){
+					manageAssets.uploadSelectedBehavior(true);
+				});
+                $('#manageAssetsDialog').dialog('open');
+			});
 
             $('#SetThumbnail').click(function(e) {
                 window.setThumbnail(false);
@@ -238,9 +278,9 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
             $('#MenuMulti').click(function(e) {
                 _Editor.SetGizmoMode(_Editor.Multi);
             });
-            $('#MenuSaveCopy').click(function(e) {
+            /*$('#MenuSaveCopy').click(function(e) {
                 _InventoryManager.Take();
-            });
+            });*/
             $('#MenuShare').click(function(e) {
                 _PermissionsManager.show();
             });
@@ -273,16 +313,16 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
             $('#MenuDelete').click(function(e) {
                 _Editor.DeleteSelection();
             });
-            $('#MenuPublish').click(function(e) {
+            /*$('#MenuPublish').click(function(e) {
                 _InventoryManager.Publish();
-            });
+            });*/
             $('#MenuChat').click(function(e) {
                 $('#ChatWindow').dialog('open');
             });
             $('#MenuUsers').click(function(e) {
                _UserManager.showPlayers();
             });
-            $('#MenuModels').click(function(e) {
+            $('#MenuAssets3DRBrowse').click(function(e) {
                 _ModelLibrary.show();
             });
             $('#MenuSnapLarge').click(function(e) {
@@ -310,7 +350,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
                 else
                     _ScriptEditor.show();
             });
-            $('#MenuInventory').click(function(e) {
+            /*$('#MenuInventory').click(function(e) {
                 if (_InventoryManager.isOpen())
                     _InventoryManager.hide();
                 else {
@@ -319,7 +359,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
                 }
     
     
-            });
+            });*/
     
     
     
@@ -338,7 +378,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
                 else
                     _PrimitiveEditor.show();
             });
-            $('#MenuGlobalInventory').click(function(e) {
+            /*$('#MenuGlobalInventory').click(function(e) {
                 if (_InventoryManager.isOpen())
                     _InventoryManager.hide();
                 else {
@@ -346,7 +386,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
                     $("#InventoryTypeChoiceGlobal").click()
                 }
     
-            });
+            });*/
             $('#MenuLatencyTest').click(function(e) {
                 var e = {};
                 e.time = new Date();
@@ -775,7 +815,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
                 }
             });
     
-            $('#MenuCreateUploadMesh').click(function(e) {
+            $('#MenuAssets3DRUpload').click(function(e) {
                 _ModelLibrary.showUpload();
             });
     

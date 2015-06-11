@@ -1,4 +1,13 @@
 {
+	"My Entities": {
+		"url": "./vwfdatamanager.svc/library/my-entities"
+	},
+	"My Materials": {
+		"url": "./vwfdatamanager.svc/library/my-materials"
+	},
+	"My Behaviors": {
+		"url": "./vwfdatamanager.svc/library/my-behaviors"
+	},
     "Demo Entities": {
         "url": "./contentlibraries/entities.json"
     },
