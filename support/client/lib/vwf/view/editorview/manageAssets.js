@@ -304,8 +304,6 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 			}
 			else
 			{
-				console.log(existingId);
-				console.log($scope.assets);
 				$scope.fields.selected = existingId;
 				$scope.assets[existingId].filedata = strToBytes( JSON.stringify(cleanObj) );
 				$scope.assets[existingId].filename = name;
@@ -314,7 +312,7 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 				$scope.assets[existingId]._uploadCallback = cb;
 			}
 
-			$scope.$apply();
+			//$scope.$apply();
 		}
 
 

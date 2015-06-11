@@ -118,15 +118,12 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 			// determine disabled status when selection changes
 			$(document).on('selectionChanged', function(e, node)
 			{
-				console.log(node);
-
 				var isEntity = !!node,
 					isMaterial = !!(node && node.properties && node.properties.materialDef),
 					isBehavior = !!(node && manageAssets.nodeIsBehavior(node)),
 					isEntityAsset = !!(node && node.properties && node.properties.sourceAssetId),
 					isMaterialAsset = !!(node && node.properties && node.properties.materialDef && node.properties.materialDef.sourceAssetId);
 					
-				console.log('Selection state:', isEntity, isMaterial, isBehavior, isEntityAsset, isMaterialAsset);
 				$('#MenuAssetsSaveAsEntity').parent()
 					.toggleClass('disabled', !isEntity);
 				$('#MenuAssetsSaveAsMaterial').parent()
