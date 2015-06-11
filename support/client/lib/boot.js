@@ -86,7 +86,7 @@ define([
         
         
 
-        assetLoader.load(stateData, function() {
+        assetLoader.loadList(stateData, function() {
             vwf.loadConfiguration(null, {
                 model: [],
                 view: []
