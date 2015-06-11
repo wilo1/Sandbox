@@ -387,7 +387,7 @@ var assetRegistry = function()
         //now that all the callbacks are hooked up to reg, try to get from the preloader. 
         //it's important to note that the callbacks on reg are executed the same if loading from preloader or not
         //therefore the preloader does not need to do it's own duplicate clean and optimize steps
-        debugger;
+        //debugger;
         if (!this.initFromPreloader(childType, assetSource, reg))
         {
             ;
