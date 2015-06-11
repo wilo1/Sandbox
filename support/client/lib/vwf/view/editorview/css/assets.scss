@@ -123,14 +123,18 @@
 			margin: 2px 0;
 		}
 
-		input, textarea {
+		input, textarea
+		{
 			&:not([disabled]) {
 				color: black;
+			}
+			&:not([type=button]):disabled {
+				background-color: #ccc;
 			}
 		}
 
 		p, span, label { &.fixed-height {
-			height: 1ex;
+			height: 1.2em;
 		}}
 
 		label#thumbnail
@@ -150,6 +154,11 @@
 
 			@include justify-content(center);
 			@include align-items(center);
+
+			p#filename
+			{
+				font-size: 16px;
+			}
 
 			input#fileInput
 			{

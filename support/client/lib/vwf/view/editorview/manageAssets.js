@@ -4,7 +4,7 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 	var dataRoot = null;
 	var appPath = '';
 
-	var uploadVWFObject;
+	var uploadVWFObject, setSelection;
 
 	app.factory('DataManager', ['$rootScope','$http', function($rootScope, $http)
 	{
@@ -12,6 +12,11 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 		$rootScope.appPath = appPath;
 		$rootScope.fields = {selected: null};
 		$rootScope.assets = {};
+
+		setSelection = function(id){
+			$rootScope.fields.selected = id;
+			$rootScope.new._added = true;
+		}
 
 		$rootScope.refreshData = function(id)
 		{
@@ -299,8 +304,6 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 			}
 			else
 			{
-				console.log(existingId);
-				console.log($scope.assets);
 				$scope.fields.selected = existingId;
 				$scope.assets[existingId].filedata = strToBytes( JSON.stringify(cleanObj) );
 				$scope.assets[existingId].filename = name;
@@ -309,7 +312,7 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 				$scope.assets[existingId]._uploadCallback = cb;
 			}
 
-			$scope.$apply();
+			//$scope.$apply();
 		}
 
 
@@ -548,6 +551,7 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 					}
 				);
 			}
+			else setSelection('new');
 		},
 
 		uploadSelectedMaterial: function(overwrite)
@@ -567,13 +571,14 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 					}
 				);
 			}
+			else setSelection('new');
 		},
 
 		uploadSelectedBehavior: function(overwrite)
 		{
 			var nodeId = _Editor.GetSelectedVWFID();
 			var node = vwf.getNode(nodeId);
-			if(nodeId && nodeInherits(nodeId, 'http://vwf.example.com/behavior.vwf')){
+			if(nodeId && nodeInherits(nodeId, 'http-vwf-example-com-behavior-vwf')){
 				uploadVWFObject(
 					node.properties.DisplayName,
 					node,
@@ -584,6 +589,15 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 					}
 				);
 			}
+			else setSelection('new');
+		},
+
+		nodeIsBehavior: function(node){
+			return nodeInherits(node.id, 'http-vwf-example-com-behavior-vwf');
+		},
+
+		uploadFile: function(){
+			setSelection('new');
 		}
 	};
 	

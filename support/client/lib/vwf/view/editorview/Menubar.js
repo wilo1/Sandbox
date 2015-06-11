@@ -5,22 +5,6 @@ function clearCameraModeIcons() {
     $('#MenuCameraFreeicon').removeClass('iconselected');
 }
 
-/*
-define(vwf/view/modelupload],function(modelupload) { 
-	return {
-		initialize: function() {
-			modelupload.init();
-			$('asdflkj').click(funciton(){
-				modelupload.show(function(newurl){   
-					_Editor.loadMeshByUrld(new url)
-					_Editor.loadMesh(val, 'subDriver/threejs/asset/vnd.three.js+json');
-				});
-			)
-	...
-	}
-}
-*/
-
 
 define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 {
@@ -127,8 +111,36 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
     
             }
 
+
 			// load asset manager
 			manageAssets.initialize();
+
+			// determine disabled status when selection changes
+			$(document).on('selectionChanged', function(e, node)
+			{
+				var isEntity = !!node,
+					isMaterial = !!(node && node.properties && node.properties.materialDef),
+					isBehavior = !!(node && manageAssets.nodeIsBehavior(node)),
+					isEntityAsset = !!(node && node.properties && node.properties.sourceAssetId),
+					isMaterialAsset = !!(node && node.properties && node.properties.materialDef && node.properties.materialDef.sourceAssetId);
+					
+				$('#MenuAssetsSaveAsEntity').parent()
+					.toggleClass('disabled', !isEntity);
+				$('#MenuAssetsSaveAsMaterial').parent()
+					.toggleClass('disabled', !isMaterial);
+				$('#MenuAssetsSaveAsBehavior').parent()
+					.toggleClass('disabled', !isBehavior);
+				$('#MenuAssetsSave').parent()
+					.toggleClass('disabled', !isEntityAsset && !isMaterialAsset);
+				$('#MenuAssetsSaveEntity').parent()
+					.toggleClass('disabled', !isEntityAsset || !isEntity);
+				$('#MenuAssetsSaveMaterial').parent()
+					.toggleClass('disabled', !isMaterialAsset || !isMaterial);
+				$('#MenuAssetsSaveBehavior').parent()
+					.toggleClass('disabled', !isEntityAsset || !isBehavior);
+			});
+
+			// hook up assets menu
             $('#MenuManageAssets').click(function(e){
 				manageAssets.refreshData();
                 $('#manageAssetsDialog').dialog('open');
@@ -152,6 +164,12 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
                 $('#manageAssetsDialog').dialog('open');
 			});
 
+			$('#MenuAssetsSaveAsFile').click(function(e){
+				manageAssets.refreshData();
+				manageAssets.uploadFile();
+                $('#manageAssetsDialog').dialog('open');
+			});
+
 			$('#MenuAssetsSaveEntity').click(function(e){
 				manageAssets.refreshData(function(){
 					manageAssets.uploadSelectedEntity(true);
@@ -172,6 +190,8 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 				});
                 $('#manageAssetsDialog').dialog('open');
 			});
+
+
 
             $('#SetThumbnail').click(function(e) {
                 window.setThumbnail(false);
