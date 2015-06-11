@@ -1739,11 +1739,11 @@ function serve(request, response)
 					break;
 				case "library":
 					{
-						if(pathAfterCommand === '/my-entities')
+						if( /my-entities$/.test(pathAfterCommand) )
 							libraryFormatter.entitiesToLibrary(UID, 'entity', response);
-						else if(pathAfterCommand === '/my-materials')
+						else if( /my-materials$/.test(pathAfterCommand) )
 							libraryFormatter.entitiesToLibrary(UID, 'material', response);
-						else if(pathAfterCommand === '/my-behaviors')
+						else if( /my-behaviors$/.test(pathAfterCommand) )
 							libraryFormatter.entitiesToLibrary(UID, 'behavior', response);
 						else
 							_404(response);
