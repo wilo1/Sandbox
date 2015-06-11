@@ -143,6 +143,19 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 		};
 	});
 
+	app.filter('humanSize', function(){
+		return function(input)
+		{
+			if( input > 1e9 )
+				return (input/1e9).toPrecision(3) + 'G';
+			else if( input > 1e6 )
+				return (input/1e6).toPrecision(3) + 'M';
+			else if( input > 1e3 )
+				return (input/1e3).toPrecision(3) + 'K';
+			else
+				return input + 'B';
+		}
+	});
 	/*app.directive('adlSticky', function()
 	{
 		return {

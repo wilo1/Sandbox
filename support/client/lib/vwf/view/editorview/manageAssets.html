@@ -13,7 +13,7 @@
 				ng-repeat='asset in assets | sortKeys:"name":true | filterThumbs:hideThumbs | searchFor:search' adl-scroll-to='fields.selected == asset.id'>
 				<div class='info verticalLayout'>
 					<p class='name' ng-style='{"font-weight": asset._dirty ? "bold" : "normal"}'>{{(asset._dirty ? '*' : '')+asset.name}}</p>
-					<p class='meta'>{{prettifyType(asset.type)}} ({{asset.id}})</p>
+					<p class='meta'>{{prettifyType(asset.type)}}, {{asset.size | humanSize}} ({{asset.id}})</p>
 				</div>
 				<div class='nonbs-thumbnail' ng-if='!asset._basicDirty && asset.thumbnail'
 					ng-style='{"background-image": "url("+appPath+"/assets/"+asset.id+"/meta/thumbnail)"}'/>
