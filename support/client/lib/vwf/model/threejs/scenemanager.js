@@ -423,7 +423,7 @@ SceneManager.prototype.loadTexture = function(url, mapping, onLoad, onError) {
 
 
     //test to see if the url ends in .dds
-    if ((/^(?!.*\.[^/.]+$).*/).test(url)){
+    if (( /\.dds$/ ).test(url)){
 
        
         //create a new texture. This texture will be returned now, and filled with the compressed dds data

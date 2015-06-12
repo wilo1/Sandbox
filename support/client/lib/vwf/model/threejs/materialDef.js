@@ -90,7 +90,7 @@
                                     propval.morphTargets = true;
                                 else
                                     propval.morphTargets = false;
-                                if (list[i].animationHandle)
+                                if (list[i] instanceof THREE.SkinnedMesh)
                                     propval.skinning = true;
                                 else
                                     propval.skinning = false;

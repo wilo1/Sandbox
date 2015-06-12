@@ -101,6 +101,7 @@
                                 skin.remove(skin.children[i]);
                         }
                         skin.animationHandle = null;
+                        skin.material = skin.material.clone();
                     }
                 }
                 if (childType === "subDriver/threejs/asset/vnd.raw-morphttarget")
