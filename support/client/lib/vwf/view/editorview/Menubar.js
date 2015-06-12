@@ -298,9 +298,6 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
             $('#MenuMulti').click(function(e) {
                 _Editor.SetGizmoMode(_Editor.Multi);
             });
-            /*$('#MenuSaveCopy').click(function(e) {
-                _InventoryManager.Take();
-            });*/
             $('#MenuShare').click(function(e) {
                 _PermissionsManager.show();
             });
@@ -333,9 +330,6 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
             $('#MenuDelete').click(function(e) {
                 _Editor.DeleteSelection();
             });
-            /*$('#MenuPublish').click(function(e) {
-                _InventoryManager.Publish();
-            });*/
             $('#MenuChat').click(function(e) {
                 $('#ChatWindow').dialog('open');
             });
@@ -370,17 +364,6 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
                 else
                     _ScriptEditor.show();
             });
-            /*$('#MenuInventory').click(function(e) {
-                if (_InventoryManager.isOpen())
-                    _InventoryManager.hide();
-                else {
-                    _InventoryManager.show();
-                    $("#InventoryTypeChoicePersonal").click()
-                }
-    
-    
-            });*/
-    
     
     
             $('#MenuPhysicsEditor').click(function(e) {
@@ -398,15 +381,6 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
                 else
                     _PrimitiveEditor.show();
             });
-            /*$('#MenuGlobalInventory').click(function(e) {
-                if (_InventoryManager.isOpen())
-                    _InventoryManager.hide();
-                else {
-                    _InventoryManager.show();
-                    $("#InventoryTypeChoiceGlobal").click()
-                }
-    
-            });*/
             $('#MenuLatencyTest').click(function(e) {
                 var e = {};
                 e.time = new Date();
