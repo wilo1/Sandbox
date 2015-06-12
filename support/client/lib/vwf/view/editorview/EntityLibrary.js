@@ -288,6 +288,7 @@ define(function() {
         }
         this.show = function() {
 
+			this.setup();
 
             $('#EntityLibrary').animate({
                 'left': 0
