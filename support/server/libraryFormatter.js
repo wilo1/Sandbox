@@ -48,7 +48,7 @@ function entitiesToLibrary(user, type, res)
 		else
 		{
 			var metaToGet = Object.keys(data.matches).length;
-			var lib = {};
+			var lib = [];
 
 			if(!metaToGet){
 				res.json(lib);
@@ -71,20 +71,20 @@ function entitiesToLibrary(user, type, res)
 							console.error('Failed to query asset', id, 'metadata:', err);
 						}
 						else {
-							var key = data.name ? data.name : id;
-							lib[key] = {
+							lib.push({
+								name: data.name || id,
 								url: baseUrl+'/assets/'+id,
 								preview: data.thumbnail ?
 									baseUrl+'/assets/'+id+'/meta/thumbnail'
 									: "./img/VWS_Logo.png",
 								type: type,
 								sourceAssetId: id
-							};
+							});
+						}
 
-							metaToGet--;
-							if(!metaToGet){
-								res.json(lib);
-							}
+						metaToGet--;
+						if(!metaToGet){
+							res.json(lib);
 						}
 					}
 				}
