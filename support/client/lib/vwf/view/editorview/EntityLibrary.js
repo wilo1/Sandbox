@@ -82,23 +82,26 @@ define(function() {
                         $('#EntityLibraryAccordion').append(section);
 
                         //for every asset in every library, setup the gui
-                        for (var j in libs[i].library) {
+                        for (var curAsset=0; curAsset<libs[i].library.length; curAsset++)
+						{
+							var j = libs[i].library[curAsset].name;
+
                             $('#library' + ToSafeID(i)).append('<div  class = "libraryAsset">' +
-                                '<img id = "asset' + ToSafeID(i) + ToSafeID(j) + '" src="' + libs[i].library[j].preview + '" draggable=true></img>' +
+                                '<img id = "asset' + ToSafeID(i) + ToSafeID(j) + '" src="' + libs[i].library[curAsset].preview + '" draggable=true></img>' +
                                 '<div>' + j + '</div>' +
                                 '</div>'
                             );
                             (function(i1, j1) {
 
-                                $("#asset" + ToSafeID(i1) + ToSafeID(j1)).on('click',function(evt)
+                                $("#asset" + ToSafeID(i1) + ToSafeID(j1.name)).on('click',function(evt)
                                 {
 
                                     
-                                    EntityLibrary.create(libs[i1].library[j1]);
+                                    EntityLibrary.create(j1);
 
                                 });
 
-                                $("#asset" + ToSafeID(i1) + ToSafeID(j1)).on('dragstart', function(evt) {
+                                $("#asset" + ToSafeID(i1) + ToSafeID(j1.name)).on('dragstart', function(evt) {
 
 
                                     var dragIcon = document.createElement('img');
@@ -107,18 +110,18 @@ define(function() {
                                     if(evt.originalEvent.dataTransfer.setDragImage)
                                         evt.originalEvent.dataTransfer.setDragImage(dragIcon, 10, 10);
 
-                                    currentDrag = libs[i1].library[j1];
+                                    currentDrag = j1;
                                     if(evt.originalEvent.dataTransfer.setData)
-                                        evt.originalEvent.dataTransfer.setData('text', JSON.stringify(libs[i1].library[j1]));
+                                        evt.originalEvent.dataTransfer.setData('text', JSON.stringify(j1));
                                     $(this).css('opacity', .5);
                                 });
-                                $("#asset" + ToSafeID(i1) + ToSafeID(j1)).on('dragend', function() {
+                                $("#asset" + ToSafeID(i1) + ToSafeID(j1.name)).on('dragend', function() {
 
                                     $(this).css('opacity', 1);
                                      currentDrag = null;
                                 });
 
-                            })(i, j)
+                            })(i, libs[i].library[curAsset])
 
                         }
                     }
