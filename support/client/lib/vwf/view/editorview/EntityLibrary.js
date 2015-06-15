@@ -382,7 +382,7 @@ define(function() {
 
                 })
             }
-            if (data.type == 'child') {
+            else if (data.type == 'child') {
 
 
 
@@ -409,7 +409,7 @@ define(function() {
                 }
 
             }
-            if (data.type == 'material') {
+            else if (data.type == 'material') {
 
                 var ID = EntityLibrary.GetPick(evt);
                 if (ID) {
@@ -420,7 +420,30 @@ define(function() {
                 }
 
             }
-            if (data.type == 'environment') {
+            else if( data.type === 'texture' ) {
+                var ID = EntityLibrary.GetPick(evt);
+                if(ID){
+                    var mat = {
+                        "color": {"r": 1,"g": 1,"b": 1},
+                        "ambient": {"r": 1,"g": 1,"b": 1},
+                        "emit": {"r": 0,"g": 0,"b": 0},
+                        "specularColor": {"r": 0.498,"g": 0.498,"b": 0.498},
+                        "specularLevel": 1, "shininess": 15,
+                        "alpha": 1, "side": 2,
+                        "reflect": 0.1,
+                        "layers": [{
+                            "mapTo": 1, "mapInput": 0,
+                            "scalex": 1, "scaley": 1,
+                            "offsetx": 0, "offsety": 0,
+                            "alpha": 1, "blendMode": 0,
+                            "src": "/sas/assets/"+data.sourceAssetId,
+                        }],
+                        "type": "phong"
+                    };
+                    _PrimitiveEditor.setProperty(ID, 'materialDef', mat);
+                }
+            }
+            else if (data.type == 'environment') {
                 $.getJSON(data.url, function(proto) {
                     _UndoManager.startCompoundEvent();
                     for (var i in proto.properties)

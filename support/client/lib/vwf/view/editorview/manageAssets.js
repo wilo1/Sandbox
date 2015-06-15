@@ -293,6 +293,25 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 					else {
 						$scope.selected.type = '';
 					}
+
+					// attempt to determine image resolution
+					if( $scope.selected.type.slice(0,6) === 'image/' )
+					{
+						// get data url from buffer
+						var dataStr = '';
+						for(var offset=0; offset<$scope.selected.filedata.byteLength; offset += 0x8000){
+							dataStr += String.fromCharCode.apply(null, $scope.selected.filedata.subarray(offset, offset+0x8000));
+						}
+						var dataUrl = 'data:'+$scope.selected.type+';base64,'+btoa(dataStr);
+
+						var img = new Image();
+						img.onload = function(){
+							$scope.selected.width = this.width;
+							$scope.selected.height = this.height;
+						};
+						img.src = dataUrl;
+					}
+
 					$scope.selected._dirty = true;
 					$scope.$apply();
 				};
@@ -395,10 +414,22 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 						url += queryChar+'permissions='+ perms.toString(8);
 						queryChar = '&';
 					}
-					if( $scope.selected.type.slice(0,6) === 'image/' && $scope.selected.filedata.byteLength < 30000 ){
-						url += queryChar+'thumbnail='+ encodeURIComponent(':self');
+					if( $scope.selected.type.slice(0,6) === 'image/' )
+					{
+						if( $scope.selected.width <= 150 && $scope.selected.height <= 150 ){
+							url += queryChar+'thumbnail='+ encodeURIComponent(':self');
+						}
+
+						url += '&imageWidth='+$scope.selected.width + '&imageHeight='+$scope.selected.height;
+
+						var base = Math.log($scope.selected.width);
+						if( $scope.selected.width === $scope.selected.height && base === Math.floor(base) ){
+							url += '&isTexture=true';
+						}
+
 						queryChar = '&';
 					}
+					if( $scope.selected.type.slice(0,6) === 'image/' && $scope.selec
 
 					var xhr = new XMLHttpRequest();
 					xhr.addEventListener('loadend', function(e)
