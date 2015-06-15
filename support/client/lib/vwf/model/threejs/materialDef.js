@@ -61,13 +61,9 @@
                 }
                 return true;
             }
-            this.settingProperty = function(propname, propval)
-                {
-                    //if it's a prim, this.build will be true. Prims must be able to reset the material, and won't pass this check
-                    if (propname == 'materialDef' && propval)
-                        if (!Object.deepEquals(propval, this.materialDef_) || this.Build)
-                        {
-                            console.log("materialDef on " + this.ID, propval )
+            this.setMaterialInternal = function(propval)
+            {
+                console.log("materialDef on " + this.ID, propval )
                             propval = JSON.parse(JSON.stringify(propval));
                             var needRebuild = false;
                             if (!this.compareLayers(this.materialDef, propval))
@@ -112,6 +108,14 @@
                             {
                                 this.dirtyStack(true);
                             }
+            }
+            this.settingProperty = function(propname, propval)
+                {
+                    //if it's a prim, this.build will be true. Prims must be able to reset the material, and won't pass this check
+                    if (propname == 'materialDef' && propval)
+                        if (!Object.deepEquals(propval, this.materialDef_) || this.Build)
+                        {
+                            this.setMaterialInternal(propval);
                         }
                 }
                 //get the material cache a chance to decrement the ref counter for the materails used by this object

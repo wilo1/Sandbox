@@ -50,10 +50,14 @@
                     self.getRoot().GetBoundingBox();
                 });
             }
+            var materialBack = this.materialDef;
+            
             this.cleanTHREEJSnodes(this.getRoot());
             //set some defaults now that the mesh is loaded
             //the VWF should set some defaults as well
-            vwf.setProperty(childID, 'materialDef', this.materialDef);
+
+
+            
             this.settingProperty('animationFrame', 0);
             //if any callbacks were waiting on the asset, call those callbacks
             this.getRoot().GetBoundingBox();
@@ -71,6 +75,10 @@
             for (var i = 0; i < list.length; i++) {
                 list[i].InvisibleToCPUPick = true;
             }
+            
+            this.setMaterialInternal(materialBack);    
+           
+            
 
         }.bind(this);
         this.loadFailed = function(id) {

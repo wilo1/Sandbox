@@ -490,23 +490,28 @@ SceneManager.prototype.loadTexture = function(url, mapping, onLoad, onError) {
                 var loader = new THREE.DDSLoader();
                 loader.load(dataUrl, function loaded(newTexture)
                 {
-                    texture.image = newTexture.image;
-                    texture._needsUpdate = newTexture._needsUpdate;
-                    texture.image = newTexture.image;
-                    texture.flipY = newTexture.flipY;
-                    texture.format = newTexture.format;
-                    texture.generateMipmaps = newTexture.generateMipmaps;
-                    texture.mapping = newTexture.mapping; 
-                    texture.mipmaps = newTexture.mipmaps;
-                    texture.offset = newTexture.offset;
-                    texture.premultiplyAlpha = newTexture.premultiplyAlpha;
-                    texture.repeat = newTexture.repeat;
-                    texture.type = newTexture.type;
-                    texture.unpackAlignment = newTexture.unpackAlignment;
-                    texture.wrapS = newTexture.wrapS;
-                    texture.wrapT = newTexture.wrapT;
-                    texture.isActuallyCompressed = true;
-                    newTexture.isActuallyCompressed = true;
+                    var clones = texture.clones.concat([texture]);
+                     for(var i in clones)
+                    {
+                        clones[i].image = newTexture.image;
+                        clones[i]._needsUpdate = newTexture._needsUpdate;
+                        clones[i].image = newTexture.image;
+                        clones[i].flipY = newTexture.flipY;
+                        clones[i].format = newTexture.format;
+                        clones[i].generateMipmaps = newTexture.generateMipmaps;
+                        clones[i].mapping = newTexture.mapping; 
+                        clones[i].mipmaps = newTexture.mipmaps;
+                        clones[i].offset = newTexture.offset;
+                        clones[i].premultiplyAlpha = newTexture.premultiplyAlpha;
+                        clones[i].repeat = newTexture.repeat;
+                        clones[i].type = newTexture.type;
+                        clones[i].unpackAlignment = newTexture.unpackAlignment;
+                        clones[i].wrapS = newTexture.wrapS;
+                        clones[i].wrapT = newTexture.wrapT;
+                        clones[i].isActuallyCompressed = true;
+                        newTexture.isActuallyCompressed = true;
+                    }
+
                     //hit the async callback
                     if (onLoad) onLoad(texture);
                 }, function error()
@@ -517,9 +522,15 @@ SceneManager.prototype.loadTexture = function(url, mapping, onLoad, onError) {
                 var img = new Image();
                 var blob = new Blob([xhr.response]);
                 img.src = window.URL.createObjectURL(blob);
-                texture.image = img;
-                texture.format = THREE.RGBAFormat;
-                texture.needsUpdate = true;
+                
+                var clones = texture.clones.concat([texture]);
+                for(var i in clones)
+                {
+                    clones[i].image = texture.image
+                    clones[i].image = img;
+                    clones[i].format = THREE.RGBAFormat;
+                    clones[i].needsUpdate = true;
+                }
             
             }
         }
@@ -732,7 +743,7 @@ SceneManager.prototype.getTexture = function(src, noclone) {
         return this.textureList[src];
     }
     var ret = this.textureList[src];
-    if (noclone) {
+    if (true) {
         ret.refCount++;
         return ret;
     }
