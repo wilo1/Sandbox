@@ -15,9 +15,9 @@ module.exports = {
 		//Create cone from menu
 		.nextGUID('testCone')
 		.click('#MenuCreate')
-		.waitForVisible('#MenuPrimitives', 1000)
+		.waitForVisible('#MenuPrimitives', 1500)
 		.click('#MenuPrimitives')
-		.waitForVisible('#MenuCreateCone', 1000)
+		.waitForVisible('#MenuCreateCone', 1500)
 		.click('#MenuCreateCone')
 		//Verify cone
 		.pause(6000).then(function() {
@@ -28,7 +28,7 @@ module.exports = {
 			});
 		})
 		//Pause and then delete cone by delete button
-		.pause(2000).click('#MenuDeleteicon')
+		.pause(2000).$click('#MenuDeleteicon')
 		//Verify deletion of cone
 		.pause(2000).then(function() {
 			testUtils.assertNodeExists("testCone", function(assertStatus, msg){
