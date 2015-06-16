@@ -209,13 +209,12 @@ define(function() {
                     
                         if(!currentDrag) return;
                         var data = currentDrag;
-                        if (currentDrag.type == 'asset') {
+                        if (currentDrag.type == 'asset' || currentDrag.type == 'model') {
                             if (!EntityLibrary.dropPreview) {
                                 EntityLibrary.dropPreview = new THREE.Mesh(new THREE.SphereGeometry(1, 30, 30), EntityLibrary.createPreviewMaterial());
                                 _dScene.add(EntityLibrary.dropPreview, true);
                                 
                                 if (data.dropPreview) {
-                                    console.log(data.dropPreview.url);
                                     
                                     //the asset must have a 'drop preview' key
                                     window.assetRegistry.get(data.dropPreview.type, data.dropPreview.url, function(asset) {
@@ -234,7 +233,6 @@ define(function() {
                             }
                         }
                         if (/material|texture|child|environment/.test(currentDrag.type)) {
-
                             if (!EntityLibrary.dropPreview) {
                                 EntityLibrary.dropPreview = new  THREE.Object3D();//new THREE.Mesh(new THREE.SphereGeometry(1, 30, 30), EntityLibrary.createPreviewMaterial());
                                 _dScene.add(EntityLibrary.dropPreview, true);
@@ -338,7 +336,7 @@ define(function() {
         }
         this.create = function(data, evt) {
             //if its a 3d file or a node prototype
-            if (data.type == 'asset') {
+            if (data.type == 'asset' || data.type == 'model') {
                 var pos = _Editor.GetInsertPoint(evt ? evt.originalEvent : null);
                 if(data.snap)
                 {
@@ -347,8 +345,7 @@ define(function() {
                    pos[2] = _Editor.SnapTo(pos[2],data.snap); 
                 }
 
-                
-                $.getJSON(data.url, function(proto) {
+                function createProto(proto) {
 
 
                     //very important to clean the node! Might have accidently left a name or id in the libarary
@@ -365,7 +362,6 @@ define(function() {
                     
                     if(data.dropOffset)
                     {
-
                         var dropOffset = new THREE.Matrix4();
                         dropOffset.fromArray(data.dropOffset);
                         var transform = new THREE.Matrix4();
@@ -374,13 +370,25 @@ define(function() {
                         proto.properties.transform = transform.elements;
                     }
 
-					// maintain reference to asset server, if applicable
-					proto.properties.sourceAssetId = data.sourceAssetId;
+                    // maintain reference to asset server, if applicable
+                    if( data.type === 'asset' )
+                        proto.properties.sourceAssetId = data.sourceAssetId;
                    
                     _Editor.createChild('index-vwf', newname, proto);
                     _Editor.SelectOnNextCreate([newname]);
 
-                })
+                }
+                if (data.type == 'asset')
+                    $.getJSON(data.url, createProto);
+                else if (data.type == 'model') 
+                {
+                    var proto = {
+                        "extends": "asset.vwf",
+                        "source": data.url,
+                        "type": data.modelType
+                    };
+                    createProto(proto);
+                }
             }
             else if (data.type == 'child') {
 
@@ -418,7 +426,6 @@ define(function() {
                         _PrimitiveEditor.setProperty(ID, 'materialDef', proto);
                     })
                 }
-
             }
             else if( data.type === 'texture' ) {
                 var ID = EntityLibrary.GetPick(evt);
@@ -427,16 +434,17 @@ define(function() {
                         "color": {"r": 1,"g": 1,"b": 1},
                         "ambient": {"r": 1,"g": 1,"b": 1},
                         "emit": {"r": 0,"g": 0,"b": 0},
-                        "specularColor": {"r": 0.498,"g": 0.498,"b": 0.498},
+                        "specularColor": {"r": 0.57,"g": 0.57,"b": 0.57},
                         "specularLevel": 1, "shininess": 15,
                         "alpha": 1, "side": 2,
-                        "reflect": 0.1,
+                        "shadeless": false, "shadow": true,
+                        "reflect": 0.8,
                         "layers": [{
                             "mapTo": 1, "mapInput": 0,
                             "scalex": 1, "scaley": 1,
                             "offsetx": 0, "offsety": 0,
                             "alpha": 1, "blendMode": 0,
-                            "src": "/sas/assets/"+data.sourceAssetId,
+                            "src": data.url,
                         }],
                         "type": "phong"
                     };
