@@ -307,11 +307,25 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 						var img = new Image();
 						img.onload = function()
 						{
-							$scope.selected.width = this.width;
-							$scope.selected.height = this.height;
-							if( this.width<200 && this.height<200 && !$scope.selected.thumbnail ){
-								$scope.selected.thumbnail = $scope.selected.id ? 'asset:'+$scope.selected.id : ':self';
-								console.log('Setting thumbnail to', $scope.selected.thumbnail);
+							if( $scope.selected.width != this.width || $scope.selected.height != this.height )
+							{
+								$scope.selected.width = this.width;
+								$scope.selected.height = this.height;
+
+								// set self thumbnail
+								if( this.width<200 && this.height<200 && !$scope.selected.thumbnail ){
+									$scope.selected.thumbnail = $scope.selected.id ? 'asset:'+$scope.selected.id : ':self';
+								}
+
+								// flag as a texture
+								var log2 = Math.log2 || function(x){ return Math.log(x)/Math.LN2; };
+								var exp = log2($scope.selected.width);
+								if( $scope.selected.width === $scope.selected.height && exp === Math.floor(exp) )
+									$scope.selected.isTexture = true;
+								else
+									$scope.selected.isTexture = null;
+
+								$scope.selected._basicDirty = true;
 							}
 						};
 						img.src = dataUrl;
@@ -423,18 +437,12 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 						url += queryChar+'thumbnail='+ encodeURIComponent($scope.selected.thumbnail);
 						queryChar = '&';
 					}
-					if( $scope.selected.type.slice(0,6) === 'image/' )
-					{
-						// save image dimensions
+					if( $scope.selected.isTexture ){
+						url += queryChar+'isTexture='+ encodeURIComponent($scope.selected.isTexture);
+						queryChar = '&';
+					}
+					if( $scope.selected.type.slice(0,6) === 'image/' ){
 						url += queryChar+'width='+$scope.selected.width + '&height='+$scope.selected.height;
-
-						// flag square pow2 images as textures
-						var log2 = Math.log2 || function(x){ return Math.log(x)/Math.LN2; };
-						var base = log2($scope.selected.width);
-						if( $scope.selected.width === $scope.selected.height && base === Math.floor(base) ){
-							url += '&isTexture=true';
-						}
-
 						queryChar = '&';
 					}
 
@@ -500,7 +508,14 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 				if($scope.selected._basicDirty)
 				{
 					toComplete += 1;
-					var meta = {name: $scope.selected.name, description: $scope.selected.description, thumbnail: $scope.selected.thumbnail};
+					var meta = {
+						name: $scope.selected.name, 
+						description: $scope.selected.description, 
+						thumbnail: $scope.selected.thumbnail,
+						width: $scope.selected.width || null,
+						height: $scope.selected.height || null,
+						isTexture: $scope.selected.isTexture
+					};
 					$http.post($scope.appPath+'/assets/'+$scope.selected.id+'/meta', meta).success(checkRemaining)
 					.error(function(data,status){
 						alertify.alert('Failed to post metadata: '+data);
