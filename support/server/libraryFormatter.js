@@ -30,35 +30,41 @@ function entitiesToLibrary(user, type, res)
 		case 'texture':
 			mimetype = 'image/%';
 			break;
+		case 'model':
+			mimetype = 'model/%';
+			break;
 	}
+
+	var qs = {
+		'user_name': user,
+		'permissions!hasPerms': '004',
+		'type!like': mimetype
+	};
+	if( type === 'texture' )
+		qs.isTexture = 'true';
 
 	request({
 		uri: baseUrl+'/assets/by-meta/all-of',
-		qs: {
-			'user_name': user,
-			'permissions!hasPerms': '004',
-			'type!like': mimetype,
-			'isTexture': type === 'texture' ? 'true' : undefined
-		},
+		qs: qs,
 		json: true
 	}, handleIndex);
 
-	function handleIndex(err, xhr, data)
+	function handleIndex(err, xhr, indexData)
 	{
 		if(err){
 			console.error(err);
-			res.json({});
+			res.json([]);
 		}
 		else
 		{
-			var metaToGet = Object.keys(data.matches).length;
+			var metaToGet = Object.keys(indexData.matches).length;
 			var lib = [];
 
 			if(!metaToGet){
 				res.json(lib);
 			}
 
-			for(var i in data.matches)
+			for(var i in indexData.matches)
 			{
 				fetchMeta(i);
 
@@ -74,8 +80,11 @@ function entitiesToLibrary(user, type, res)
 						if(err){
 							console.error('Failed to query asset', id, 'metadata:', err);
 						}
-						else {
-							lib.push({
+						else
+						{
+							data.type = indexData.matches[id].type;
+
+							var libitem = {
 								name: data.name || id,
 								url: baseUrl+'/assets/'+id,
 								preview: data.thumbnail ?
@@ -83,7 +92,24 @@ function entitiesToLibrary(user, type, res)
 									: "./img/VWS_Logo.png",
 								type: type,
 								sourceAssetId: id
-							});
+							};
+
+							var modelType = /^model\/(.+)$/.exec(data.type);
+							if( modelType ){
+								libitem.modelType = 'subDriver/threejs/asset/'+modelType[1];
+								libitem.dropPreview = {
+									'url': libitem.url,
+									'type': libitem.modelType,
+									'transform': [
+										1,0,0,0,
+										0,1,0,0,
+										0,0,1,0,
+										0,0,0,1
+									]
+								};
+							}
+
+							lib.push(libitem);
 						}
 
 						metaToGet--;

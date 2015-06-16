@@ -2,6 +2,9 @@
 	"My Entities": {
 		"url": "./vwfdatamanager.svc/library/my-entities"
 	},
+	"My Models": {
+		"url": "./vwfdatamanager.svc/library/my-models"
+	},
 	"My Materials": {
 		"url": "./vwfdatamanager.svc/library/my-materials"
 	},

@@ -169,7 +169,7 @@ define(function() {
                         evt.preventDefault();
                         if(!currentDrag) return;
                         
-                        if (currentDrag.type == 'asset') {
+                        if (currentDrag.type == 'asset' || currentDrag.type == 'model') {
                             var pos = _Editor.GetInsertPoint(evt.originalEvent);
                             if(currentDrag.snap)
                             {
@@ -180,7 +180,7 @@ define(function() {
                             EntityLibrary.dropPreview.position.copy( new THREE.Vector3(pos[0], pos[1], pos[2]));
                             EntityLibrary.dropPreview.updateMatrixWorld();
                         }
-                        if (/material|texture|child/.test(currentDrag.type)) {
+                        else if (/material|texture|child/.test(currentDrag.type)) {
                             var ID = EntityLibrary.GetPick(evt);
                             if (ID) {
 
@@ -197,7 +197,7 @@ define(function() {
                                 EntityLibrary.dropPreview.updateMatrixWorld();
                             }
                         }
-                        if (currentDrag.type == 'environment') {
+                        else if (currentDrag.type == 'environment') {
                             EntityLibrary.dropPreview.position.set(0, 0, 0);
                             EntityLibrary.dropPreview.scale.set(10, 10, 10);
                             EntityLibrary.dropPreview.updateMatrixWorld();
@@ -209,8 +209,8 @@ define(function() {
                     
                         if(!currentDrag) return;
                         var data = currentDrag;
-                        if (currentDrag.type == 'asset' || currentDrag.type == 'model') {
-                            if (!EntityLibrary.dropPreview) {
+                        if (!EntityLibrary.dropPreview) {
+                            if (currentDrag.type == 'asset' || currentDrag.type == 'model') {
                                 EntityLibrary.dropPreview = new THREE.Mesh(new THREE.SphereGeometry(1, 30, 30), EntityLibrary.createPreviewMaterial());
                                 _dScene.add(EntityLibrary.dropPreview, true);
                                 
@@ -231,9 +231,7 @@ define(function() {
                                     });
                                 }
                             }
-                        }
-                        if (/material|texture|child|environment/.test(currentDrag.type)) {
-                            if (!EntityLibrary.dropPreview) {
+                            else if (/material|texture|child|environment/.test(currentDrag.type)) {
                                 EntityLibrary.dropPreview = new  THREE.Object3D();//new THREE.Mesh(new THREE.SphereGeometry(1, 30, 30), EntityLibrary.createPreviewMaterial());
                                 _dScene.add(EntityLibrary.dropPreview, true);
                             }
@@ -380,7 +378,7 @@ define(function() {
                 }
                 if (data.type == 'asset')
                     $.getJSON(data.url, createProto);
-                else if (data.type == 'model') 
+                else /*if (data.type == 'model')*/ 
                 {
                     var proto = {
                         "extends": "asset.vwf",
