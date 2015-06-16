@@ -347,7 +347,7 @@ define(function() {
                    pos[2] = _Editor.SnapTo(pos[2],data.snap); 
                 }
 
-                function(proto) {
+                function createProto(proto) {
 
 
                     //very important to clean the node! Might have accidently left a name or id in the libarary
@@ -476,7 +476,7 @@ define(function() {
                         "src": data.url
                     }
                 ]
-            },
+            };
 
                 var ID = EntityLibrary.GetPick(evt);
                 if (ID) {
