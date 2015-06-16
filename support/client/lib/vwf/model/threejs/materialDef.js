@@ -67,7 +67,7 @@
                     if (propname == 'materialDef' && propval)
                         if (!Object.deepEquals(propval, this.materialDef_) || this.Build)
                         {
-                            console.log("materialDef on " + this.ID, propval )
+                            //console.log("materialDef on " + this.ID, propval )
                             propval = JSON.parse(JSON.stringify(propval));
                             var needRebuild = false;
                             if (!this.compareLayers(this.materialDef, propval))

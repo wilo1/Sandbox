@@ -180,7 +180,7 @@ define(function() {
                             EntityLibrary.dropPreview.position.copy( new THREE.Vector3(pos[0], pos[1], pos[2]));
                             EntityLibrary.dropPreview.updateMatrixWorld();
                         }
-                        if (currentDrag.type == 'material' || currentDrag.type == 'child') {
+                        if (/material|texture|child/.test(currentDrag.type)) {
                             var ID = EntityLibrary.GetPick(evt);
                             if (ID) {
 
@@ -233,7 +233,7 @@ define(function() {
                                 }
                             }
                         }
-                        if (currentDrag.type == 'material' || currentDrag.type == 'child' || currentDrag.type == 'environment') {
+                        if (/material|texture|child|environment/.test(currentDrag.type)) {
 
                             if (!EntityLibrary.dropPreview) {
                                 EntityLibrary.dropPreview = new  THREE.Object3D();//new THREE.Mesh(new THREE.SphereGeometry(1, 30, 30), EntityLibrary.createPreviewMaterial());

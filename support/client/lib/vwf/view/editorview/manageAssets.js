@@ -281,6 +281,9 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 					$scope.selected.filename = files[0].name;
 					$scope.selected.filedata = new Uint8Array(fr.result);
 
+					if( $scope.selected.name === '<new asset>' )
+						$scope.selected.name = files[0].name;
+
 					if(files[0].type){
 						$scope.selected.type = files[0].type;
 					}
@@ -320,7 +323,7 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 								// flag as a texture
 								var log2 = Math.log2 || function(x){ return Math.log(x)/Math.LN2; };
 								var exp = log2($scope.selected.width);
-								if( $scope.selected.width === $scope.selected.height && exp === Math.floor(exp) )
+								if( $scope.selected.width === $scope.selected.height && exp === Math.floor(exp) && exp >= 8 )
 									$scope.selected.isTexture = true;
 								else
 									$scope.selected.isTexture = null;

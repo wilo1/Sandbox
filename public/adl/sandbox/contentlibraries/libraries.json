@@ -8,6 +8,9 @@
 	"My Behaviors": {
 		"url": "./vwfdatamanager.svc/library/my-behaviors"
 	},
+	"My Textures": {
+		"url": "./vwfdatamanager.svc/library/my-textures"
+	},
     "Demo Entities": {
         "url": "./contentlibraries/entities.json"
     },

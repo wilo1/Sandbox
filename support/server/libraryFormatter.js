@@ -27,6 +27,9 @@ function entitiesToLibrary(user, type, res)
 			mimetype = 'application/vnd.vws-behavior+json';
 			type = 'child';
 			break;
+		case 'texture':
+			mimetype = 'image/%';
+			break;
 	}
 
 	request({
@@ -34,7 +37,8 @@ function entitiesToLibrary(user, type, res)
 		qs: {
 			'user_name': user,
 			'permissions!hasPerms': '004',
-			'type': mimetype
+			'type!like': mimetype,
+			'isTexture': type === 'texture' ? 'true' : undefined
 		},
 		json: true
 	}, handleIndex);
