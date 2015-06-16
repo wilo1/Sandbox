@@ -34,7 +34,12 @@
 		<div id='dragarea' class='verticalLayout'>
 			<span class='fixed-height'>{{!fields.selected ? '' : fields.selected==='new' ? 'Create Asset' : 'Replace Asset'}}</span>
 			<p id='filename' class='fixed-height' ng-show='fields.selected'>{{selected.filename || 'Drag/drop or click to upload'}}</p>
-			<input type='text' id='typeInput' placeholder='application/octet-stream' ng-model='selected.type' ng-disabled='!fields.selected'/>
+			<div id='typeInput' class='horizontalLayout'>
+				<input type='text' placeholder='application/octet-stream' ng-model='selected.type' ng-disabled='!fields.selected'/>
+				<select ng-model='selected.type' ng-options='prettifyType(v) for v in knownTypes'>
+					<option value=''>Other</option>
+				</select>
+			</div>
 			<input type='file' id='fileInput' disabled='disabled' onchange='getFileData(this.files)'/>
 		</div>
 

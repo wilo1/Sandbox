@@ -173,8 +173,17 @@
 				cursor: pointer;
 			}
 
-			input#typeInput {
+			#typeInput
+			{
 				z-index: 1;
+
+				input, select {
+					direction: rtl;
+				}
+
+				select {
+					width: 20px;
+				}
 			}
 
 			span {

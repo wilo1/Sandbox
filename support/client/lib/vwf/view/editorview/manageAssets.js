@@ -84,6 +84,18 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 		}
 		$rootScope.resetNew();
 
+		$rootScope.prettifyType = function(type){
+			switch(type){
+				case 'application/vnd.vws-entity+json':
+					return 'VWS Entity';
+				case 'application/vnd.vws-material+json':
+					return 'VWS Material';
+				case 'application/vnd.vws-behavior+json':
+					return 'VWS Behavior';
+				default:
+					return type;
+			}
+		};
 
 		return null;
 	}]);
@@ -217,22 +229,16 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 	{
 		$scope.hideThumbs = true;
 
-		$scope.prettifyType = function(type){
-			switch(type){
-				case 'application/vnd.vws-entity+json':
-					return 'VWS Entity';
-				case 'application/vnd.vws-material+json':
-					return 'VWS Material';
-				case 'application/vnd.vws-behavior+json':
-					return 'VWS Behavior';
-				default:
-					return type;
-			}
-		}
 	}]);
 
 	app.controller('AssetPropertiesController', ['$scope','$rootScope','$http','DataManager', function($scope,$rootScope,$http)
 	{
+		$scope.knownTypes = [
+			'image/png', 'image/jpeg', 'image/dds',
+			'model/vnd.collada+xml', 'model/vnd.three.js+json', 'model/vnd.gltf+json',
+			'application/vnd.vws-entity+json', 'application/vnd.vws-material+json', 'application/vnd.vws-behavior+json',
+			'application/octet-stream', 'application/json'
+		].sort();
 
 		// keep 'selected' in sync with currently selected asset
 		$scope.$watchGroup(['fields.selected', 'assets[fields.selected]', 'new'], function(newvals)
@@ -503,7 +509,7 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 						checkRemaining();
 					});
 					xhr.open('POST', $scope.appPath+'/assets/'+$scope.selected.id);
-					xhr.setRequestHeader('Content-Type', $('#manageAssetsDialog input#typeInput').val());
+					xhr.setRequestHeader('Content-Type', $scope.selected.type);
 
 					xhr.send($scope.selected.filedata);
 				}

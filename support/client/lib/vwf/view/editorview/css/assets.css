@@ -136,8 +136,12 @@
         left: 0;
         opacity: 0;
         cursor: pointer; }
-      #manageAssetsDialog #propertyBrowser #dragarea input#typeInput {
+      #manageAssetsDialog #propertyBrowser #dragarea #typeInput {
         z-index: 1; }
+        #manageAssetsDialog #propertyBrowser #dragarea #typeInput input, #manageAssetsDialog #propertyBrowser #dragarea #typeInput select {
+          direction: rtl; }
+        #manageAssetsDialog #propertyBrowser #dragarea #typeInput select {
+          width: 20px; }
       #manageAssetsDialog #propertyBrowser #dragarea span {
         margin: 20px;
         font-size: 18px;
