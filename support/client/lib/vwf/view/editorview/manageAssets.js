@@ -305,9 +305,14 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 						var dataUrl = 'data:'+$scope.selected.type+';base64,'+btoa(dataStr);
 
 						var img = new Image();
-						img.onload = function(){
+						img.onload = function()
+						{
 							$scope.selected.width = this.width;
 							$scope.selected.height = this.height;
+							if( this.width<200 && this.height<200 && !$scope.selected.thumbnail ){
+								$scope.selected.thumbnail = $scope.selected.id ? 'asset:'+$scope.selected.id : ':self';
+								console.log('Setting thumbnail to', $scope.selected.thumbnail);
+							}
 						};
 						img.src = dataUrl;
 					}
@@ -414,22 +419,24 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 						url += queryChar+'permissions='+ perms.toString(8);
 						queryChar = '&';
 					}
+					if( $scope.selected.thumbnail ){
+						url += queryChar+'thumbnail='+ encodeURIComponent($scope.selected.thumbnail);
+						queryChar = '&';
+					}
 					if( $scope.selected.type.slice(0,6) === 'image/' )
 					{
-						if( $scope.selected.width <= 150 && $scope.selected.height <= 150 ){
-							url += queryChar+'thumbnail='+ encodeURIComponent(':self');
-						}
+						// save image dimensions
+						url += queryChar+'width='+$scope.selected.width + '&height='+$scope.selected.height;
 
-						url += '&imageWidth='+$scope.selected.width + '&imageHeight='+$scope.selected.height;
-
-						var base = Math.log($scope.selected.width);
+						// flag square pow2 images as textures
+						var log2 = Math.log2 || function(x){ return Math.log(x)/Math.LN2; };
+						var base = log2($scope.selected.width);
 						if( $scope.selected.width === $scope.selected.height && base === Math.floor(base) ){
 							url += '&isTexture=true';
 						}
 
 						queryChar = '&';
 					}
-					if( $scope.selected.type.slice(0,6) === 'image/' && $scope.selec
 
 					var xhr = new XMLHttpRequest();
 					xhr.addEventListener('loadend', function(e)
