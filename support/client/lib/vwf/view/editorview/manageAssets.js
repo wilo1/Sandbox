@@ -704,10 +704,6 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 			else setSelection('new');
 		},
 
-		nodeIsBehavior: function(node){
-			return nodeInherits(node.id, 'http-vwf-example-com-behavior-vwf');
-		},
-
 		uploadFile: function(){
 			setSelection('new');
 		}
