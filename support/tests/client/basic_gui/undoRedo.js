@@ -52,7 +52,7 @@ module.exports = {
 			testUtils.assertNodeExists("Cone", function(assertStatus, msg) {
 				passed = passed && !!assertStatus;
 				outStr += "Cone Redone: " + msg + "; ";
-				finished(passed, outStr);
+				finished(passed, outStr, false);
 			});
 		})
 	
