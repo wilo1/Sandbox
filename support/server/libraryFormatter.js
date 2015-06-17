@@ -36,10 +36,11 @@ function entitiesToLibrary(user, type, res)
 	}
 
 	var qs = {
-		'user_name': user,
 		'permissions!hasPerms': '004',
 		'type!like': mimetype
 	};
+	if( user )
+		qs.user_name = user;
 	if( type === 'texture' )
 		qs.isTexture = 'true';
 
@@ -55,9 +56,13 @@ function entitiesToLibrary(user, type, res)
 			console.error(err);
 			res.json([]);
 		}
+		else if( !indexData.matches ){
+			console.error('How did we even get here? Cannot populate library');
+			res.json([]);
+		}
 		else
-		{
-			var metaToGet = Object.keys(indexData.matches).length;
+		{	
+			var metaToGet = Object.keys(indexData.matches || {}).length;
 			var lib = [];
 
 			if(!metaToGet){
