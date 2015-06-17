@@ -133,9 +133,13 @@
 			}
 		}
 
-		p, span, label { &.fixed-height {
-			height: 1.2em;
-		}}
+		p, span, label
+		{
+			&.fixed-height
+			{
+				min-height: 1.2em;
+			}
+		}
 
 		label#thumbnail
 		{
@@ -197,6 +201,7 @@
 		p#url {
 			text-align: center;
 			font-size: 18px;
+			word-wrap: break-word;
 		}
 
 		#permissions

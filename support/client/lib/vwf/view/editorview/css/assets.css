@@ -96,7 +96,7 @@
     #manageAssetsDialog #propertyBrowser input:not([type=button]):disabled, #manageAssetsDialog #propertyBrowser textarea:not([type=button]):disabled {
       background-color: #ccc; }
     #manageAssetsDialog #propertyBrowser p.fixed-height, #manageAssetsDialog #propertyBrowser span.fixed-height, #manageAssetsDialog #propertyBrowser label.fixed-height {
-      height: 1.2em; }
+      min-height: 1.2em; }
     #manageAssetsDialog #propertyBrowser label#thumbnail {
       margin-top: 3px;
       -webkit-box-pack: justify;
@@ -148,7 +148,8 @@
         text-decoration: underline; }
     #manageAssetsDialog #propertyBrowser p#url {
       text-align: center;
-      font-size: 18px; }
+      font-size: 18px;
+      word-wrap: break-word; }
     #manageAssetsDialog #propertyBrowser #permissions {
       -webkit-box-align: center;
       -moz-align-items: center;
