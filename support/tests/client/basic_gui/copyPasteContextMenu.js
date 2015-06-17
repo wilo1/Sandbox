@@ -55,8 +55,8 @@ module.exports = {
 		.pause(3000).then(function() {
 			testUtils.assertNodeExists("copyBox", function(assertStatus, msg) {
 				passed = passed && !!assertStatus;
-				outStr += "testBox copied and pasted as copyBox: " +msg + "; ";
-				finished(passed, outStr, true);
+				outStr += "testBox copied and pasted as copyBox: " + msg + "; ";
+				finished(passed, outStr);
 			});
 		})
 
