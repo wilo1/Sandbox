@@ -133,9 +133,13 @@
 			}
 		}
 
-		p, span, label { &.fixed-height {
-			height: 1.2em;
-		}}
+		p, span, label
+		{
+			&.fixed-height
+			{
+				min-height: 1.2em;
+			}
+		}
 
 		label#thumbnail
 		{
@@ -173,8 +177,17 @@
 				cursor: pointer;
 			}
 
-			input#typeInput {
+			#typeInput
+			{
 				z-index: 1;
+
+				input, select {
+					direction: rtl;
+				}
+
+				select {
+					width: 20px;
+				}
 			}
 
 			span {
@@ -188,6 +201,7 @@
 		p#url {
 			text-align: center;
 			font-size: 18px;
+			word-wrap: break-word;
 		}
 
 		#permissions

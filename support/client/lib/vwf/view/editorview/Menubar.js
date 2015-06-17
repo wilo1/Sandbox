@@ -111,6 +111,17 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
     
             }
 
+/*
+ * truthy if user has permission to edit world
+_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(),vwf.application())
+
+* on connected client, reevaluate login/logout status
+this.calledMethod = function(id,name)
+	if(id == vwf.application() && name == 'clientConnected')
+
+* truthy if user has an avatar
+_UserManager.GetAvatarForClientID(_UserManager.GetCurrentUserID())
+*/
 
 			// load asset manager
 			manageAssets.initialize();

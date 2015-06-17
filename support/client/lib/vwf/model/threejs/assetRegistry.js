@@ -218,7 +218,8 @@ var assetRegistry = function()
 {
     this.assets = {};
     this.initFromPreloader = function(childType, assetSource, reg)
-    {
+    {   
+       
         var asset = null;
         //see if it was preloaded
         asset = _assetLoader.get(assetSource,childType);

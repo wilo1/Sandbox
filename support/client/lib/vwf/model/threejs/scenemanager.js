@@ -520,6 +520,7 @@ SceneManager.prototype.loadTexture = function(url, mapping, onLoad, onError) {
                 texture.image = img;
                 texture.format = THREE.RGBAFormat;
                 texture.needsUpdate = true;
+                if (onLoad) onLoad(texture);
             
             }
         }
