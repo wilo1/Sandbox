@@ -15,6 +15,7 @@ var libpath = require('path'),
     fs = require('fs'),
     url = require("url"),
     mime = require('mime'),
+	jade = require('jade'),
 
     YAML = require('js-yaml');
 var DAL = require('./DAL').DAL;
@@ -205,6 +206,22 @@ function _404(response) {
     response.write("404 Not Found\n");
     response.end();
 }
+
+function ServeTemplate(req, filename, res, URL)
+{
+	if( /^jade:/.test(filename) ){
+		var templateFile = libpath.join(__dirname,'..','templates', filename.slice(5)+'.jade');
+		var html = jade.renderFile(templateFile, {
+			filename: templateFile,
+			pretty: '\t'
+		});
+		res.send(html);
+	}
+	else {
+		ServeFile(req, filename, res, URL);
+	}
+}
+
 //Parse and serve a YAML file
 function ServeYAML(filename, response, URL) {
     var tf = filename;
@@ -489,7 +506,8 @@ function handleRequest(request, response, next) {
                     var instanceName = appname.substr(14).replace(/\//g, '_').replace(/\\/g, '_') + instance + "_";
                     DAL.getInstance(instanceName, function(data) {
                         if (data) {
-                            ServeFile(request, filename, response, URL);
+                            //ServeFile(request, filename, response, URL);
+							ServeTemplate(request, 'jade:index', response, URL);
                             callback(true, true);
                             return;
                         } else {

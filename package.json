@@ -7,6 +7,7 @@
     "test": "test"
   },
   "dependencies": {
+    "SandboxAssetServer": "git://github.com/adlnet/SandboxAssetServer.git#development",
     "adl-xapiwrapper": "~0.2.1",
     "async": "~0.2.7",
     "body-parser": "~1.10.2",
@@ -25,7 +26,7 @@
     "hogan-express": "~0.3.3",
     "http-proxy": "~1.9.0",
     "i18next": "~1.7.1",
-    "jade": "~1.9.1",
+    "jade": "^1.11.0",
     "js-yaml": "~2.0.2",
     "method-override": "~2.3.1",
     "mime": "~1.2.11",
@@ -51,8 +52,7 @@
     "spdy": "~1.26.5",
     "winston": "~0.8.3",
     "ws": "~0.4.25",
-    "yamljs": "~0.1.4",
-    "SandboxAssetServer": "git://github.com/adlnet/SandboxAssetServer.git#development"
+    "yamljs": "~0.1.4"
   },
   "devDependencies": {},
   "scripts": {
