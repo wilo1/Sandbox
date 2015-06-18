@@ -82,10 +82,6 @@ define([
         // With the scripts loaded, we must initialize the framework. vwf.initialize()
         // accepts three parameters: a world specification, model configuration parameters,
         // and view configuration parameters.
-        $(document.body).append('<div id="glyphOverlay" style="display:none"/>');
-        
-        
-
         assetLoader.loadList(stateData, function() {
             vwf.loadConfiguration(null, {
                 model: [],
