@@ -41,17 +41,17 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/lib/alertify.js-0.
 
 
                 //set the title of the window to the title of the world.
-                if(_DataManager.getInstanceData())
-                document.title = _DataManager.getInstanceData().title;
+                //if(_DataManager.getInstanceData())
+                //	document.title = _DataManager.getInstanceData().title;
 
                 window._Editor = require("vwf/view/editorview/Editor").getSingleton();
                 if (this.needTools()) {
 
-                    var data = $.ajax('vwf/view/editorview/menus.html', {
+                    /*var data = $.ajax('vwf/view/editorview/menus.html', {
                         async: false,
                         dataType: 'html'
                     }).responseText;
-                    $(document.body).append(data);
+                    $(document.body).append(data);*/
                     $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/lib/ddsmoothmenu.js"></script>');
 
 

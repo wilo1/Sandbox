@@ -1,4 +1,4 @@
-include ./manageAssets.jade
+include ./editorTools
 
 doctype html
 html
@@ -8,7 +8,7 @@ html
 		meta(name="format-detection", content="telephone=no")
 		meta(name="viewport", content="width = device-width,initial-scale = 1.0, user-scalable = no")
 
-		//
+		//-
 			Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
 			Secretary of Defense (Personnel & Readiness).
 
@@ -29,14 +29,14 @@ html
 			URI and loaded from a network-visible location.
 
 
-		title ADL VW Sandbox
+		title= instanceData.title
 
 		script(type="text/javascript", src="../polyfills.js")
 		script(type="text/javascript", src="../require.js")
 		script(type="text/javascript", src="/vwfDataManager.svc/getanalytics.js")
 		link(href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,400italic|Roboto+Condensed|Roboto|Open+Sans', rel='stylesheet', type='text/css')
 
-		//
+		//-
 			This is the main client library. vwf.js creates a framework manager and attaches it to
 			the global window object as window.vwf. All access to the framework is through that
 			reference, and no other objects are globally visible.
@@ -53,15 +53,16 @@ html
 		link(rel="shortcut icon", href="/adl/sandbox/img/VWS_Logo.ico")
 
 		if needsTools
-			+manageAssets_head
+			+editorTools_head
 
 		script(type="text/javascript").
-			//here we go! this fires a bunch of loads, and when they are don, launches the VWF
+			// here we go! this fires a bunch of loads, and when they are don, launches the VWF
 			require(['../load']);
+
 
 	body(style="background: black;overflow:hidden")
 
-		//
+		//-
 			Generic clients may have nearly empty pages, but pages for custom clients may be laid
 			out in any manner desired. Any view and models that render to the page should be
 			instructed where to attach their content.
@@ -70,10 +71,10 @@ html
 
 		div#vwf-root
 
-		// Overlay div to display loading information
+		//- Overlay div to display loading information
 		div#glyphOverlay(style='display: none;')
 
-		// asset preload loading screen
+		//- asset preload loading screen
 		div#preloadGUIBack(style='display:none')
 			span#fullscreenlink Please enter full screen mode. Click here or hit F11.
 			img#loadingSplash
@@ -84,6 +85,5 @@ html
 				div
 					div#preloadguiText Loading...
 
-		- console.log('needsTools=',needsTools)
 		if needsTools
-			+manageAssets_body
+			+editorTools_body
