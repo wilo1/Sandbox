@@ -609,38 +609,32 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 
 		initialize: function()
 		{
-			// actually insert the html
-			$("<link rel='stylesheet' href='vwf/view/editorview/css/assets.css'/>").appendTo(document.head);
-			$('<div id="manageAssetsContainer"></div>').appendTo(document.body);
-			$('#manageAssetsContainer').load('vwf/view/editorview/manageAssets.html',function()
+			$('#manageAssetsDialog').dialog({
+				title: 'Manage Assets',
+				width: 600,
+				height: 600,
+				autoOpen: false
+			});
+
+			$.get('vwfDataManager.svc/saspath', function(data)
 			{
-				$('#manageAssetsDialog').dialog({
-					title: 'Manage Assets',
-					width: 600,
-					height: 600,
-					autoOpen: false
-				});
+				appPath = data;
 
-				$.get('vwfDataManager.svc/saspath', function(data)
-				{
-					appPath = data;
+				// check if same origin
+				var loc = window.location;
+				var a = document.createElement('a');
+				a.href = appPath;
 
-					// check if same origin
-					var loc = window.location;
-					var a = document.createElement('a');
-					a.href = appPath;
-
-					if( a.hostname == loc.hostname && a.port == loc.port && a.protocol == loc.protocol ){
-						// no need to fetch header name, just initialize
+				if( a.hostname == loc.hostname && a.port == loc.port && a.protocol == loc.protocol ){
+					// no need to fetch header name, just initialize
+					angular.bootstrap($('#manageAssetsDialog')[0], ['ManageAssetsDialog']);
+				}
+				else {
+					$.get(appPath+'/session-header-name', function(data){
+						appHeaderName = data;
 						angular.bootstrap($('#manageAssetsDialog')[0], ['ManageAssetsDialog']);
-					}
-					else {
-						$.get(appPath+'/session-header-name', function(data){
-							appHeaderName = data;
-							angular.bootstrap($('#manageAssetsDialog')[0], ['ManageAssetsDialog']);
-						});
-					}
-				});
+					});
+				}
 			});
 		},
 

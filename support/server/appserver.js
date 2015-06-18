@@ -207,13 +207,14 @@ function _404(response) {
     response.end();
 }
 
-function ServeTemplate(req, filename, res, URL)
+function ServeTemplate(req,res, filename, instanceData)
 {
 	if( /^jade:/.test(filename) ){
 		var templateFile = libpath.join(__dirname,'..','templates', filename.slice(5)+'.jade');
 		var html = jade.renderFile(templateFile, {
 			filename: templateFile,
-			pretty: '\t'
+			pretty: '\t',
+			needsTools: instanceData && instanceData.publishSettings && instanceData.publishSettings.allowTools
 		});
 		res.send(html);
 	}
@@ -506,8 +507,9 @@ function handleRequest(request, response, next) {
                     var instanceName = appname.substr(14).replace(/\//g, '_').replace(/\\/g, '_') + instance + "_";
                     DAL.getInstance(instanceName, function(data) {
                         if (data) {
+							console.log(data);
                             //ServeFile(request, filename, response, URL);
-							ServeTemplate(request, 'jade:index', response, URL);
+							ServeTemplate(request,response, 'jade:index', data);
                             callback(true, true);
                             return;
                         } else {
