@@ -21,11 +21,11 @@ module.exports = {
 
 		//Focus on the box
 		.pause(1000)
-		.click('#MenuFocusSelectedicon')
+		.$click('#MenuFocusSelectedicon')
 		
 		.pause(3000)
-		.moveToObject('#index-vwf')
-		.click('#index-vwf')
+		// .moveToObject('#index-vwf')
+		.$click('#index-vwf')
 		
 		//Copy testBox with ctrl-c
 		.pause(1000).$keydown("canvas", "ctrlKey")
