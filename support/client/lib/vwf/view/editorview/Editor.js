@@ -481,13 +481,20 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
         }
         this.dblclick_Gizmo = function(e)
         {
-            this.mouseup(e);
-            _PrimitiveEditor.show();
+           window.setTimeout(function()
+           {
+            if(_Editor.GetSelectedVWFID() && !_PrimitiveEditor.isOpen())
+                _PrimitiveEditor.show();
+            if(_Editor.GetSelectedVWFID() && _PrimitiveEditor.isOpen())
+                showSidePanel();
+            },20)
+            
+             this.mouseup(e);
         }
         this.mouseup_Gizmo = function(e) {
             
             //tracking for double click
-            if(performance.now() - this.mouseUpTime  < 300)
+            if(performance.now() - this.mouseUpTime  < 300 && e.button == 0)
             {
                 this.mouseUpTime = 0;
                 this.dblclick_Gizmo(e)

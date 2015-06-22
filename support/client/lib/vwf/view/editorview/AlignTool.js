@@ -190,9 +190,9 @@ function AlignTool() {
 		var zFrom = $('#AlignToolGUI').find('#ZFrom :checked').next().text();
 		var zTo = $('#AlignToolGUI').find('#ZTo :checked').next().text();
 
-		var alignX = $("#AlignX").is(':checked') != undefined
-		var alignY = $("#AlignY").is(':checked') != undefined
-		var alignZ = $("#AlignZ").is(':checked') != undefined
+		var alignX = $("#AlignX").is(':checked');
+		var alignY = $("#AlignY").is(':checked');
+		var alignZ = $("#AlignZ").is(':checked');
 
 		for (var i = 0; i < this.sourceNodeIDs.length; i++) {
 			var source = _Editor.findviewnode(this.sourceNodeIDs[i])
@@ -343,7 +343,20 @@ function AlignTool() {
 			trans[14] = spos.z;
  			vwf_view.kernel.setProperty(this.sourceNodeIDs[i], 'transform', trans);
 		}
-
+		
+		var xCenter = (tbounds.min[0] + tbounds.max[0]) / 2;
+		var yCenter = (tbounds.min[1] + tbounds.max[1]) / 2;
+		var zCenter = (tbounds.min[2] + tbounds.max[2]) / 2;
+		
+		this.xDisplay.position.y += yCenter;
+		this.xDisplay.position.z += zCenter;
+		
+		this.yDisplay.position.x += xCenter;
+		this.yDisplay.position.z += zCenter;
+		
+		this.zDisplay.position.x += xCenter;
+		this.zDisplay.position.y += yCenter;
+		
 		if (zTo == 'Max')
 			this.zDisplay.position.z += tbounds.max[2];
 		if (zTo == 'Min')
@@ -357,11 +370,11 @@ function AlignTool() {
 		if (xTo == 'Min')
 			this.xDisplay.position.x += tbounds.min[0];
 		if (xTo == 'Center')
-			this.xDisplay.position.x += (tbounds.min[0] + tbounds.max[0]) / 2;
+			this.xDisplay.position.x += xCenter;
 		if (yTo == 'Center')
-			this.yDisplay.position.y += (tbounds.min[1] + tbounds.max[1]) / 2;
+			this.yDisplay.position.y += yCenter;
 		if (zTo == 'Center')
-			this.zDisplay.position.z += (tbounds.min[2] + tbounds.max[2]) / 2;
+			this.zDisplay.position.z += zCenter;
 
 		this.xDisplay.updateMatrixWorld(true);
 		this.yDisplay.updateMatrixWorld(true);
