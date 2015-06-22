@@ -52,6 +52,7 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/lib/alertify.js-0.
                         dataType: 'html'
                     }).responseText;
                     $(document.body).append(data);*/
+					$('#smoothmenu1').show();
                     $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/lib/ddsmoothmenu.js"></script>');
 
 
