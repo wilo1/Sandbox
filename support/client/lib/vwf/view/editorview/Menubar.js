@@ -1020,8 +1020,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 
 		calledMethod: function(id, evtname, data)
 		{
-			console.log('Menu calledMethod', id, evtname);
-			if(id == vwf.application() && evtname == 'clientConnected'){
+			if(/^character-vwf/.test(id) && evtname == 'ready'){
 				updateMenuState();
 			}
 		}
