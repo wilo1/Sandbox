@@ -28,7 +28,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 			isMaterialAsset = !!(node && node.properties && node.properties.materialDef && node.properties.materialDef.sourceAssetId),
 			isGroup = !!(node && nodeInherits(node.id, 'sandboxGroup-vwf')),
 			loggedIn = !!_UserManager.GetCurrentUserName(),
-			hasAvatar = !!(loggedIn && _UserManager.GetAvatarForClientID(_UserManager.GetCurrentUserID()));
+			hasAvatar = !!(loggedIn && _UserManager.GetAvatarForClientID(vwf.moniker()));
 
 		console.log('Updating menu state: hasAvatar =', hasAvatar, 'loggedIn =', loggedIn);
 
