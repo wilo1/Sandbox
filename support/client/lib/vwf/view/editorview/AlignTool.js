@@ -70,6 +70,7 @@ function AlignTool() {
 		this.xDisplay.material.ambient.g = 0;
 		this.xDisplay.material.ambient.b = 0;
 		this.xDisplay.material.ambient.r = 1;
+		this.xDisplay.material.wireframe = true;
 
 		this.yDisplay.material.side = 2
 		this.yDisplay.material.transparent = true
@@ -81,6 +82,7 @@ function AlignTool() {
 		this.yDisplay.material.ambient.g = 1;
 		this.yDisplay.material.ambient.b = 0;
 		this.yDisplay.material.ambient.r = 0;
+		this.yDisplay.material.wireframe = true;
 
 		this.zDisplay.material.side = 2
 		this.zDisplay.material.transparent = true
@@ -92,6 +94,7 @@ function AlignTool() {
 		this.zDisplay.material.ambient.g = 0;
 		this.zDisplay.material.ambient.b = 1;
 		this.zDisplay.material.ambient.r = 0;
+		this.zDisplay.material.wireframe = true;
 
 		this.xDisplay.material.map = THREE.ImageUtils.loadTexture('./textures/grid2.gif');
 		this.yDisplay.material.map = THREE.ImageUtils.loadTexture('./textures/grid2.gif');
