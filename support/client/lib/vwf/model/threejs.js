@@ -177,6 +177,8 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
 
             if (node.initializingNode)
                 node.initializingNode();
+            if(node.threeObject)
+                node.threeObject.updateMatrixWorld(true);
         },
         // == Model API ============================================================================
 
