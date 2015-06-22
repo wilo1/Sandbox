@@ -190,9 +190,9 @@ function AlignTool() {
 		var zFrom = $('#AlignToolGUI').find('#ZFrom :checked').next().text();
 		var zTo = $('#AlignToolGUI').find('#ZTo :checked').next().text();
 
-		var alignX = $("#AlignX").is(':checked') != undefined
-		var alignY = $("#AlignY").is(':checked') != undefined
-		var alignZ = $("#AlignZ").is(':checked') != undefined
+		var alignX = $("#AlignX").is(':checked');
+		var alignY = $("#AlignY").is(':checked');
+		var alignZ = $("#AlignZ").is(':checked');
 
 		for (var i = 0; i < this.sourceNodeIDs.length; i++) {
 			var source = _Editor.findviewnode(this.sourceNodeIDs[i])
