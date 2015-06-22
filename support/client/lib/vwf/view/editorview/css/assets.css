@@ -51,7 +51,8 @@
         flex-grow: 1; }
         #manageAssetsDialog #assetBrowser .asset .info .name, #manageAssetsDialog #assetBrowser .newAsset .info .name {
           margin: 2px 0;
-          font-size: 16px; }
+          font-size: 16px;
+          overflow-wrap: break-word; }
         #manageAssetsDialog #assetBrowser .asset .info .meta, #manageAssetsDialog #assetBrowser .newAsset .info .meta {
           margin: 2px 0;
           font-size: 12px; }
