@@ -192,8 +192,8 @@ define(function() {
 		this.EventChanged = false;
 		//$('#ScriptEditor').resize(function(){_ScriptEditor.resize()});
 		$('#scripteditortitle').prepend('<div class="headericon script"  />');
-		$('#scripteditortitle').append('<div id="maximizescripteditor" style="float:right;margin-right: 20px;" class="icon up2" />');
-		$('#scripteditortitle').append('<div id="hidescripteditor" class="icon down" style="float:right"  />');
+		$('#scripteditortitle').append('<div id="maximizescripteditor" style="float:right;margin-right: 20px;" class="icon glyphicon glyphicon-chevron-up" />');
+		$('#scripteditortitle').append('<div id="hidescripteditor" class="icon glyphicon glyphicon-chevron-down" style="float:right;"  />');
 		$('#hidescripteditor').click(function() {
 			_ScriptEditor.hide();
 		});
