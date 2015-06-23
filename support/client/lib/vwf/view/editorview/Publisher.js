@@ -58,8 +58,11 @@ define([], function() {
                 var idList = list[1];
 
                 alertify.choice("Choose the camera to use in the Published Scene", function(ok, val) {
-                    $('#chooseCamera').button('option', 'label', val);
-                    $('#chooseCamera').attr('cameraID', idList[camList.indexOf(val)]);
+					//Only update if ok button was pressed, not cancel
+					if(ok){
+						$('#chooseCamera').button('option', 'label', val);
+						$('#chooseCamera').attr('cameraID', idList[camList.indexOf(val)]);
+					}
                 }, camList)
             })
             $(window).on('setstatecomplete', function() {
