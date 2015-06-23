@@ -354,7 +354,18 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             var vwfnode;
             while (pick && pick.object && !pick.object.vwfID) pick.object = pick.object.parent;
             if (pick && pick.object) vwfnode = pick.object.vwfID;
-            if (self.isSelected(vwfnode)) {
+
+            var selected = self.isSelected(vwfnode);
+            var testnode = vwfnode;
+            while(!selected && testnode)
+            {
+                testnode = vwf.parent(testnode);
+                selected = self.isSelected(testnode);
+                
+            }
+            if(selected)
+            vwfnode = testnode;
+            if (selected) {
                 $('#ContextMenuCopy').show();
                 $('#ContextMenuDelete').show();
                 $('#ContextMenuFocus').show();
@@ -383,9 +394,9 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             this.ContextShowEvent = e;
             $('#ContextMenuActions').empty();
             if (vwfnode) {
-                var actions = vwf.getEvents(vwfnode);
+                var actions = vwf.getMethods(vwfnode);
                 for (var i in actions) {
-                    if (actions[i].parameters.length == 1 && $.trim(actions[i].parameters[0]) == '') {
+                    if (actions[i].parameters.length == 0) {
                         $('#ContextMenuActions').append('<div id="Action' + i + '" class="ContextMenuAction">' + i + '</div>');
                         $('#Action' + i).attr('EventName', i);
                         $('#Action' + i).click(function() {
@@ -393,7 +404,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
                             $('#ContextMenu').css('z-index', '-1');
                             $(".ddsmoothmenu").find('li').trigger('mouseleave');
                             $('#index-vwf').focus();
-                            vwf_view.kernel.dispatchEvent(vwfnode, $(this).attr('EventName'));
+                            vwf_view.kernel.callMethod(vwfnode, $(this).attr('EventName'));
                         });
                     }
                 }
