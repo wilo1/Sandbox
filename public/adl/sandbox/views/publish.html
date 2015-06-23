@@ -112,13 +112,13 @@ color: lightgray;
 		$.ajax(root + '/vwfDataManager.svc/cameras?SID=' + sid, {
 			cache: false,
 			success: function(data,status,xhr){
-				data.unshift({id: "", name: "Default Camera"});
+				data.unshift({id: "", name: "Editor Camera"});
 				vwfPortalModel.cameraList(data);
 				$('#txtCamera').val(lastActiveCamera);
 			},
 			error: function(status,xhr,err){
 				$('#error').text("Error: " + xhr.responseText);
-				vwfPortalModel.cameraList([{id: "", name: "Default Camera"}]);
+				vwfPortalModel.cameraList([{id: "", name: "Editor Camera"}]);
 			}
 		});
 
