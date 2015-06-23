@@ -118,6 +118,7 @@ color: lightgray;
 			},
 			error: function(status,xhr,err){
 				$('#error').text("Error: " + xhr.responseText);
+				vwfPortalModel.cameraList([{id: "", name: "Default Camera"}]);
 			}
 		});
 
