@@ -913,6 +913,9 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
 
             }
         }
+        this.initializedProperty = function(id, propname, val) {
+            this.satProperty(id, propname, val);
+        }
         this.satProperty = function(id, propname, val) {
 
 
