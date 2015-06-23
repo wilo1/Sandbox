@@ -1850,14 +1850,14 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             translation[2] = this.SnapTo(translation[2], MoveSnap);
             translation[2] += .001;
             var BoxProto = {
-                extends: (type==='node' ? 'node3' : type+'2')+'.vwf',
+                extends: (type==='node' ? 'http://vwf.example.com/node3' : type+'2')+'.vwf',
                 properties: {}
             };
-            BoxProto.type = 'subDriver/threejs';
             var proto = BoxProto;
 
             if( type !== 'node' ){
                 BoxProto.source = 'vwf/model/threejs/' + type + '.js';
+                BoxProto.type = 'subDriver/threejs';
                 var defaultmaterialDef = {
                     shininess: 15,
                     alpha: 1,
@@ -1901,16 +1901,19 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
                 }
 
                 proto.properties.materialDef = defaultmaterialDef;
+                proto.properties.type = 'primitive';
+            }
+            else {
+                proto.properties.glyphURL = '../vwf/view/editorview/images/icons/sphere.png';
             }
 
             proto.properties.transform = MATH.transposeMat4(MATH.translateMatrix(translation));
 
             proto.properties.owner = owner;
 
-            proto.properties.type = 'primitive';
-
             proto.properties.DisplayName = self.GetUniqueName(type);
             var newname = GUID();
+            
             this.createChild('index-vwf', newname, proto, null, null);
             this.SelectOnNextCreate([newname])
         }.bind(this);
