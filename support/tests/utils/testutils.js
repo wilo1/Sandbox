@@ -38,7 +38,7 @@ module.exports.hookupUtils = function(browser) {
             })
         })
     });
-    browser.addCommand("getNode", function(nodename, cb) {
+	browser.addCommand("getNode", function(nodename, cb) {
         
         //var cb = arguments[arguments.length -1]
         module.exports.waitForNode(nodename, 10000, function(node) {
@@ -47,7 +47,7 @@ module.exports.hookupUtils = function(browser) {
             cb(null,node);
         })
     });
-    browser.addCommand("getProperty", function(newnodename, propname) {
+	browser.addCommand("getProperty", function(newnodename, propname) {
         
         var cb = arguments[arguments.length -1]
         browser.execute(function(a,b) {
@@ -60,7 +60,7 @@ module.exports.hookupUtils = function(browser) {
         	cb(null,r)
         });
     });
-    browser.addCommand("setProperty", function(newnodename, propname, value) {
+	browser.addCommand("setProperty", function(newnodename, propname, value) {
         
         var cb = arguments[arguments.length -1]
         browser.execute(function(a,b,c) {
@@ -72,13 +72,13 @@ module.exports.hookupUtils = function(browser) {
         	cb(null,r.value)
         });
     });
-    browser.addCommand("deleteNode", function(newnodename) {
+	browser.addCommand("deleteNode", function(newnodename) {
         
         var cb = arguments[arguments.length -1]
         browser.execute(function(a) {
-            var id = vwf.find(vwf.application(), a)[0];
+			var id = vwf.find(vwf.application(), a)[0];
 			if(!id) id = a;
-        	return vwf_view.kernel.deleteChild(vwf.application(),"" + id);
+			return vwf_view.kernel.deleteChild(vwf.application(),"" + id);
         }, newnodename,function(err, r)
         {
         	cb(null,r.value)
@@ -86,12 +86,6 @@ module.exports.hookupUtils = function(browser) {
     });
 	browser.addCommand("$click", function(cssSelector) {
 		var cb = arguments[arguments.length -1];
-        browser.execute(function(a) {
-        	return $(a).click();
-        }, cssSelector,function(err, jqObj)
-        {
-        	cb(null, jqObj);
-        });
 		browser.execute(function(a) {
 			return $(a).click();
 		}, cssSelector,function(err, jqObj)
@@ -109,11 +103,6 @@ module.exports.hookupUtils = function(browser) {
         {
         	cb(null, jqObj);
         });
-			return $(c).trigger(e);
-		}, cssSelector, key, function(err, jqObj)
-		{
-			cb(null, jqObj);
-		});
 	});
 	browser.addCommand("$keyup", function(cssSelector, key) {
 		var cb = arguments[arguments.length -1];
@@ -125,22 +114,12 @@ module.exports.hookupUtils = function(browser) {
         {
         	cb(null, jqObj);
         });
-			return $(c).trigger(e);
-		}, cssSelector, key, function(err, jqObj)
-		{
-			cb(null, jqObj);
-		});
 	});
 	browser.addCommand("$keypress", function(cssSelector, key) {
 		var cb = arguments[arguments.length -1];
         browser.execute(function(c, k) {
 			var e = $.Event("keypress");
 			e.which = e.keyCode = k.charCodeAt(0);
-        	return $(c).trigger(e);
-        }, cssSelector, key, function(err, jqObj)
-        {
-        	cb(null, jqObj);
-        });
 			return $(c).trigger(e);
 		}, cssSelector, key, function(err, jqObj)
 		{
@@ -156,11 +135,6 @@ module.exports.hookupUtils = function(browser) {
 				return true;
 			}
 			
-        	return false;
-        }, function(err, didSave)
-        {
-        	cb(null, didSave);
-        });
 			return false;
 		}, function(err, didSave)
 		{
