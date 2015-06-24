@@ -98,46 +98,49 @@ MyRTC.prototype.initialize = function( params )
 				}, 5000 );
 			}
 
-			// try to bind to camera and microphone
-			this.getUserMedia(
-				mediaDescription,
-				
-				// on success, bind webcam to local vid feed
-				bind_safetydance( this, function(stream)
-				{
-					// get rid of reminder
-					if( this.detectedBrowser == 'chrome' ){
-						clearTimeout(reminderTimeout);
-						$('#permission-reminder').hide( 'fade', 'fast' );
-					}
+			// on success, bind webcam to local vid feed
+			var mediaSuccess = bind_safetydance( this, function(stream)
+			{
+				// get rid of reminder
+				if( this.detectedBrowser == 'chrome' ){
+					clearTimeout(reminderTimeout);
+					$('#permission-reminder').hide( 'fade', 'fast' );
+				}
 
-					console.log('Binding local camera');
+				console.log('Binding local camera');
 
-					this.attachStreamToFrame(stream, this.localPlayer);
-					this.localStream = stream;
+				this.attachStreamToFrame(stream, this.localPlayer);
+				this.localStream = stream;
 					
-					setTimeout(function(){
-						console.log('Local video running at', this.localPlayer.videoWidth, 'by', this.localPlayer.videoHeight);
-					}.bind(this), 500);
+				setTimeout(function(){
+					console.log('Local video running at', this.localPlayer.videoWidth, 'by', this.localPlayer.videoHeight);
+				}.bind(this), 500);
 
-					this.setStatus( this.statusText.calling );
+				this.setStatus( this.statusText.calling );
 
-					if( this.trySetLocalMedia() ){
-						if( this.readyToOffer ){
-							this.readyToOffer = false;
-							this.makeOffer();
-						}
-						else if( this.readyToAnswer ){
-							this.readyToAnswer = false;
-							this.makeAnswer();
-							this.readyForIce = true;
-							this.onIceCreation();
-						}
+				if( this.trySetLocalMedia() ){
+					if( this.readyToOffer ){
+						this.readyToOffer = false;
+						this.makeOffer();
 					}
-				}),
+					else if( this.readyToAnswer ){
+						this.readyToAnswer = false;
+						this.makeAnswer();
+						this.readyForIce = true;
+						this.onIceCreation();
+					}
+				}
+			});
 					
-				// otherwise just print an error
-				bind_safetydance( this, function(error)
+			// otherwise just print an error
+			var mediaFailure = bind_safetydance( this, function(error)
+			{
+				// retry media request without video if failed
+				if( mediaDescription.video && error.name == 'DevicesNotFoundError'){
+					mediaDescription.video = false;
+					this.getUserMedia(mediaDescription, mediaSuccess, mediaFailure);
+				}
+				else
 				{
 					// get rid of reminder
 					clearTimeout(reminderTimeout);
@@ -156,8 +159,11 @@ MyRTC.prototype.initialize = function( params )
 						this.readyForIce = true;
 						this.onIceCreation();
 					}
-				})
-			);
+				}
+			});
+
+			// try to bind to camera and microphone
+			this.getUserMedia(mediaDescription, mediaSuccess, mediaFailure);
 		}
 	}
 	else {
