@@ -169,7 +169,7 @@ define(function() {
                         evt.preventDefault();
                         if(!currentDrag) return;
                         
-                        if (currentDrag.type == 'asset') {
+                        if (currentDrag.type == 'asset' || currentDrag.type == 'model') {
                             var pos = _Editor.GetInsertPoint(evt.originalEvent);
                             if(currentDrag.snap)
                             {
@@ -180,7 +180,7 @@ define(function() {
                             EntityLibrary.dropPreview.position.copy( new THREE.Vector3(pos[0], pos[1], pos[2]));
                             EntityLibrary.dropPreview.updateMatrixWorld();
                         }
-                        if (currentDrag.type == 'material' || currentDrag.type == 'child') {
+                        else if (/material|texture|child/.test(currentDrag.type)) {
                             var ID = EntityLibrary.GetPick(evt);
                             if (ID) {
 
@@ -197,7 +197,7 @@ define(function() {
                                 EntityLibrary.dropPreview.updateMatrixWorld();
                             }
                         }
-                        if (currentDrag.type == 'environment') {
+                        else if (currentDrag.type == 'environment') {
                             EntityLibrary.dropPreview.position.set(0, 0, 0);
                             EntityLibrary.dropPreview.scale.set(10, 10, 10);
                             EntityLibrary.dropPreview.updateMatrixWorld();
@@ -209,13 +209,12 @@ define(function() {
                     
                         if(!currentDrag) return;
                         var data = currentDrag;
-                        if (currentDrag.type == 'asset' || currentDrag.type == 'model') {
-                            if (!EntityLibrary.dropPreview) {
+                        if (!EntityLibrary.dropPreview) {
+                            if (currentDrag.type == 'asset' || currentDrag.type == 'model') {
                                 EntityLibrary.dropPreview = new THREE.Mesh(new THREE.SphereGeometry(1, 30, 30), EntityLibrary.createPreviewMaterial());
                                 _dScene.add(EntityLibrary.dropPreview, true);
                                 
                                 if (data.dropPreview) {
-                                    console.log(data.dropPreview.url);
                                     
                                     //the asset must have a 'drop preview' key
                                     window.assetRegistry.get(data.dropPreview.type, data.dropPreview.url, function(asset) {
@@ -232,10 +231,7 @@ define(function() {
                                     });
                                 }
                             }
-                        }
-                        if (currentDrag.type == 'material' || currentDrag.type == 'child' || currentDrag.type == 'environment' || currentDrag.type == 'texture') {
-
-                            if (!EntityLibrary.dropPreview) {
+                            else if (/material|texture|child|environment/.test(currentDrag.type)) {
                                 EntityLibrary.dropPreview = new  THREE.Object3D();//new THREE.Mesh(new THREE.SphereGeometry(1, 30, 30), EntityLibrary.createPreviewMaterial());
                                 _dScene.add(EntityLibrary.dropPreview, true);
                             }
@@ -373,7 +369,8 @@ define(function() {
                     }
 
                     // maintain reference to asset server, if applicable
-                    proto.properties.sourceAssetId = data.sourceAssetId;
+                    if( data.type === 'asset' )
+                        proto.properties.sourceAssetId = data.sourceAssetId;
                    
                     _Editor.createChild('index-vwf', newname, proto);
                     _Editor.SelectOnNextCreate([newname]);
@@ -381,21 +378,17 @@ define(function() {
                 }
                 if (data.type == 'asset')
                     $.getJSON(data.url, createProto);
-                if (data.type == 'model') 
+                else /*if (data.type == 'model')*/ 
                 {
                     var proto = {
                         "extends": "asset.vwf",
                         "source": data.url,
-                        "type": data.type,
-                        "properties":
-                        {
-                            "sourceAssetId" : data.sourceAssetId
-                        }
-                    }
+                        "type": data.modelType
+                    };
                     createProto(proto);
                 }
             }
-            if (data.type == 'child') {
+            else if (data.type == 'child') {
 
 
 
@@ -422,7 +415,7 @@ define(function() {
                 }
 
             }
-            if (data.type == 'material') {
+            else if (data.type == 'material') {
 
                 var ID = EntityLibrary.GetPick(evt);
                 if (ID) {
@@ -432,59 +425,31 @@ define(function() {
                     })
                 }
             }
-            if (data.type == 'texture') {
-
-                var materialDef ={
-                "shininess": 15,
-                "alpha": 1,
-                "ambient": {
-                    "r": 1,
-                    "g": 1,
-                    "b": 1
-                },
-                "color": {
-                    "r": 1,
-                    "g": 1,
-                    "b": 1,
-                    "a": 1
-                },
-                "emit": {
-                    "r": 0,
-                    "g": 0,
-                    "b": 0
-                },
-                "reflect": 0.8,
-                "shadeless": false,
-                "shadow": true,
-                "specularColor": {
-                    "r": 0.5773502691896258,
-                    "g": 0.5773502691896258,
-                    "b": 0.5773502691896258
-                },
-                "specularLevel": 1,
-                "sourceAssetId": data.sourceAssetId,
-                "layers": [{
-                        "alpha": 1,
-                        "blendMode": 0,
-                        "mapInput": 0,
-                        "mapTo": 1,
-                        "offsetx": 0,
-                        "offsety": 0,
-                        "rot": 0,
-                        "scalex": 1,
-                        "scaley": 1,
-                        "src": data.url
-                    }
-                ]
-            };
-
+            else if( data.type === 'texture' ) {
                 var ID = EntityLibrary.GetPick(evt);
-                if (ID) {
-                    proto.sourceAssetId = data.sourceAssetId;
-                    _PrimitiveEditor.setProperty(ID, 'materialDef', proto);
+                if(ID){
+                    var mat = {
+                        "color": {"r": 1,"g": 1,"b": 1},
+                        "ambient": {"r": 1,"g": 1,"b": 1},
+                        "emit": {"r": 0,"g": 0,"b": 0},
+                        "specularColor": {"r": 0.57,"g": 0.57,"b": 0.57},
+                        "specularLevel": 1, "shininess": 15,
+                        "alpha": 1, "side": 2,
+                        "shadeless": false, "shadow": true,
+                        "reflect": 0.8,
+                        "layers": [{
+                            "mapTo": 1, "mapInput": 0,
+                            "scalex": 1, "scaley": 1,
+                            "offsetx": 0, "offsety": 0,
+                            "alpha": 1, "blendMode": 0,
+                            "src": data.url,
+                        }],
+                        "type": "phong"
+                    };
+                    _PrimitiveEditor.setProperty(ID, 'materialDef', mat);
                 }
             }
-            if (data.type == 'environment') {
+            else if (data.type == 'environment') {
                 $.getJSON(data.url, function(proto) {
                     _UndoManager.startCompoundEvent();
                     for (var i in proto.properties)

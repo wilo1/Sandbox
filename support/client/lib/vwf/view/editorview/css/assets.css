@@ -51,7 +51,8 @@
         flex-grow: 1; }
         #manageAssetsDialog #assetBrowser .asset .info .name, #manageAssetsDialog #assetBrowser .newAsset .info .name {
           margin: 2px 0;
-          font-size: 16px; }
+          font-size: 16px;
+          overflow-wrap: break-word; }
         #manageAssetsDialog #assetBrowser .asset .info .meta, #manageAssetsDialog #assetBrowser .newAsset .info .meta {
           margin: 2px 0;
           font-size: 12px; }
@@ -96,7 +97,7 @@
     #manageAssetsDialog #propertyBrowser input:not([type=button]):disabled, #manageAssetsDialog #propertyBrowser textarea:not([type=button]):disabled {
       background-color: #ccc; }
     #manageAssetsDialog #propertyBrowser p.fixed-height, #manageAssetsDialog #propertyBrowser span.fixed-height, #manageAssetsDialog #propertyBrowser label.fixed-height {
-      height: 1.2em; }
+      min-height: 1.2em; }
     #manageAssetsDialog #propertyBrowser label#thumbnail {
       margin-top: 3px;
       -webkit-box-pack: justify;
@@ -136,15 +137,20 @@
         left: 0;
         opacity: 0;
         cursor: pointer; }
-      #manageAssetsDialog #propertyBrowser #dragarea input#typeInput {
+      #manageAssetsDialog #propertyBrowser #dragarea #typeInput {
         z-index: 1; }
+        #manageAssetsDialog #propertyBrowser #dragarea #typeInput input, #manageAssetsDialog #propertyBrowser #dragarea #typeInput select {
+          direction: rtl; }
+        #manageAssetsDialog #propertyBrowser #dragarea #typeInput select {
+          width: 20px; }
       #manageAssetsDialog #propertyBrowser #dragarea span {
         margin: 20px;
         font-size: 18px;
         text-decoration: underline; }
     #manageAssetsDialog #propertyBrowser p#url {
       text-align: center;
-      font-size: 18px; }
+      font-size: 18px;
+      word-wrap: break-word; }
     #manageAssetsDialog #propertyBrowser #permissions {
       -webkit-box-align: center;
       -moz-align-items: center;

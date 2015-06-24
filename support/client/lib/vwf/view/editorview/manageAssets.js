@@ -3,8 +3,19 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 	var app = angular.module('ManageAssetsDialog', []);
 	var dataRoot = null;
 	var appPath = '';
-
+	var appHeaderName = '';
 	var uploadVWFObject, setSelection;
+
+	app.run(['$http', function($http){
+		if(appHeaderName){
+			var cookie = /session=([A-Za-z0-9_.-]+)/.exec(document.cookie);
+			if(cookie){
+				$http.defaults.headers.post[appHeaderName] = cookie[1];
+				$http.defaults.headers.delete = $http.defaults.headers.delete || {};
+				$http.defaults.headers.delete[appHeaderName] = cookie[1];
+			}
+		}
+	}]);
 
 	app.factory('DataManager', ['$rootScope','$http', function($rootScope, $http)
 	{
@@ -84,6 +95,18 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 		}
 		$rootScope.resetNew();
 
+		$rootScope.prettifyType = function(type){
+			switch(type){
+				case 'application/vnd.vws-entity+json':
+					return 'VWS Entity';
+				case 'application/vnd.vws-material+json':
+					return 'VWS Material';
+				case 'application/vnd.vws-behavior+json':
+					return 'VWS Behavior';
+				default:
+					return type;
+			}
+		};
 
 		return null;
 	}]);
@@ -217,22 +240,16 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 	{
 		$scope.hideThumbs = true;
 
-		$scope.prettifyType = function(type){
-			switch(type){
-				case 'application/vnd.vws-entity+json':
-					return 'VWS Entity';
-				case 'application/vnd.vws-material+json':
-					return 'VWS Material';
-				case 'application/vnd.vws-behavior+json':
-					return 'VWS Behavior';
-				default:
-					return type;
-			}
-		}
 	}]);
 
 	app.controller('AssetPropertiesController', ['$scope','$rootScope','$http','DataManager', function($scope,$rootScope,$http)
 	{
+		$scope.knownTypes = [
+			'image/png', 'image/jpeg', 'image/dds',
+			'model/vnd.collada+xml', 'model/vnd.three.js+json', 'model/vnd.gltf+json',
+			'application/vnd.vws-entity+json', 'application/vnd.vws-material+json', 'application/vnd.vws-behavior+json',
+			'application/octet-stream', 'application/json'
+		].sort();
 
 		// keep 'selected' in sync with currently selected asset
 		$scope.$watchGroup(['fields.selected', 'assets[fields.selected]', 'new'], function(newvals)
@@ -281,18 +298,60 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 					$scope.selected.filename = files[0].name;
 					$scope.selected.filedata = new Uint8Array(fr.result);
 
+					if( $scope.selected.name === '<new asset>' )
+						$scope.selected.name = files[0].name;
+
 					if(files[0].type){
 						$scope.selected.type = files[0].type;
 					}
 					else if(/\.dae$/i.test(files[0].name)){
 						$scope.selected.type = 'model/vnd.collada+xml';
 					}
+					/* force user to disambiguate json extensions
 					else if(/\.json$/i.test(files[0].name)){
 						$scope.selected.type = 'application/json';
-					}
+					}*/
 					else {
 						$scope.selected.type = '';
 					}
+
+					// attempt to determine image resolution
+					if( $scope.selected.type.slice(0,6) === 'image/' )
+					{
+						// get data url from buffer
+						var dataStr = '';
+						for(var offset=0; offset<$scope.selected.filedata.byteLength; offset += 0x8000){
+							dataStr += String.fromCharCode.apply(null, $scope.selected.filedata.subarray(offset, offset+0x8000));
+						}
+						var dataUrl = 'data:'+$scope.selected.type+';base64,'+btoa(dataStr);
+
+						var img = new Image();
+						img.onload = function()
+						{
+							if( $scope.selected.width != this.width || $scope.selected.height != this.height )
+							{
+								$scope.selected.width = this.width;
+								$scope.selected.height = this.height;
+
+								// set self thumbnail
+								if( this.width<200 && this.height<200 && !$scope.selected.thumbnail ){
+									$scope.selected.thumbnail = $scope.selected.id ? 'asset:'+$scope.selected.id : ':self';
+								}
+
+								// flag as a texture
+								var log2 = Math.log2 || function(x){ return Math.log(x)/Math.LN2; };
+								var exp = log2($scope.selected.width);
+								if( $scope.selected.width === $scope.selected.height && exp === Math.floor(exp) && exp >= 8 )
+									$scope.selected.isTexture = true;
+								else
+									$scope.selected.isTexture = null;
+
+								$scope.selected._basicDirty = true;
+							}
+						};
+						img.src = dataUrl;
+					}
+
 					$scope.selected._dirty = true;
 					$scope.$apply();
 				};
@@ -395,8 +454,16 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 						url += queryChar+'permissions='+ perms.toString(8);
 						queryChar = '&';
 					}
-					if( $scope.selected.type.slice(0,6) === 'image/' && $scope.selected.filedata.byteLength < 30000 ){
-						url += queryChar+'thumbnail='+ encodeURIComponent(':self');
+					if( $scope.selected.thumbnail ){
+						url += queryChar+'thumbnail='+ encodeURIComponent($scope.selected.thumbnail);
+						queryChar = '&';
+					}
+					if( $scope.selected.isTexture ){
+						url += queryChar+'isTexture='+ encodeURIComponent($scope.selected.isTexture);
+						queryChar = '&';
+					}
+					if( $scope.selected.type.slice(0,6) === 'image/' ){
+						url += queryChar+'width='+$scope.selected.width + '&height='+$scope.selected.height;
 						queryChar = '&';
 					}
 
@@ -420,6 +487,11 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 
 					xhr.open('POST', url);
 					xhr.setRequestHeader('Content-Type', $scope.selected.type);
+
+					if( $http.defaults.headers.post[appHeaderName] ){
+						xhr.setRequestHeader(appHeaderName, $http.defaults.headers.post[appHeaderName]);
+					}
+
 					xhr.send($scope.selected.filedata);
 
 				}
@@ -454,7 +526,11 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 						checkRemaining();
 					});
 					xhr.open('POST', $scope.appPath+'/assets/'+$scope.selected.id);
-					xhr.setRequestHeader('Content-Type', $('#manageAssetsDialog input#typeInput').val());
+					xhr.setRequestHeader('Content-Type', $scope.selected.type);
+
+					if( $http.defaults.headers.post[appHeaderName] ){
+						xhr.setRequestHeader(appHeaderName, $http.defaults.headers.post[appHeaderName]);
+					}
 
 					xhr.send($scope.selected.filedata);
 				}
@@ -462,7 +538,14 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 				if($scope.selected._basicDirty)
 				{
 					toComplete += 1;
-					var meta = {name: $scope.selected.name, description: $scope.selected.description, thumbnail: $scope.selected.thumbnail};
+					var meta = {
+						name: $scope.selected.name, 
+						description: $scope.selected.description, 
+						thumbnail: $scope.selected.thumbnail,
+						width: $scope.selected.width || null,
+						height: $scope.selected.height || null,
+						isTexture: $scope.selected.isTexture
+					};
 					$http.post($scope.appPath+'/assets/'+$scope.selected.id+'/meta', meta).success(checkRemaining)
 					.error(function(data,status){
 						alertify.alert('Failed to post metadata: '+data);
@@ -527,7 +610,6 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 		initialize: function()
 		{
 			// actually insert the html
-			$("<link rel='stylesheet' href='vwf/view/editorview/css/assets.css'/>").appendTo(document.head);
 			$('<div id="manageAssetsContainer"></div>').appendTo(document.body);
 			$('#manageAssetsContainer').load('vwf/view/editorview/manageAssets.html',function()
 			{
@@ -538,9 +620,25 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 					autoOpen: false
 				});
 
-				$.get('vwfDataManager.svc/saspath', function(data){
+				$.get('vwfDataManager.svc/saspath', function(data)
+				{
 					appPath = data;
-					angular.bootstrap($('#manageAssetsDialog')[0], ['ManageAssetsDialog']);
+
+					// check if same origin
+					var loc = window.location;
+					var a = document.createElement('a');
+					a.href = appPath;
+
+					if( a.hostname == loc.hostname && a.port == loc.port && a.protocol == loc.protocol ){
+						// no need to fetch header name, just initialize
+						angular.bootstrap($('#manageAssetsDialog')[0], ['ManageAssetsDialog']);
+					}
+					else {
+						$.get(appPath+'/session-header-name', function(data){
+							appHeaderName = data;
+							angular.bootstrap($('#manageAssetsDialog')[0], ['ManageAssetsDialog']);
+						});
+					}
 				});
 			});
 		},
@@ -603,10 +701,6 @@ define(['vwf/view/editorview/lib/angular','vwf/view/editorview/strToBytes'], fun
 				);
 			}
 			else setSelection('new');
-		},
-
-		nodeIsBehavior: function(node){
-			return nodeInherits(node.id, 'http-vwf-example-com-behavior-vwf');
 		},
 
 		uploadFile: function(){

@@ -8,6 +8,79 @@ function clearCameraModeIcons() {
 
 define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 {
+	function updateMenuState()
+	{
+		function nodeInherits(node, ancestor)
+		{
+			if(!node)
+				return false;
+			else if(node == ancestor)
+				return true;
+			else
+				return nodeInherits( vwf.prototype(node), ancestor );
+		}
+
+		var node = _Editor.GetSelectedVWFNode(),
+			selection = !!node,
+			hasMaterial = !!(node && node.properties && node.properties.materialDef),
+			isBehavior = !!(node && nodeInherits(node.id, 'http-vwf-example-com-behavior-vwf')),
+			isEntityAsset = !!(node && node.properties && node.properties.sourceAssetId),
+			isMaterialAsset = !!(node && node.properties && node.properties.materialDef && node.properties.materialDef.sourceAssetId),
+			isGroup = !!(node && nodeInherits(node.id, 'sandboxGroup-vwf')),
+			loggedIn = !!_UserManager.GetCurrentUserName(),
+			hasAvatar = !!(loggedIn && _UserManager.GetAvatarForClientID(vwf.moniker()));
+
+		$('#MenuLogIn').parent()
+			.toggleClass('disabled', loggedIn);
+		$('#MenuLogOut').parent()
+			.toggleClass('disabled', !loggedIn);
+
+		$('#MenuCopy').parent()
+			.toggleClass('disabled', !selection);
+		$('#MenuDuplicate').parent()
+			.toggleClass('disabled', !selection);
+		$('#MenuDelete').parent()
+			.toggleClass('disabled', !selection);
+
+		$('#MenuAssetsSaveAsEntity').parent()
+			.toggleClass('disabled', !selection);
+		$('#MenuAssetsSaveAsMaterial').parent()
+			.toggleClass('disabled', !hasMaterial);
+		$('#MenuAssetsSaveAsBehavior').parent()
+			.toggleClass('disabled', !isBehavior);
+		$('#MenuAssetsSave').parent()
+			.toggleClass('disabled', !isEntityAsset && !isMaterialAsset);
+		$('#MenuAssetsSaveEntity').parent()
+			.toggleClass('disabled', !isEntityAsset || !selection);
+		$('#MenuAssetsSaveMaterial').parent()
+			.toggleClass('disabled', !isMaterialAsset || !hasMaterial);
+		$('#MenuAssetsSaveBehavior').parent()
+			.toggleClass('disabled', !isEntityAsset || !isBehavior);
+
+		$('#MenuFocusSelected').parent()
+			.toggleClass('disabled', !selection);
+
+		$('#MenuHierarchy').parent()
+			.toggleClass('disabled', !selection);
+		$('#MenuUngroup').parent()
+			.toggleClass('disabled', !isGroup);
+		$('#MenuOpenGroup').parent()
+			.toggleClass('disabled', !isGroup);
+		$('#MenuCloseGroup').parent()
+			.toggleClass('disabled', !isGroup);
+
+		$('#MenuLocation').parent()
+			.toggleClass('disabled', !hasAvatar);
+		$('#MenuAlign').parent()
+			.toggleClass('disabled', !selection);
+		$('#MenuSplineTools').parent()
+			.toggleClass('disabled', !selection);
+		$('#ToolsShowID').parent()
+			.toggleClass('disabled', !selection);
+		$('#ToolsShowVWF').parent()
+			.toggleClass('disabled', !selection);
+	}
+
 	return {
 
         initialize: function()
@@ -111,34 +184,11 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
     
             }
 
+			// determine disabled status when selection changes
+			$(document).on('selectionChanged', updateMenuState);
 
 			// load asset manager
 			manageAssets.initialize();
-
-			// determine disabled status when selection changes
-			$(document).on('selectionChanged', function(e, node)
-			{
-				var isEntity = !!node,
-					isMaterial = !!(node && node.properties && node.properties.materialDef),
-					isBehavior = !!(node && manageAssets.nodeIsBehavior(node)),
-					isEntityAsset = !!(node && node.properties && node.properties.sourceAssetId),
-					isMaterialAsset = !!(node && node.properties && node.properties.materialDef && node.properties.materialDef.sourceAssetId);
-					
-				$('#MenuAssetsSaveAsEntity').parent()
-					.toggleClass('disabled', !isEntity);
-				$('#MenuAssetsSaveAsMaterial').parent()
-					.toggleClass('disabled', !isMaterial);
-				$('#MenuAssetsSaveAsBehavior').parent()
-					.toggleClass('disabled', !isBehavior);
-				$('#MenuAssetsSave').parent()
-					.toggleClass('disabled', !isEntityAsset && !isMaterialAsset);
-				$('#MenuAssetsSaveEntity').parent()
-					.toggleClass('disabled', !isEntityAsset || !isEntity);
-				$('#MenuAssetsSaveMaterial').parent()
-					.toggleClass('disabled', !isMaterialAsset || !isMaterial);
-				$('#MenuAssetsSaveBehavior').parent()
-					.toggleClass('disabled', !isEntityAsset || !isBehavior);
-			});
 
 			// hook up assets menu
             $('#MenuManageAssets').click(function(e){
@@ -513,7 +563,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
     
     
             $('#MenuHelpBrowse').click(function(e) {
-                window.open('http://vwf.adlnet.gov/r/c/documentation/', '_blank');
+                window.open('http://sandboxdocs.readthedocs.org/en/latest/', '_blank');
             });
             $('#MenuHelpAbout').click(function(e) {
                 $('#NotifierAlertMessage').dialog('open');
@@ -846,6 +896,9 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
             });
     
     
+            $('#MenuCreateEmpty').click(function(e) {
+                _Editor.CreatePrim('node', _Editor.GetInsertPoint(), null, null, document.PlayerNumber, '');
+            });
             $('#MenuCreateSphere').click(function(e) {
                 _Editor.CreatePrim('sphere', _Editor.GetInsertPoint(), [.5, 1, 1], 'checker.jpg', document.PlayerNumber, '');
             });
@@ -971,6 +1024,13 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
     
             //make every clicked menu item close all menus
             // $('#smoothmenu1').find('[id]').filter(':only-child').click(function(){ddsmoothmenu.closeall({type:'click',target:'asd'})});
-    	}
+    	},
+
+		calledMethod: function(id, evtname, data)
+		{
+			if(/^character-vwf/.test(id) && evtname == 'ready'){
+				updateMenuState();
+			}
+		}
     };
 });

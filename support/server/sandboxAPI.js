@@ -1745,6 +1745,10 @@ function serve(request, response)
 							libraryFormatter.entitiesToLibrary(UID, 'material', response);
 						else if( /my-behaviors$/.test(pathAfterCommand) )
 							libraryFormatter.entitiesToLibrary(UID, 'behavior', response);
+						else if( /my-textures$/.test(pathAfterCommand) )
+							libraryFormatter.entitiesToLibrary(UID, 'texture', response);
+						else if( /my-models$/.test(pathAfterCommand) )
+							libraryFormatter.entitiesToLibrary(UID, 'model', response);
 						else
 							_404(response);
 					}

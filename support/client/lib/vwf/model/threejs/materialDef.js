@@ -63,51 +63,42 @@
             }
             this.setMaterialInternal = function(propval)
             {
-                console.log("materialDef on " + this.ID, propval )
-                            propval = JSON.parse(JSON.stringify(propval));
-                            var needRebuild = false;
-                            if (!this.compareLayers(this.materialDef, propval))
-                            {
-                                needRebuild = true;
-                            }
-                            //the copy here is necesary because we tack some properties onto this should not be send back when requesting the value
-                            this.materialDef_ = JSON.parse(JSON.stringify(propval));
-                            var list = [];
-                            for (var i = 0; i < this.getRoot().children.length; i++)
-                            {
-                                this.GetAllLeafMeshesMat(this.getRoot().children[i], list);
-                            }
-                            if (this.getRoot() instanceof THREE.Mesh)
-                                list.push(this.getRoot());
-                            for (var i = 0; i < list.length; i++)
-                            {
-                               
-                                if (list[i].morphTargetInfluences)
-                                    propval.morphTargets = true;
-                                else
-                                    propval.morphTargets = false;
-                                if (list[i] instanceof THREE.SkinnedMesh)
-                                    propval.skinning = true;
-                                else
-                                    propval.skinning = false;
-                                if (list[i].receiveShadow)
-                                    propval.shadows = true;
-                                else
-                                    propval.shadows = false;
-                                if (!(propval instanceof Array))
-                                    _MaterialCache.setMaterial(list[i], propval);
-                                else if (list.length == 1)
-                                    _MaterialCache.setMaterial(list[i], propval);
-                                else
-                                {
-                                    _MaterialCache.setMaterial(list[i], propval[Math.min(i, propval.length - 1)]);
-                                }
-                                list[i].materialUpdated();
-                            }
-                            if (this.dirtyStack && needRebuild)
-                            {
-                                this.dirtyStack(true);
-                            }
+                //console.log("materialDef on " + this.ID, propval )
+                propval = JSON.parse(JSON.stringify(propval));
+                var needRebuild = false;
+                if (!this.compareLayers(this.materialDef, propval))
+                {
+                    needRebuild = true;
+                }
+                //the copy here is necesary because we tack some properties onto this should not be send back when requesting the value
+                this.materialDef_ = JSON.parse(JSON.stringify(propval));
+                var list = [];
+                for (var i = 0; i < this.getRoot().children.length; i++)
+                {
+                    this.GetAllLeafMeshesMat(this.getRoot().children[i], list);
+                }
+                if (this.getRoot() instanceof THREE.Mesh)
+                    list.push(this.getRoot());
+                for (var i = 0; i < list.length; i++)
+                {
+                    propval.morphTargets = !!list[i].morphTargetInfluences;
+                    propval.skinning = !!(list[i] instanceof THREE.SkinnedMesh);
+                    propval.shadows = !!list[i].receiveShadow;
+                    
+                    if (!(propval instanceof Array))
+                        _MaterialCache.setMaterial(list[i], propval);
+                    else if (list.length == 1)
+                        _MaterialCache.setMaterial(list[i], propval);
+                    else
+                    {
+                        _MaterialCache.setMaterial(list[i], propval[Math.min(i, propval.length - 1)]);
+                    }
+                    list[i].materialUpdated();
+                }
+                if (this.dirtyStack && needRebuild)
+                {
+                    this.dirtyStack(true);
+                }
             }
             this.settingProperty = function(propname, propval)
                 {
