@@ -12,7 +12,7 @@ function bind_safetydance(context, fn){
 /*
  * MyRTC object constructor
  */
-function MyRTC(localPlayer, remotePlayer, channelSendCallback, channelReceiveCallback)
+function MyRTC(localPlayer, remotePlayer, channelSendCallback, channelReceiveCallback, statusCallback)
 {
 	// set status text constants
 	this.statusText = {
@@ -37,6 +37,7 @@ function MyRTC(localPlayer, remotePlayer, channelSendCallback, channelReceiveCal
 	// register callbacks
 	this.sendMessage = channelSendCallback;
 	this.registerReceiveCallback = channelReceiveCallback;
+	this.statusCallback = statusCallback;
 	this.localPlayer = localPlayer;
 	this.remotePlayer = remotePlayer;
 	
@@ -47,8 +48,8 @@ MyRTC.prototype.setStatus = function( params )
 {
 	if( this.statusLocked ) return;
 
-	$('#vidFrame #connectionStatus').text( params.text );
-	$('#vidFrame #connectionStatus').css( 'color', params.color );
+	this.statusCallback(params);
+
 	if( params.sticky )
 		this.statusLocked = true;
 }
@@ -311,7 +312,9 @@ MyRTC.prototype.createPeerConnection = function()
 	this.peerConn.oniceconnectionstatechange = bind_safetydance(this, function(evt)
 	{
 		console.log('Ice change:', evt.currentTarget.iceConnectionState);
-		if( evt.currentTarget.iceConnectionState == 'connected' ){
+
+		// check both for compatibility reasons. different versions of spec?
+		if( /^(completed|connected)$/.test(evt.currentTarget.iceConnectionState) ){
 			this.isRemoteStreamStarted = true;
 			this.setStatus( this.statusText.connected );
 		}
