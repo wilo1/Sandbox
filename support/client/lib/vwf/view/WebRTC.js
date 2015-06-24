@@ -197,6 +197,7 @@ define(["module", "vwf/view", "vwf/view/rtcObject"], function(module, view, RTCO
 							} else {
 								console.log('Call rejected');
 								$('#vidFrame'+ToSafeID(params.sender)+' #videoClose').click();
+								vwf_view.kernel.callMethod('index-vwf', 'rtcDisconnect', {target: params.sender, sender: vwf.moniker()});
 							}
 
 						}.bind(this));
