@@ -1384,8 +1384,8 @@ define(["module", "vwf/model", "vwf/configuration"], function(module, model, con
                         collisionPointB: collisionPointB,
                         collisionNormal: collisionNormal
                     };
-                    if (!this.oldCollisions[vwfIDA] || this.oldCollisions[vwfIDA].indexOf(vwfIDB) === -1) vwf.callMethod(vwfIDA, 'collision', [vwfIDB, collision]);
-                    if (!this.oldCollisions[vwfIDB] || this.oldCollisions[vwfIDB].indexOf(vwfIDA) === -1) vwf.callMethod(vwfIDB, 'collision', [vwfIDA, collision]);
+                    if (!this.oldCollisions[vwfIDA] || this.oldCollisions[vwfIDA].indexOf(vwfIDB) === -1 && vwf.isSimulating(vwfIDA)) vwf.callMethod(vwfIDA, 'collision', [vwfIDB, collision]);
+                    if (!this.oldCollisions[vwfIDB] || this.oldCollisions[vwfIDB].indexOf(vwfIDA) === -1 && vwf.isSimulating(vwfIDB)) vwf.callMethod(vwfIDB, 'collision', [vwfIDA, collision]);
                     if (!newCollisions[vwfIDA]) newCollisions[vwfIDA] = [];
                     if (!newCollisions[vwfIDB]) newCollisions[vwfIDB] = [];
                     newCollisions[vwfIDA].push(vwfIDB);
@@ -1401,7 +1401,7 @@ define(["module", "vwf/model", "vwf/configuration"], function(module, model, con
                 var nodekeys = Object.keys(this.allNodes).sort();
                 for (var g =0; g < nodekeys.length; g++) {
                     var node = this.allNodes[nodekeys[g]];
-                    if (vwf.isSimulating(node.id) && node && node.update) {
+                    if (node && node.update) {
                         node.update();
                         var propkeys = Object.keys(node.delayedProperties || {});
                         for (var i =0; i < propkeys.length; i++) {
@@ -1419,17 +1419,20 @@ define(["module", "vwf/model", "vwf/configuration"], function(module, model, con
                 var nodekeys = Object.keys(this.allNodes).sort();
                  for (var i =0; i < nodekeys.length; i++) {
                     var node = this.allNodes[nodekeys[i]];
-                    if (node.body && node.initialized === true && node.mass > 0 && node.getActivationState() != 2) {
-                        vwf.setProperty(node.id, 'transform', node.getTransform(tempmat));
-                        //so, we were setting these here in order to inform the kernel that the property changed. Can we not do this, and 
-                        //rely on the getter? that would be great....
-                        vwf.setProperty(node.id, '___physics_activation_state', node.getActivationState());
-                        vwf.setProperty(node.id, '___physics_velocity_angular', node.getAngularVelocity());
-                        vwf.setProperty(node.id, '___physics_velocity_linear', node.getLinearVelocity());
-                        vwf.setProperty(node.id, '___physics_deactivation_time', node.getDeactivationTime());
-                    }if(node.joint)
-                    {
-                         vwf.setProperty(node.id, 'transform', node.getTransform(tempmat));
+                   // if(vwf.isSimulating(node.id))
+                    {    
+                        if (node.body && node.initialized === true && node.mass > 0 && node.getActivationState() != 2) {
+                            vwf.setProperty(node.id, 'transform', node.getTransform({}));
+                            //so, we were setting these here in order to inform the kernel that the property changed. Can we not do this, and 
+                            //rely on the getter? that would be great....
+                            vwf.setProperty(node.id, '___physics_activation_state', node.getActivationState());
+                            vwf.setProperty(node.id, '___physics_velocity_angular', node.getAngularVelocity());
+                            vwf.setProperty(node.id, '___physics_velocity_linear', node.getLinearVelocity());
+                            vwf.setProperty(node.id, '___physics_deactivation_time', node.getDeactivationTime());
+                        }if(node.joint)
+                        {
+                             vwf.setProperty(node.id, 'transform', node.getTransform(tempmat));
+                        }
                     }
 
                 }

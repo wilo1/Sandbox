@@ -793,6 +793,13 @@ function ClientConnected(socket, namespace, instancedata)
                         node: "index-vwf",
                         "time": thisInstance.time
                     })));
+
+                    socket.emit('message', messageCompress.pack(JSON.stringify(
+                    {
+                        "action": "startSimulating",
+                        "parameters": ["index-vwf"],
+                        "time": thisInstance.time
+                    })));
                     socket.pending = false;
                     //this must come after the client is added. Here, there is only one client
                     thisInstance.messageConnection(socket.id, socket.loginData ? socket.loginData.Username : "", socket.loginData ? socket.loginData.UID : "");
@@ -1118,13 +1125,7 @@ function ClientConnected(socket, namespace, instancedata)
                         xapi.sendStatement(socket.loginData.UID, xapi.verbs.rezzed, childID,childComponent.properties.DisplayName,null,thisInstance.id);
 
                         
-                        sendingclient.emit('message', messageCompress.pack(JSON.stringify(
-                        {
-
-                            "action": "startSimulating",
-                            "parameters": [childID],
-                            "time": 0
-                        })));
+                       
                     
                     }
                     else
@@ -1201,6 +1202,18 @@ function ClientConnected(socket, namespace, instancedata)
                         if (client.pending == true)
                         {
                             client.pendingList.push(compressedMessage);
+
+                            if(message.action == "createChild")
+                            {
+                                sendingclient.emit('message', messageCompress.pack(JSON.stringify(
+                                {
+
+                                    "action": "startSimulating",
+                                    "parameters": [childID],
+                                    "time": thisInstance.time
+                                })));
+                            }
+                            
                             logger.debug('PENDING', 2);
                         }
                         else
@@ -1220,6 +1233,16 @@ function ClientConnected(socket, namespace, instancedata)
                             {
 
                                 client.emit('message', compressedMessage);
+                            }
+                            if(message.action == "createChild")
+                            {
+                                sendingclient.emit('message', messageCompress.pack(JSON.stringify(
+                                {
+
+                                    "action": "startSimulating",
+                                    "parameters": [childID],
+                                    "time": thisInstance.time
+                                })));
                             }
                         }
                     }

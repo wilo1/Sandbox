@@ -1131,18 +1131,25 @@ this.respond = function( nodeID, actionName, memberName, parameters, result ) {
 /// @name module:vwf.receive
 
 this.nodesSimulating = [];
+this.propertyDataUpdates = {};
 this.startSimulating = function(nodeID)
 {
-    if(this.nodesSimulating.indexOf(nodeID) == -1)
+    var nodes = this.decendants(nodeID);
+    if(nodeID !== "index-vwf")
+        nodes.push(nodeID);
+    for (var i =0; i < nodes.length; i++)
+    if(this.nodesSimulating.indexOf(nodes[i]) == -1)
     {
-        this.nodesSimulating.push(nodeID);
+        this.nodesSimulating.push(nodes[i]);
     }
 }
 this.endSimulating = function(nodeID)
 {
-    if(this.nodesSimulating.indexOf(nodeID) != -1)
+    var nodes = this.decendants(nodeID);
+    nodes.push(nodeID);
+    if(this.nodesSimulating.indexOf(nodes[i]) != -1)
     {
-        this.nodesSimulating.splice(this.nodesSimulating.indexOf(nodeID),1);
+        this.nodesSimulating.splice(this.nodesSimulating.indexOf(nodes[i]),1);
     }
 }
 this.isSimulating = function(nodeID)
@@ -1150,18 +1157,37 @@ this.isSimulating = function(nodeID)
     return nodeID == "index-vwf" ||
      (this.nodesSimulating.indexOf(nodeID) != -1)
 }
-this.simulationStateUpdate = function(nodeID,state)
+this.simulationStateUpdate = function(nodeID,member,state)
 {
     if(!nodes.existing[nodeID]) return;
     if(this.isSimulating(nodeID)) return;
-    this.setProperties(nodeID,state)
+    for (var i in state)
+        this.setProperty(nodeID,i,state[i]);
 }
 this.postSimulationStateUpdate = function(nodeID)
 {
     if(!nodes.existing[nodeID]) return;
     var action = "simulationStateUpdate";
-    var props = this.getProperties(nodeID);
-    this.send(nodeID,action,null,[props])
+    var props = this.propertyDataUpdates[nodeID];
+    if(props)
+        this.send(nodeID,action,"null",[props]);
+}
+this.postSimulationStateUpdates = function()
+{
+    for(var i = 0; i < this.nodesSimulating.length; i++)
+    {
+        this.postSimulationStateUpdate(this.nodesSimulating[i]);
+    }
+    this.propertyDataUpdates = {};
+}
+this.propertyUpdated = function(id,name,val)
+{
+    if(this.isSimulating(id))
+    {
+        if(!this.propertyDataUpdates[id])
+            this.propertyDataUpdates[id] = {};
+        this.propertyDataUpdates[id][name] = val;
+    }
 }
 this.receive = function( nodeID, actionName, memberName, parameters, respond, origin ) {
 
@@ -1363,10 +1389,7 @@ this.tick = function() {
         view.ticked && view.ticked( this.now ); // TODO: maintain a list of tickable views and only call those
     }, this );
 
-    for(var i = 0; i < this.nodesSimulating.length; i++)
-    {
-        this.postSimulationStateUpdate(this.nodesSimulating[i]);
-    }
+    this.postSimulationStateUpdates();
 };
 
 // -- setState -----------------------------------------------------------------------------
@@ -3544,7 +3567,7 @@ this.setProperty = function( nodeID, propertyName, propertyValue ) {
     if ( outermost ) {
         delete entrants.assignments;
     }
-
+    this.propertyUpdated(nodeID,propertyName,propertyValue);
     this.logger.debugu();
 
     return propertyValue;
