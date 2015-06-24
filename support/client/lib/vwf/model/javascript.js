@@ -564,8 +564,6 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
 
         // -- settingProperties --------------------------------------------------------------------
 
-        settingProperties: function(nodeID, properties) { // TODO: these are here as a hack to keep scripts from coloring the setNode()/getNode() property values; vwf/kernel/model's disable and set/getProperties need to handle this properly (problem: getters can still return a value even when reentry is blocked)
-        },
 
         // -- gettingProperties --------------------------------------------------------------------
 
@@ -1520,8 +1518,11 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
 
             var body = node.private.bodies && node.private.bodies[method];
 
+
             if (body) {
-                body.apply(node, args);
+                if(vwf.isSimulating(node.id))
+                    body.apply(node, args);
+               
             }
 
             if (node.children)

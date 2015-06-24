@@ -75,9 +75,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         // -- settingProperties --------------------------------------------------------------------
 
-        settingProperties: function( nodeID, properties ) {
-
-        },
+       
 
         // -- gettingProperties --------------------------------------------------------------------
 

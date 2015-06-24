@@ -1130,6 +1130,39 @@ this.respond = function( nodeID, actionName, memberName, parameters, result ) {
 /// 
 /// @name module:vwf.receive
 
+this.nodesSimulating = [];
+this.startSimulating = function(nodeID)
+{
+    if(this.nodesSimulating.indexOf(nodeID) == -1)
+    {
+        this.nodesSimulating.push(nodeID);
+    }
+}
+this.endSimulating = function(nodeID)
+{
+    if(this.nodesSimulating.indexOf(nodeID) != -1)
+    {
+        this.nodesSimulating.splice(this.nodesSimulating.indexOf(nodeID),1);
+    }
+}
+this.isSimulating = function(nodeID)
+{
+    return nodeID == "index-vwf" ||
+     (this.nodesSimulating.indexOf(nodeID) != -1)
+}
+this.simulationStateUpdate = function(nodeID,state)
+{
+    if(!nodes.existing[nodeID]) return;
+    if(this.isSimulating(nodeID)) return;
+    this.setProperties(nodeID,state)
+}
+this.postSimulationStateUpdate = function(nodeID)
+{
+    if(!nodes.existing[nodeID]) return;
+    var action = "simulationStateUpdate";
+    var props = this.getProperties(nodeID);
+    this.send(nodeID,action,null,[props])
+}
 this.receive = function( nodeID, actionName, memberName, parameters, respond, origin ) {
 
     // origin == "reflector" ?
@@ -1144,6 +1177,11 @@ this.receive = function( nodeID, actionName, memberName, parameters, respond, or
 
     // Note that the message should be validated before looking up and invoking an arbitrary
     // handler.
+
+    if(["callMethod","fireEvent","dispatchEvent"].indexOf(actionName) != -1 && !this.isSimulating(nodeID))
+    {
+        return; //we're not going to actually do the simulation for nodes we don't own
+    }
 
     if(actionName == 'status' && !nodeID)
     {
@@ -1325,8 +1363,10 @@ this.tick = function() {
         view.ticked && view.ticked( this.now ); // TODO: maintain a list of tickable views and only call those
     }, this );
 
-
-
+    for(var i = 0; i < this.nodesSimulating.length; i++)
+    {
+        this.postSimulationStateUpdate(this.nodesSimulating[i]);
+    }
 };
 
 // -- setState -----------------------------------------------------------------------------

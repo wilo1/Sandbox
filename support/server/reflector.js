@@ -1116,10 +1116,21 @@ function ClientConnected(socket, namespace, instancedata)
                         fixIDs(node.children[childID]);
                         thisInstance.Log("created " + childID, 2);
                         xapi.sendStatement(socket.loginData.UID, xapi.verbs.rezzed, childID,childComponent.properties.DisplayName,null,thisInstance.id);
+
+                        
+                        sendingclient.emit('message', messageCompress.pack(JSON.stringify(
+                        {
+
+                            "action": "startSimulating",
+                            "parameters": [childID],
+                            "time": 0
+                        })));
+                    
                     }
                     else
                     {
                         thisInstance.Error('permission denied for creating child ' + node.id, 1);
+                       
                         return;
                     }
                 }
@@ -1207,6 +1218,7 @@ function ClientConnected(socket, namespace, instancedata)
                             }
                             else
                             {
+
                                 client.emit('message', compressedMessage);
                             }
                         }

@@ -1401,7 +1401,7 @@ define(["module", "vwf/model", "vwf/configuration"], function(module, model, con
                 var nodekeys = Object.keys(this.allNodes).sort();
                 for (var g =0; g < nodekeys.length; g++) {
                     var node = this.allNodes[nodekeys[g]];
-                    if (node && node.update) {
+                    if (vwf.isSimulating(node.id) && node && node.update) {
                         node.update();
                         var propkeys = Object.keys(node.delayedProperties || {});
                         for (var i =0; i < propkeys.length; i++) {
