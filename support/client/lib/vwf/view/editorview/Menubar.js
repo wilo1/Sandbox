@@ -28,12 +28,19 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 			isMaterialAsset = !!(node && node.properties && node.properties.materialDef && node.properties.materialDef.sourceAssetId),
 			isGroup = !!(node && nodeInherits(node.id, 'sandboxGroup-vwf')),
 			loggedIn = !!_UserManager.GetCurrentUserName(),
-			hasAvatar = !!(loggedIn && _UserManager.GetAvatarForClientID(vwf.moniker()));
+			hasAvatar = !!(loggedIn && _UserManager.GetAvatarForClientID(vwf.moniker())),
+			isExample = !!(_DataManager.getInstanceData() || {}).isExample;
 
 		$('#MenuLogIn').parent()
 			.toggleClass('disabled', loggedIn);
 		$('#MenuLogOut').parent()
 			.toggleClass('disabled', !loggedIn);
+		$('#MenuShareWorld').parent()
+			.toggleClass('disabled', isExample);
+		$('#SetThumbnail').parent()
+			.toggleClass('disabled', isExample);
+		$('#TestSettings').parent()
+			.toggleClass('disabled', isExample);
 
 		$('#MenuCopy').parent()
 			.toggleClass('disabled', !selection);
@@ -82,6 +89,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 	}
 
 	return {
+        updateMenuState: updateMenuState,
 
         initialize: function()
         {
