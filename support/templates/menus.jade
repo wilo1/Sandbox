@@ -109,7 +109,7 @@ mixin menus_body
 			a#MenuCamera Camera
 			ul
 				
-				li.disabled: a#MenuFocusSelected
+				li: a#MenuFocusSelected
 					.glyphicon.glyphicon-screenshot
 					| Focus Selected
 				li
@@ -138,10 +138,9 @@ mixin menus_body
 						li: a#MenuCamera3RDPerson Avatar View
 						li: a#MenuCameraNavigate Navigate
 						li: a#MenuCameraFly Fly
-						li: a#MenuCameraNone None
 						li: a#MenuCameraDeviceOrientation DeviceOrientation
 
-		li.disabled
+		li
 			a#MenuHierarchy Hierarchy
 			ul
 				li: a#MenuSetParent
@@ -159,13 +158,13 @@ mixin menus_body
 						li: a#MenuGroup
 							.glyphicon.glyphicon-oil
 							| Group
-						li.disabled: a#MenuUngroup
+						li: a#MenuUngroup
 							.glyphicon.glyphicon-duplicate
 							| Ungroup
-						li.disabled: a#MenuOpenGroup
+						li: a#MenuOpenGroup
 							.glyphicon.glyphicon-resize-full
 							| Open Group
-						li.disabled: a#MenuCloseGroup
+						li: a#MenuCloseGroup
 							.glyphicon.glyphicon-resize-small
 							| Close Group
 
@@ -175,6 +174,7 @@ mixin menus_body
 				li
 					a#MenuPrimitives Primitives
 					ul
+						li: a#MenuCreateEmpty Empty
 						li: a#MenuCreateSphere Sphere
 						li: a#MenuCreateBox Box
 						li: a#MenuCreatePlane Plane
@@ -218,15 +218,7 @@ mixin menus_body
 						li: a#MenuCreateBehaviorPathFollow Path Follow
 						li: a#MenuCreateBehaviorClampToGround Clamp To Ground
 						li: a#MenuCreateBehaviorLookat LookAt
-						li: a#MenuCreateBehaviorOneClick OneClick
 						li: a#MenuCreateBehaviorSeek Seek
-						li: a#MenuCreateBehaviorDialog Dialog System
-				li
-					a#MenuTriggers Triggers
-					ul
-						li: a#MenuCreateTriggerDistance Distance Trigger
-						li: a#MenuCreateTriggerProperty Property Change Trigger
-						li: a#MenuCreateTriggerMethod Method Call Trigger
 				li
 					a#MenuPhysics Physics
 					ul
@@ -253,7 +245,6 @@ mixin menus_body
 					ul
 						li: a#MenuCreateTerrain Terrain
 						li: a#MenuCreateTerrainGrass Grass
-						li: a#MenuCreateTerrainDecorator Decorator
 				li
 					a#GUI GUI Elements
 					ul
@@ -273,30 +264,30 @@ mixin menus_body
 						.glyphicon.glyphicon-save
 						| Create New Asset
 					ul
-						li.disabled: a#MenuAssetsSaveAsEntity
+						li: a#MenuAssetsSaveAsEntity
 							.glyphicon.glyphicon-book
 							| From Sel. Entity
-						li.disabled: a#MenuAssetsSaveAsMaterial
+						li: a#MenuAssetsSaveAsMaterial
 							.glyphicon.glyphicon-tint
 							| From Sel. Material
-						li.disabled: a#MenuAssetsSaveAsBehavior
+						li: a#MenuAssetsSaveAsBehavior
 							.glyphicon.glyphicon-cog
 							| From Sel. Behavior
 						li: a#MenuAssetsSaveAsFile
 							.glyphicon.glyphicon-hdd
 							| From File
-				li.disabled
+				li
 					a#MenuAssetsSave
 						.glyphicon.glyphicon-floppy-save
 						| Refresh Asset
 					ul
-						li.disabled: a#MenuAssetsSaveEntity
+						li: a#MenuAssetsSaveEntity
 							.glyphicon.glyphicon-book
 							| From Sel. Entity
-						li.disabled: a#MenuAssetsSaveMaterial
+						li: a#MenuAssetsSaveMaterial
 							.glyphicon.glyphicon-tint
 							| From Sel. Material
-						li.disabled: a#MenuAssetsSaveBehavior
+						li: a#MenuAssetsSaveBehavior
 							.glyphicon.glyphicon-cog
 							| From Sel. Behavior
 				li: a#MenuManageAssets
@@ -320,26 +311,26 @@ mixin menus_body
 		li
 			a#MenuTools Tools
 			ul
-				li.disabled
+				li
 					a#MenuLocation Location
 					ul
 						li: a#LocationGoToPosition Go to Position...
 						li: a#LocationGoToPlacemark Go to Placemark...
 						li: a#LocationAddPlacemark Add Placemark...
 						li: a#LocationMoveToGround Move to ground
-				li.disabled: a#MenuAlign
+				li: a#MenuAlign
 					.glyphicon.glyphicon-object-align-bottom
 					| Align
 				li: a#MenuBlockPainter
 					.glyphicon.glyphicon-equalizer
 					| Block Painter
-				li.disabled: a#MenuSplineTools
+				li: a#MenuSplineTools
 					.glyphicon.glyphicon-pencil
 					| Spline Tools
-				li.disabled: a#ToolsShowID
+				li: a#ToolsShowID
 					.glyphicon.glyphicon-console
 					| Show ID
-				li.disabled: a#ToolsShowVWF
+				li: a#ToolsShowVWF
 					.glyphicon.glyphicon-console
 					| Show VWF Entity Definition
 				li: a#ToolsShowVWFSaveData

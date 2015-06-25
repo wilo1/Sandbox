@@ -1,5 +1,5 @@
 mixin manageAssets_head
-	link(rel='stylesheet', href='vwf/view/editorview/css/assets.css')
+	block
 
 mixin manageAssets_body
 
@@ -55,6 +55,15 @@ mixin manageAssets_body
 			label#description.verticalLayout Description
 				br
 				textarea(placeholder='Description', ng-model='selected.description', ng-change='selected._basicDirty = true', ng-disabled='!fields.selected')
+
+			label#license.verticalLayout License
+				br
+				select(ng-model='selected.license', ng-change='selected._basicDirty = true', ng-disabled='!fields.selected')
+					option(value='CC0') CC0 Public Domain
+					option(value='CC-BY') CC Attribution
+					option(value='CC-BY-ND') CC Attribution-NoDerivs
+					option(value='CC-BY-NC') CC Attribution-NonCommercial
+					option(value='CC-BY-NC-ND') CC Attribution-NonCommercial-NoDerivs
 
 			label#thumbnail.horizontalLayout
 				span Thumbnail asset id: 
