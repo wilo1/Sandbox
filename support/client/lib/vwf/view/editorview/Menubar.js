@@ -28,14 +28,31 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 			isMaterialAsset = !!(node && node.properties && node.properties.materialDef && node.properties.materialDef.sourceAssetId),
 			isGroup = !!(node && nodeInherits(node.id, 'sandboxGroup-vwf')),
 			loggedIn = !!_UserManager.GetCurrentUserName(),
-			hasAvatar = !!(loggedIn && _UserManager.GetAvatarForClientID(_UserManager.GetCurrentUserID()));
-
-		console.log('Updating menu state: hasAvatar =', hasAvatar, 'loggedIn =', loggedIn);
+			hasAvatar = !!(loggedIn && _UserManager.GetAvatarForClientID(vwf.moniker())),
+			isExample = !!_DataManager.getInstanceData().isExample,
+			userIsOwner = _UserManager.GetCurrentUserName() != _DataManager.getInstanceData().owner,
+			worldIsPersistent = _DataManager.getInstanceData().publishSettings.persistence,
+			worldIsSinglePlayer = _DataManager.getInstanceData().publishSettings.SinglePlayer;
 
 		$('#MenuLogIn').parent()
 			.toggleClass('disabled', loggedIn);
 		$('#MenuLogOut').parent()
 			.toggleClass('disabled', !loggedIn);
+		$('#MenuShareWorld').parent()
+			.toggleClass('disabled', isExample);
+		$('#SetThumbnail').parent()
+			.toggleClass('disabled', isExample || !userIsOwner);
+		$('#TestSettings').parent()
+			.toggleClass('disabled', isExample || !userIsOwner);
+		$('#TestLaunch').parent()
+			.toggleClass('disabled', !(worldIsPersistent && userIsOwner) || worldIsSinglePlayer || isExample);
+
+		$('#MenuCopy').parent()
+			.toggleClass('disabled', !selection);
+		$('#MenuDuplicate').parent()
+			.toggleClass('disabled', !selection);
+		$('#MenuDelete').parent()
+			.toggleClass('disabled', !selection);
 
 		$('#MenuAssetsSaveAsEntity').parent()
 			.toggleClass('disabled', !selection);
@@ -77,6 +94,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 	}
 
 	return {
+        updateMenuState: updateMenuState,
 
         initialize: function()
         {
@@ -891,6 +909,9 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
             });
     
     
+            $('#MenuCreateEmpty').click(function(e) {
+                _Editor.CreatePrim('node', _Editor.GetInsertPoint(), null, null, document.PlayerNumber, '');
+            });
             $('#MenuCreateSphere').click(function(e) {
                 _Editor.CreatePrim('sphere', _Editor.GetInsertPoint(), [.5, 1, 1], 'checker.jpg', document.PlayerNumber, '');
             });
@@ -1020,8 +1041,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 
 		calledMethod: function(id, evtname, data)
 		{
-			console.log('Menu calledMethod', id, evtname);
-			if(id == vwf.application() && evtname == 'clientConnected'){
+			if(/^character-vwf/.test(id) && evtname == 'ready'){
 				updateMenuState();
 			}
 		}

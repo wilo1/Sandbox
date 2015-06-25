@@ -317,7 +317,18 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             var vwfnode;
             while (pick && pick.object && !pick.object.vwfID) pick.object = pick.object.parent;
             if (pick && pick.object) vwfnode = pick.object.vwfID;
-            if (self.isSelected(vwfnode)) {
+
+            var selected = self.isSelected(vwfnode);
+            var testnode = vwfnode;
+            while(!selected && testnode)
+            {
+                testnode = vwf.parent(testnode);
+                selected = self.isSelected(testnode);
+                
+            }
+            if(selected)
+            vwfnode = testnode;
+            if (selected) {
                 $('#ContextMenuCopy').show();
                 $('#ContextMenuDelete').show();
                 $('#ContextMenuFocus').show();
@@ -346,9 +357,9 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             this.ContextShowEvent = e;
             $('#ContextMenuActions').empty();
             if (vwfnode) {
-                var actions = vwf.getEvents(vwfnode);
+                var actions = vwf.getMethods(vwfnode);
                 for (var i in actions) {
-                    if (actions[i].parameters.length == 1 && $.trim(actions[i].parameters[0]) == '') {
+                    if (actions[i].parameters.length == 0) {
                         $('#ContextMenuActions').append('<div id="Action' + i + '" class="ContextMenuAction">' + i + '</div>');
                         $('#Action' + i).attr('EventName', i);
                         $('#Action' + i).click(function() {
@@ -356,7 +367,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
                             $('#ContextMenu').css('z-index', '-1');
                             $(".ddsmoothmenu").find('li').trigger('mouseleave');
                             $('#index-vwf').focus();
-                            vwf_view.kernel.dispatchEvent(vwfnode, $(this).attr('EventName'));
+                            vwf_view.kernel.callMethod(vwfnode, $(this).attr('EventName'));
                         });
                     }
                 }
@@ -444,13 +455,20 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
         }
         this.dblclick_Gizmo = function(e)
         {
-            this.mouseup(e);
-            _PrimitiveEditor.show();
+           window.setTimeout(function()
+           {
+            if(_Editor.GetSelectedVWFID() && !_PrimitiveEditor.isOpen())
+                _PrimitiveEditor.show();
+            if(_Editor.GetSelectedVWFID() && _PrimitiveEditor.isOpen())
+                showSidePanel();
+            },20)
+            
+             this.mouseup(e);
         }
         this.mouseup_Gizmo = function(e) {
             
             //tracking for double click
-            if(performance.now() - this.mouseUpTime  < 300)
+            if(performance.now() - this.mouseUpTime  < 300 && e.button == 0)
             {
                 this.mouseUpTime = 0;
                 this.dblclick_Gizmo(e)
@@ -618,7 +636,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             }
 
             if (document.AxisSelected == 15) {
-                SetCoordSystem(CoordSystem == WorldCoords ? LocalCoords : WorldCoords);
+                this.SetCoordSystem(CoordSystem == WorldCoords ? LocalCoords : WorldCoords);
                 this.updateGizmoOrientation(true);
             }
             if (MoveGizmo) {
@@ -868,6 +886,9 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
                 SelectedVWFNodes.splice(i,1);
 
             }
+        }
+        this.initializedProperty = function(id, propname, val) {
+            this.satProperty(id, propname, val);
         }
         this.satProperty = function(id, propname, val) {
 
@@ -1803,65 +1824,70 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             translation[2] = this.SnapTo(translation[2], MoveSnap);
             translation[2] += .001;
             var BoxProto = {
-                extends: type + '2.vwf',
+                extends: (type==='node' ? 'http://vwf.example.com/node3' : type+'2')+'.vwf',
                 properties: {}
             };
-            BoxProto.type = 'subDriver/threejs';
-            BoxProto.source = 'vwf/model/threejs/' + type + '.js';
             var proto = BoxProto;
 
-            var defaultmaterialDef = {
-                shininess: 15,
-                alpha: 1,
-                ambient: {
-                    r: 1,
-                    g: 1,
-                    b: 1
-                },
-                color: {
-                    r: 1,
-                    g: 1,
-                    b: 1,
-                    a: 1
-                },
-                emit: {
-                    r: 0,
-                    g: 0,
-                    b: 0
-                },
-                reflect: 0.8,
-                shadeless: false,
-                shadow: true,
-                specularColor: {
-                    r: 0.5773502691896258,
-                    g: 0.5773502691896258,
-                    b: 0.5773502691896258
-                },
-                specularLevel: 1,
-                layers: [{
+            if( type !== 'node' ){
+                BoxProto.source = 'vwf/model/threejs/' + type + '.js';
+                BoxProto.type = 'subDriver/threejs';
+                var defaultmaterialDef = {
+                    shininess: 15,
                     alpha: 1,
-                    blendMode: 0,
-                    mapInput: 0,
-                    mapTo: 1,
-                    offsetx: 0,
-                    offsety: 0,
-                    rot: 0,
-                    scalex: 1,
-                    scaley: 1,
-                    src: "checker.jpg"
-                }]
-            }
+                    ambient: {
+                        r: 1,
+                        g: 1,
+                        b: 1
+                    },
+                    color: {
+                        r: 1,
+                        g: 1,
+                        b: 1,
+                        a: 1
+                    },
+                    emit: {
+                        r: 0,
+                        g: 0,
+                        b: 0
+                    },
+                    reflect: 0.8,
+                    shadeless: false,
+                    shadow: true,
+                    specularColor: {
+                        r: 0.5773502691896258,
+                        g: 0.5773502691896258,
+                        b: 0.5773502691896258
+                    },
+                    specularLevel: 1,
+                    layers: [{
+                        alpha: 1,
+                        blendMode: 0,
+                        mapInput: 0,
+                        mapTo: 1,
+                        offsetx: 0,
+                        offsety: 0,
+                        rot: 0,
+                        scalex: 1,
+                        scaley: 1,
+                        src: "checker.jpg"
+                    }]
+                }
 
-            proto.properties.materialDef = defaultmaterialDef;
+                proto.properties.materialDef = defaultmaterialDef;
+                proto.properties.type = 'primitive';
+            }
+            else {
+                proto.properties.glyphURL = '../vwf/view/editorview/images/icons/sphere.png';
+            }
 
             proto.properties.transform = MATH.transposeMat4(MATH.translateMatrix(translation));
 
             proto.properties.owner = owner;
 
-            proto.properties.type = 'primitive';
-
             proto.properties.DisplayName = self.GetUniqueName(type);
             var newname = GUID();
+            
             this.createChild('index-vwf', newname, proto, null, null);
             this.SelectOnNextCreate([newname])
         }.bind(this);
@@ -2621,21 +2647,21 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             rotz.rotation.z = 90;
 
 
-            MoveGizmo.allChildren.push(this.BuildBox([.5, .5, .5], [10.25, 0, 0], red)); //scale x		
-            MoveGizmo.allChildren.push(this.BuildBox([.5, .5, .5], [0, 10.25, 0], green)); //scale y
-            MoveGizmo.allChildren.push(this.BuildBox([.5, .5, .5], [0, 0, 10.25], blue)); //scale z
-            MoveGizmo.allChildren.push(this.BuildBox([.85, .85, .85], [9.25, 0, 0], red)); //scale xyz
-            MoveGizmo.allChildren.push(this.BuildBox([.85, .85, .85], [0, 9.25, 0], green)); //scale xyz
-            MoveGizmo.allChildren.push(this.BuildBox([.85, .85, .85], [0, 0, 9.25], blue)); //scale xyz
-            MoveGizmo.allChildren.push(this.BuildBox([6, 6, 0], [3, 3, -.2], [75, 75, 0, 1], .5)); //movexy
+            MoveGizmo.allChildren.push(this.BuildBox([.5, .5, .5], [11.25, 0, 0], red)); //scale x		
+            MoveGizmo.allChildren.push(this.BuildBox([.5, .5, .5], [0, 11.25, 0], green)); //scale y
+            MoveGizmo.allChildren.push(this.BuildBox([.5, .5, .5], [0, 0, 11.25], blue)); //scale z
+            MoveGizmo.allChildren.push(this.BuildBox([.85, .85, .85], [12.25, 0, 0], red)); //scale xyz
+            MoveGizmo.allChildren.push(this.BuildBox([.85, .85, .85], [0, 12.25, 0], green)); //scale xyz
+            MoveGizmo.allChildren.push(this.BuildBox([.85, .85, .85], [0, 0, 12.25], blue)); //scale xyz
+            MoveGizmo.allChildren.push(this.BuildBox([6, 6, .1], [3, 3, -.2], [75, 75, .1, 1], .5)); //movexy
             //MoveGizmo.allChildren[MoveGizmo.allChildren.length -1].geometry.setPickGeometry(new THREE.BoxGeometry( 8, 8, .30 ));
-            MoveGizmo.allChildren.push(this.BuildBox([6, 0, 6], [3.2, -.2, 3], [75, 0, 75, 1], .5)); //movexz
+            MoveGizmo.allChildren.push(this.BuildBox([6, .1, 6], [3.2, -.2, 3], [75, 0, 75, 1], .5)); //movexz
             //MoveGizmo.allChildren[MoveGizmo.allChildren.length -1].geometry.setPickGeometry(new THREE.BoxGeometry( 8, .30, 8 ));
-            MoveGizmo.allChildren.push(this.BuildBox([0, 6, 6], [-.2, 3.2, 3], [0, 75, 75, 1], .5)); //moveyz
+            MoveGizmo.allChildren.push(this.BuildBox([.1, 6, 6], [-.2, 3.2, 3], [0, 75, 75, 1], .5)); //moveyz
             //MoveGizmo.allChildren[MoveGizmo.allChildren.length -1].geometry.setPickGeometry(new THREE.BoxGeometry( .30, 8, 8 ));
 
 
-            MoveGizmo.allChildren.push(this.BuildRing(12, .7, [0, 0, 1], 30, [1, 1, 1, 1], 90, 450)); //rotate z
+            MoveGizmo.allChildren.push(this.BuildRing(14, .2, [0, 0, 1], 30, [.5, .5, .5, 1], 90, 450)); //rotate z
 
             var xRotation = this.BuildRing(7, 0.5, [1, 0, 0], 37, red, 0, 370);
             xRotation.add(this.BuildBox([.5, .5, 13], [0, 0, 0], red), true);
@@ -2705,10 +2731,10 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
                 MoveGizmo.allChildren[i].material.originalColor = new THREE.Color();
                 var c = MoveGizmo.allChildren[i].material.color;
                 MoveGizmo.allChildren[i].material.originalColor.setRGB(c.r, c.g, c.b);
-                MoveGizmo.allChildren[i].renderDepth = -10000 - i;
-                MoveGizmo.allChildren[i].material.depthTest = false;
-                MoveGizmo.allChildren[i].material.depthWrite = false;
-                MoveGizmo.allChildren[i].material.transparent = true;
+                //MoveGizmo.allChildren[i].renderDepth = -10000 - i;
+               // MoveGizmo.allChildren[i].material.depthTest = false;
+               // MoveGizmo.allChildren[i].material.depthWrite = false;
+                //MoveGizmo.allChildren[i].material.transparent = true;
                 MoveGizmo.allChildren[i].material.fog = false;
                 MoveGizmo.allChildren[i].PickPriority = 10;
             }
@@ -2756,7 +2782,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             if (type == Multi) {
                 $('#StatusTransform').text('Multi');
                 for (var i = 0; i < MoveGizmo.allChildren.length; i++) {
-                    if (i <= 15) {
+                    if ([0,1,2,3,4,5,12,13,14,15,19].indexOf(i) > -1) {
                         MoveGizmo.add(MoveGizmo.allChildren[i], true);
                     } else {
                         MoveGizmo.remove(MoveGizmo.allChildren[i], true);

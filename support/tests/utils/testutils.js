@@ -52,6 +52,7 @@ module.exports.hookupUtils = function(browser) {
         var cb = arguments[arguments.length -1]
         browser.execute(function(a,b) {
             var id = vwf.find(vwf.application(), a)[0];
+			if(!id) id = a;
         	return vwf.getProperty("" + id,b);
         }, newnodename,propname,function(err, r)
         {
@@ -64,6 +65,7 @@ module.exports.hookupUtils = function(browser) {
         var cb = arguments[arguments.length -1]
         browser.execute(function(a,b,c) {
             var id = vwf.find(vwf.application(), a)[0];
+			if(!id) id = a;
         	return vwf_view.kernel.setProperty("" + id,b,c);
         }, newnodename,propname,value,function(err, r)
         {
@@ -75,6 +77,7 @@ module.exports.hookupUtils = function(browser) {
         var cb = arguments[arguments.length -1]
         browser.execute(function(a) {
             var id = vwf.find(vwf.application(), a)[0];
+			if(!id) id = a;
         	return vwf_view.kernel.deleteChild(vwf.application(),"" + id);
         }, newnodename,function(err, r)
         {
@@ -138,17 +141,18 @@ module.exports.hookupUtils = function(browser) {
         	cb(null, didSave);
         });
 	});	
-	browser.addCommand("hasViewNode", function(nodeName, treatAsId) {
+	browser.addCommand("hasViewNode", function(nodeName) {
 		var cb = arguments[arguments.length -1];
-        browser.execute(function(a, b) {
+        browser.execute(function(a) {
 			try{
-				a = b ? a : vwf.find(vwf.application(), a)[0];
-				return findviewnode(a).children[0].children[0] ? true : false;
+				var id = vwf.find(vwf.application(), a)[0];
+				if(!id) id = a;
+				return findviewnode(id).children[0].children[0] ? true : false;
 			} 
 			catch(e){
 				return false;
 			}
-        }, nodeName, treatAsId, function(err, viewNode)
+        }, nodeName, function(err, viewNode)
         {
         	cb(err, viewNode.value);
         });
@@ -157,6 +161,7 @@ module.exports.hookupUtils = function(browser) {
 		var cb = arguments[arguments.length -1];
 		browser.execute(function(name){
 			var id = vwf.find(vwf.application(), name)[0];
+			if(!id) id = name;
 			return vwf.children(id);
 		}, nodeName, function(err, children){
 			cb(err, children.value);
@@ -219,6 +224,7 @@ module.exports.hookupUtils = function(browser) {
         var cb = arguments[arguments.length -1]
         browser.execute(function(a) {
             var id = vwf.find(vwf.application(), a)[0];
+			if(!id) id = a;
         	return _Editor.isSelected("" + id);
         }, nodename,function(err, r)
         {
@@ -271,6 +277,18 @@ module.exports.hookupUtils = function(browser) {
         {
         	
         	cb(null,r.value)
+        });
+    });
+	
+	browser.addCommand("getUUID", function(nodename) {
+        var cb = arguments[arguments.length -1];
+        browser.execute(function(a) {
+            var id = vwf.find(vwf.application(), a)[0];
+			if(!id) id = a;
+			return _Editor.findviewnode(id).children[0].children[0].uuid;
+        }, nodename,function(err, r)
+        {
+        	cb(err, r ? r.value : null);
         });
     });
 }
