@@ -195,7 +195,7 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/lib/alertify.js-0.
                     $('body *').not(':has(input)').not('[draggable]').not('input').disableSelection();
                     //enable selection on the ancestors of all draggables, to make drag work in FF
                     $('[draggable]').parentsUntil().enableSelection();
-
+                  
                 }
 
             }
