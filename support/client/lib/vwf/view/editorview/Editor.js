@@ -129,7 +129,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
         var CurrentY = [0, 1, 0];
         var CurrentX = [1, 0, 0];
         var RotateSnap = 5 * 0.0174532925;
-        var MoveSnap = .2;
+        var MoveSnap = .25;
         var ScaleSnap = .15;
         var oldxrot = 0;
         var oldyrot = 0;
@@ -1574,6 +1574,16 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
                                 transform[12] += gizoffset[0];
                                 transform[13] += gizoffset[1];
                                 transform[14] += gizoffset[2];
+                              
+                                //when moving in world space, snap directly to worldspace.
+                                //Note that you can't do this in local space, because local space snaps might 
+                                //not fall nicely on worldspace snaps
+                                if(CoordSystem == WorldCoords)
+                                {
+                                    transform[12] = this.SnapTo(transform[12],MoveSnap);
+                                    transform[13] = this.SnapTo(transform[13],MoveSnap);
+                                    transform[14] = this.SnapTo(transform[14],MoveSnap);
+                                }
                                 lastpos[s] = [transform[12], transform[13], transform[14]];
                                 var success = this.setTransformCallback(SelectedVWFNodes[s].id, transform);
 
@@ -1749,7 +1759,11 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
                 var dxy2 = this.intersectLinePlane(ray, campos, [0, 0, 0], [0, 0, 1]);
                 var newintersectxy2 = MATH.addVec3(campos, MATH.scaleVec3(ray, dxy2));
                 newintersectxy2[2] += .01;
-                return newintersectxy[2] > newintersectxy2[2] ? newintersectxy : newintersectxy2;
+                var finalpos = newintersectxy[2] > newintersectxy2[2] ? newintersectxy : newintersectxy2;
+                finalpos[0] = this.SnapTo(finalpos[0],MoveSnap)
+                finalpos[1] = this.SnapTo(finalpos[1],MoveSnap)
+                finalpos[2] = this.SnapTo(finalpos[2],MoveSnap)
+                return finalpos;
             }
         }
         this.createChild = function(parent, name, proto, uri, callback) {
