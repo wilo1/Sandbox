@@ -397,15 +397,14 @@ scripts:
                     _dScene.add(g1);
                     g1.rotation.x = Math.PI/2;
                     g1.position.z = -.01;
-                    g1.material.depthWrite = false;
-                    g1.material.transparent = true;
+                  
                     window._gGrid = g1;
                     g1.updateMatrixWorld();
        this.grid = g1;
        g1.visible = true;             
        ground.receiveShadow = _SettingsManager.getKey('shadows');
        ground.PickPriority = -1;
-       this.grid.PickPriority = -1;
+       this.grid.InvisibleToCPUPick = true;
        
        var grassTex = THREE.ImageUtils.loadTexture('textures/gridnew.png');
        
