@@ -4,6 +4,9 @@ require.config({
         "vwf": "../vwf"
     },
     shim: {
+		'vwf/view/editorview/lib/angular-resource': {
+			deps: ['vwf/view/editorview/lib/angular']
+		},
         'vwf/view/xapi/xapiwrapper': {
             deps: ['vwf/view/editorview/sha256', "vwf/view/editorview/_3DRIntegration"],
             exports: 'XAPIWrapper'
