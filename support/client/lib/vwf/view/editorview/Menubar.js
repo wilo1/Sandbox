@@ -29,7 +29,10 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 			isGroup = !!(node && nodeInherits(node.id, 'sandboxGroup-vwf')),
 			loggedIn = !!_UserManager.GetCurrentUserName(),
 			hasAvatar = !!(loggedIn && _UserManager.GetAvatarForClientID(vwf.moniker())),
-			isExample = !!(_DataManager.getInstanceData() || {}).isExample;
+			isExample = !!_DataManager.getInstanceData().isExample,
+			userIsOwner = _UserManager.GetCurrentUserName() != _DataManager.getInstanceData().owner,
+			worldIsPersistent = _DataManager.getInstanceData().publishSettings.persistence,
+			worldIsSinglePlayer = _DataManager.getInstanceData().publishSettings.SinglePlayer;
 
 		$('#MenuLogIn').parent()
 			.toggleClass('disabled', loggedIn);
@@ -38,9 +41,11 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 		$('#MenuShareWorld').parent()
 			.toggleClass('disabled', isExample);
 		$('#SetThumbnail').parent()
-			.toggleClass('disabled', isExample);
+			.toggleClass('disabled', isExample || !userIsOwner);
 		$('#TestSettings').parent()
-			.toggleClass('disabled', isExample);
+			.toggleClass('disabled', isExample || !userIsOwner);
+		$('#TestLaunch').parent()
+			.toggleClass('disabled', !(worldIsPersistent && userIsOwner) || worldIsSinglePlayer || isExample);
 
 		$('#MenuCopy').parent()
 			.toggleClass('disabled', !selection);
