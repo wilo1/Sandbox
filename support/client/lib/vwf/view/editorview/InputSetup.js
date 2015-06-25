@@ -56,6 +56,16 @@ define({
 				
 			}
 		});
+		$('#vwf-root').keypress(function(e) {
+			
+            if (e.charCode == 92) {
+                if (!_EditorView.needTools()) return;
+                if (toolsOpen())
+                    hideTools();
+                else
+                    showTools();
+            }
+        });
 		$(window).keypress(function(e)
 		{
 			
