@@ -253,7 +253,6 @@ define({
             _Editor.SetSelectMode('none');
             _Editor.hidePeerSelections();
             $(window).resize();
-            alertify.alert('Press the \\ (backslash) key to unhide the editor tools.', function(ok){});
         }
         window.showTools = function() {
             if (!toolsLoaded) return;

@@ -60,8 +60,10 @@ define({
 			
             if (e.charCode == 92) {
                 if (!_EditorView.needTools()) return;
-                if (toolsOpen())
+                if (toolsOpen()){
                     hideTools();
+            		alertify.alert('Press the \\ (backslash) key to unhide the editor tools.');
+				}
                 else
                     showTools();
             }
