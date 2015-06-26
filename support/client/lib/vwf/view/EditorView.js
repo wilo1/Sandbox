@@ -128,7 +128,6 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/lib/alertify.js-0.
                 this.addManager(_Editor);
 
 				angular_app.initialize();
-				this.addManager(angular_app);
             }
         },
         managers: [], //list of objects that need notification of events

@@ -1,6 +1,5 @@
-define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes'], function(angular_app, strToBytes)
+define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes'], function(app, strToBytes)
 {
-	var app = angular_app.app;
 	var dataRoot = null;
 	var appHeaderName = '';
 	var uploadVWFObject, setSelection;

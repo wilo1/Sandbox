@@ -6,9 +6,9 @@ function clearCameraModeIcons() {
 }
 
 
-define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], function(angular_app, manageAssets)
+define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], function(app, manageAssets)
 {
-	angular_app.app.controller('MenuController', ['$scope', function($scope)
+	app.controller('MenuController', ['$scope', function($scope)
 	{
 		function nodeInherits(node, ancestor)
 		{
