@@ -299,6 +299,7 @@ var assetRegistry = function()
             //store this asset in the registry
             //get the entry from the asset registry
             reg = assetRegistry.assets[assetSource];
+            reg.rawAnimationChannels = asset.rawAnimationChannels;
             if (reg.loadState !== PENDING) return; // in this case, the callback from the load either came too late, and we have decided it failed, or came twice, which really it never should
             //it's not pending, and it is loaded
             if (!asset)
@@ -311,7 +312,7 @@ var assetRegistry = function()
             reg.pending = false;
             reg.loaded = true;
             //actually, is this necessary? can we just store the raw loaded asset in the cache? 
-            if (childType !== 'subDriver/threejs/asset/vnd.gltf+json' && childType !== 'subDriver/threejs/asset/vnd.raw-animation')
+            if (childType !== 'subDriver/threejs/asset/vnd.gltf+json' )
                 reg.node = asset.scene;
             else
             {
@@ -336,11 +337,12 @@ var assetRegistry = function()
                     })
                 });
             }
-            reg.node.traverse(function(o)
-            {
-                if (o.geometry)
-                    o.geometry.dynamic = false;
-            });
+            if(reg.node)
+                reg.node.traverse(function(o)
+                {
+                    if (o.geometry)
+                        o.geometry.dynamic = false;
+                });
             for (var i = 0; i < reg.callbacks.length; i++)
                 reg.callbacks[i](reg.node, reg.rawAnimationChannels);
             //nothing should be waiting on callbacks now.

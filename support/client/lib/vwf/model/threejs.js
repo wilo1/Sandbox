@@ -54,7 +54,7 @@ function setMeshStatic(node, val) {
         setMeshStatic(node.children[i], val);
 }
 
-define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/threejs/backgroundLoader", "vwf/model/threejs/glTFCloner", "vwf/model/threejs/glTFLoaderUtils", "vwf/model/threejs/glTFLoader", "vwf/model/threejs/glTFAnimation", "vwf/model/threejs/glTFAnimation", "vwf/model/threejs/materialCache", "vwf/model/threejs/assetRegistry","vwf/model/threejs/RMXLoader"], function(module, model, utility, Color, backgroundLoader) {
+define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/threejs/backgroundLoader", "vwf/model/threejs/glTFCloner", "vwf/model/threejs/glTFLoaderUtils", "vwf/model/threejs/glTFLoader", "vwf/model/threejs/glTFAnimation", "vwf/model/threejs/materialCache", "vwf/model/threejs/assetRegistry","vwf/model/threejs/RMXLoader"], function(module, model, utility, Color, backgroundLoader) {
 
 
 
@@ -415,6 +415,22 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
                 else if (isPhantomDefinition.call(this, protos)) {
 
                     node = this.state.nodes[childID] = this.subDriverFactory.createNode(childID, 'vwf/model/threejs/phantomAsset.js', childName, childType, childSource, callback);
+
+                    node.name = childName,
+                    node.ID = childID;
+                    node.parentID = nodeID;
+                    node.sourceType = childType;
+                    node.type = childExtendsID;
+                    node.sceneID = this.state.sceneRootID;
+
+                    node.threeObject = new THREE.Object3D();
+                    node.threeObject.add(node.getRoot());
+                    threeParent.add(node.threeObject);
+                } 
+                else if (childType == 'subDriver/threejs/asset/vnd.raw-animation') {
+
+                  
+                    node = this.state.nodes[childID] = this.subDriverFactory.createNode(childID, 'vwf/model/threejs/animation.js', childName, childType, childSource, callback);
 
                     node.name = childName,
                     node.ID = childID;
