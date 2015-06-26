@@ -408,7 +408,7 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                                     cb(geometry, materials);
                                     //ok, this model loaded, we can start the next load
                                     nextTask();
-                                }, animOnly);
+                                }, node.animOnly);
                             }, 1);
                         }
                         //we need to queue up our entry to this module, since it cannot handle re-entry. This means that while it 
@@ -418,7 +418,8 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                             node:
                             {
                                 source: url,
-                                loader: loader
+                                loader: loader,
+                                animOnly:animOnly
                             },
                             cb: function(asset)
                             {

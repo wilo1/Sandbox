@@ -129,7 +129,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
         var CurrentY = [0, 1, 0];
         var CurrentX = [1, 0, 0];
         var RotateSnap = 5 * 0.0174532925;
-        var MoveSnap = .2;
+        var MoveSnap = .25;
         var ScaleSnap = .15;
         var oldxrot = 0;
         var oldyrot = 0;
@@ -673,7 +673,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             }
 
             if (document.AxisSelected == 15) {
-                SetCoordSystem(CoordSystem == WorldCoords ? LocalCoords : WorldCoords);
+                this.SetCoordSystem(CoordSystem == WorldCoords ? LocalCoords : WorldCoords);
                 this.updateGizmoOrientation(true);
             }
             if (MoveGizmo) {
@@ -1574,6 +1574,16 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
                                 transform[12] += gizoffset[0];
                                 transform[13] += gizoffset[1];
                                 transform[14] += gizoffset[2];
+                              
+                                //when moving in world space, snap directly to worldspace.
+                                //Note that you can't do this in local space, because local space snaps might 
+                                //not fall nicely on worldspace snaps
+                                if(CoordSystem == WorldCoords)
+                                {
+                                    transform[12] = this.SnapTo(transform[12],MoveSnap);
+                                    transform[13] = this.SnapTo(transform[13],MoveSnap);
+                                    transform[14] = this.SnapTo(transform[14],MoveSnap);
+                                }
                                 lastpos[s] = [transform[12], transform[13], transform[14]];
                                 var success = this.setTransformCallback(SelectedVWFNodes[s].id, transform);
 
@@ -1749,7 +1759,11 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
                 var dxy2 = this.intersectLinePlane(ray, campos, [0, 0, 0], [0, 0, 1]);
                 var newintersectxy2 = MATH.addVec3(campos, MATH.scaleVec3(ray, dxy2));
                 newintersectxy2[2] += .01;
-                return newintersectxy[2] > newintersectxy2[2] ? newintersectxy : newintersectxy2;
+                var finalpos = newintersectxy[2] > newintersectxy2[2] ? newintersectxy : newintersectxy2;
+                finalpos[0] = this.SnapTo(finalpos[0],MoveSnap)
+                finalpos[1] = this.SnapTo(finalpos[1],MoveSnap)
+                finalpos[2] = this.SnapTo(finalpos[2],MoveSnap)
+                return finalpos;
             }
         }
         this.createChild = function(parent, name, proto, uri, callback) {
@@ -2684,21 +2698,21 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             rotz.rotation.z = 90;
 
 
-            MoveGizmo.allChildren.push(this.BuildBox([.5, .5, .5], [10.25, 0, 0], red)); //scale x		
-            MoveGizmo.allChildren.push(this.BuildBox([.5, .5, .5], [0, 10.25, 0], green)); //scale y
-            MoveGizmo.allChildren.push(this.BuildBox([.5, .5, .5], [0, 0, 10.25], blue)); //scale z
-            MoveGizmo.allChildren.push(this.BuildBox([.85, .85, .85], [9.25, 0, 0], red)); //scale xyz
-            MoveGizmo.allChildren.push(this.BuildBox([.85, .85, .85], [0, 9.25, 0], green)); //scale xyz
-            MoveGizmo.allChildren.push(this.BuildBox([.85, .85, .85], [0, 0, 9.25], blue)); //scale xyz
-            MoveGizmo.allChildren.push(this.BuildBox([6, 6, 0], [3, 3, -.2], [75, 75, 0, 1], .5)); //movexy
+            MoveGizmo.allChildren.push(this.BuildBox([.5, .5, .5], [11.25, 0, 0], red)); //scale x		
+            MoveGizmo.allChildren.push(this.BuildBox([.5, .5, .5], [0, 11.25, 0], green)); //scale y
+            MoveGizmo.allChildren.push(this.BuildBox([.5, .5, .5], [0, 0, 11.25], blue)); //scale z
+            MoveGizmo.allChildren.push(this.BuildBox([.85, .85, .85], [12.25, 0, 0], red)); //scale xyz
+            MoveGizmo.allChildren.push(this.BuildBox([.85, .85, .85], [0, 12.25, 0], green)); //scale xyz
+            MoveGizmo.allChildren.push(this.BuildBox([.85, .85, .85], [0, 0, 12.25], blue)); //scale xyz
+            MoveGizmo.allChildren.push(this.BuildBox([6, 6, .1], [3, 3, -.2], [75, 75, .1, 1], .5)); //movexy
             //MoveGizmo.allChildren[MoveGizmo.allChildren.length -1].geometry.setPickGeometry(new THREE.BoxGeometry( 8, 8, .30 ));
-            MoveGizmo.allChildren.push(this.BuildBox([6, 0, 6], [3.2, -.2, 3], [75, 0, 75, 1], .5)); //movexz
+            MoveGizmo.allChildren.push(this.BuildBox([6, .1, 6], [3.2, -.2, 3], [75, 0, 75, 1], .5)); //movexz
             //MoveGizmo.allChildren[MoveGizmo.allChildren.length -1].geometry.setPickGeometry(new THREE.BoxGeometry( 8, .30, 8 ));
-            MoveGizmo.allChildren.push(this.BuildBox([0, 6, 6], [-.2, 3.2, 3], [0, 75, 75, 1], .5)); //moveyz
+            MoveGizmo.allChildren.push(this.BuildBox([.1, 6, 6], [-.2, 3.2, 3], [0, 75, 75, 1], .5)); //moveyz
             //MoveGizmo.allChildren[MoveGizmo.allChildren.length -1].geometry.setPickGeometry(new THREE.BoxGeometry( .30, 8, 8 ));
 
 
-            MoveGizmo.allChildren.push(this.BuildRing(12, .7, [0, 0, 1], 30, [1, 1, 1, 1], 90, 450)); //rotate z
+            MoveGizmo.allChildren.push(this.BuildRing(14, .2, [0, 0, 1], 30, [.5, .5, .5, 1], 90, 450)); //rotate z
 
             var xRotation = this.BuildRing(7, 0.5, [1, 0, 0], 37, red, 0, 370);
             xRotation.add(this.BuildBox([.5, .5, 13], [0, 0, 0], red), true);
@@ -2768,10 +2782,10 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
                 MoveGizmo.allChildren[i].material.originalColor = new THREE.Color();
                 var c = MoveGizmo.allChildren[i].material.color;
                 MoveGizmo.allChildren[i].material.originalColor.setRGB(c.r, c.g, c.b);
-                MoveGizmo.allChildren[i].renderDepth = -10000 - i;
-                MoveGizmo.allChildren[i].material.depthTest = false;
-                MoveGizmo.allChildren[i].material.depthWrite = false;
-                MoveGizmo.allChildren[i].material.transparent = true;
+                //MoveGizmo.allChildren[i].renderDepth = -10000 - i;
+               // MoveGizmo.allChildren[i].material.depthTest = false;
+               // MoveGizmo.allChildren[i].material.depthWrite = false;
+                //MoveGizmo.allChildren[i].material.transparent = true;
                 MoveGizmo.allChildren[i].material.fog = false;
                 MoveGizmo.allChildren[i].PickPriority = 10;
             }
@@ -2819,7 +2833,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             if (type == Multi) {
                 $('#StatusTransform').text('Multi');
                 for (var i = 0; i < MoveGizmo.allChildren.length; i++) {
-                    if (i <= 15) {
+                    if ([0,1,2,3,4,5,12,13,14,15,19].indexOf(i) > -1) {
                         MoveGizmo.add(MoveGizmo.allChildren[i], true);
                     } else {
                         MoveGizmo.remove(MoveGizmo.allChildren[i], true);

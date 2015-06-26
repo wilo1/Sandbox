@@ -403,6 +403,7 @@ define(function() {
 			if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
 		}
 		this.BuildGUI = this.BuildGUI.bind(this);
+		this.BuildGUI = debounce(this.BuildGUI, 250);
 		this.appendThreeChildDOM = function(node, parentDiv, type) {
 			
 			//there are one or 2 objects that should never be listed in the scene
@@ -465,17 +466,16 @@ define(function() {
 
 				if(method == 'ready' && this.isOpen())
 				{
-					debounce(this.BuildGUI, 500);
+					this.BuildGUI();
 			    }
 			
 		}
 		this.deletedNode = function(id) {
-			debugger;
-				debounce(this.BuildGUI, 500);
+				this.BuildGUI();
 		}
 		this.satProperty = function(id,propname,val)
 		{
-			debounce(this.BuildGUI, 500);
+			this.BuildGUI();
 		}
 		
 		
