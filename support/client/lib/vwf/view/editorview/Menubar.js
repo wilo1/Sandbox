@@ -6,9 +6,9 @@ function clearCameraModeIcons() {
 }
 
 
-define(['vwf/view/editorview/manageAssets'], function(manageAssets)
+define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], function(angular_app, manageAssets)
 {
-	function updateMenuState()
+	angular_app.app.controller('MenuController', ['$scope', function($scope)
 	{
 		function nodeInherits(node, ancestor)
 		{
@@ -20,82 +20,32 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 				return nodeInherits( vwf.prototype(node), ancestor );
 		}
 
-		var node = _Editor.GetSelectedVWFNode(),
-			selection = !!node,
-			hasMaterial = !!(node && node.properties && node.properties.materialDef),
-			isBehavior = !!(node && nodeInherits(node.id, 'http-vwf-example-com-behavior-vwf')),
-			isEntityAsset = !!(node && node.properties && node.properties.sourceAssetId),
-			isMaterialAsset = !!(node && node.properties && node.properties.materialDef && node.properties.materialDef.sourceAssetId),
-			isGroup = !!(node && nodeInherits(node.id, 'sandboxGroup-vwf')),
-			loggedIn = !!_UserManager.GetCurrentUserName(),
-			hasAvatar = !!(loggedIn && _UserManager.GetAvatarForClientID(vwf.moniker())),
-			isExample = !!_DataManager.getInstanceData().isExample,
-			userIsOwner = _UserManager.GetCurrentUserName() != _DataManager.getInstanceData().owner,
-			worldIsPersistent = _DataManager.getInstanceData().publishSettings.persistence,
-			worldIsSinglePlayer = _DataManager.getInstanceData().publishSettings.SinglePlayer;
+		$scope.$watchGroup(['fields.selectedNode.id','fields.worldIsReady'], function(newvals)
+		{
+			//console.log('Updating menu state');
+			var node = _Editor.GetSelectedVWFNode();
+			var instanceData = _DataManager.getInstanceData();
 
-		$('#MenuLogIn').parent()
-			.toggleClass('disabled', loggedIn);
-		$('#MenuLogOut').parent()
-			.toggleClass('disabled', !loggedIn);
-		$('#MenuShareWorld').parent()
-			.toggleClass('disabled', isExample);
-		$('#SetThumbnail').parent()
-			.toggleClass('disabled', isExample || !userIsOwner);
-		$('#TestSettings').parent()
-			.toggleClass('disabled', isExample || !userIsOwner);
-		$('#TestLaunch').parent()
-			.toggleClass('disabled', !(worldIsPersistent && userIsOwner) || worldIsSinglePlayer || isExample);
+			$scope.selection = !!node;
+			$scope.hasMaterial = !!(node && node.properties && node.properties.materialDef);
+			$scope.isBehavior = !!(node && nodeInherits(node.id, 'http-vwf-example-com-behavior-vwf'));
+			$scope.isEntityAsset = !!(node && node.properties && node.properties.sourceAssetId);
+			$scope.isMaterialAsset = !!(node && node.properties && node.properties.materialDef && node.properties.materialDef.sourceAssetId);
+			$scope.isGroup = !!(node && nodeInherits(node.id, 'sandboxGroup-vwf'));
+			$scope.loggedIn = !!_UserManager.GetCurrentUserName();
+			$scope.hasAvatar = !!(($scope.loggedIn || instanceData.publishSettings.allowAnonymous) && instanceData.publishSettings.createAvatar);
+			$scope.isExample = !!instanceData.isExample;
+			$scope.userIsOwner = _UserManager.GetCurrentUserName() === instanceData.owner;
+			$scope.worldIsPersistent = instanceData.publishSettings.persistence;
+			$scope.worldIsSinglePlayer = instanceData.publishSettings.SinglePlayer;
+			$scope.worldIsLaunchable = !($scope.worldIsPersistent && $scope.userIsOwner) || $scope.worldIsSinglePlayer || $scope.isExample;
 
-		$('#MenuCopy').parent()
-			.toggleClass('disabled', !selection);
-		$('#MenuDuplicate').parent()
-			.toggleClass('disabled', !selection);
-		$('#MenuDelete').parent()
-			.toggleClass('disabled', !selection);
+			//console.log('UserIsOwner:', $scope.userIsOwner);
+		});
 
-		$('#MenuAssetsSaveAsEntity').parent()
-			.toggleClass('disabled', !selection);
-		$('#MenuAssetsSaveAsMaterial').parent()
-			.toggleClass('disabled', !hasMaterial);
-		$('#MenuAssetsSaveAsBehavior').parent()
-			.toggleClass('disabled', !isBehavior);
-		$('#MenuAssetsSave').parent()
-			.toggleClass('disabled', !isEntityAsset && !isMaterialAsset);
-		$('#MenuAssetsSaveEntity').parent()
-			.toggleClass('disabled', !isEntityAsset || !selection);
-		$('#MenuAssetsSaveMaterial').parent()
-			.toggleClass('disabled', !isMaterialAsset || !hasMaterial);
-		$('#MenuAssetsSaveBehavior').parent()
-			.toggleClass('disabled', !isEntityAsset || !isBehavior);
-
-		$('#MenuFocusSelected').parent()
-			.toggleClass('disabled', !selection);
-
-		$('#MenuHierarchy').parent()
-			.toggleClass('disabled', !selection);
-		$('#MenuUngroup').parent()
-			.toggleClass('disabled', !isGroup);
-		$('#MenuOpenGroup').parent()
-			.toggleClass('disabled', !isGroup);
-		$('#MenuCloseGroup').parent()
-			.toggleClass('disabled', !isGroup);
-
-		$('#MenuLocation').parent()
-			.toggleClass('disabled', !hasAvatar);
-		$('#MenuAlign').parent()
-			.toggleClass('disabled', !selection);
-		$('#MenuSplineTools').parent()
-			.toggleClass('disabled', !selection);
-		$('#ToolsShowID').parent()
-			.toggleClass('disabled', !selection);
-		$('#ToolsShowVWF').parent()
-			.toggleClass('disabled', !selection);
-	}
+	}]);
 
 	return {
-        updateMenuState: updateMenuState,
-
         initialize: function()
         {
             //$(document.body).append('');
@@ -196,9 +146,6 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
     
     
             }
-
-			// determine disabled status when selection changes
-			$(document).on('selectionChanged', updateMenuState);
 
 			// load asset manager
 			manageAssets.initialize();
@@ -1037,13 +984,6 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
     
             //make every clicked menu item close all menus
             // $('#smoothmenu1').find('[id]').filter(':only-child').click(function(){ddsmoothmenu.closeall({type:'click',target:'asd'})});
-    	},
-
-		calledMethod: function(id, evtname, data)
-		{
-			if(/^character-vwf/.test(id) && evtname == 'ready'){
-				updateMenuState();
-			}
-		}
+    	}
     };
 });

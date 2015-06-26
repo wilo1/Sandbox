@@ -13,7 +13,7 @@ jQuery.extend({
     }
 });
 
-define(["module", "version", "vwf/view", "vwf/view/editorview/lib/alertify.js-0.3.9/src/alertify", "vwf/view/editorview/Menubar", "vwf/view/editorview/ObjectPools", "vwf/view/editorview/LocationTools", "vwf/view/editorview/WindowResize", "vwf/view/editorview/_PermissionsManager", "vwf/view/editorview/InputSetup", "vwf/view/editorview/SaveLoadTimer", "vwf/view/editorview/TouchHandler", "vwf/view/editorview/SidePanel", "vwf/view/editorview/Toolbar", "vwf/view/editorview/ChatSystemGUI", "vwf/view/editorview/PrimitiveEditor", "vwf/view/editorview/MaterialEditor", "vwf/view/editorview/Notifier", "vwf/view/editorview/ScriptEditor", "vwf/view/editorview/Editor", "vwf/view/editorview/_3DRIntegration", "vwf/view/editorview/HeirarchyManager", "vwf/view/editorview/DataManager", "vwf/view/editorview/UserManager", "vwf/view/editorview/help", "vwf/view/editorview/SideTabs", "vwf/view/editorview/wireeditor", "vwf/view/editorview/selectionEditor", "vwf/view/editorview/UndoManager", "vwf/view/editorview/Publisher", "vwf/view/editorview/EntityLibrary", "vwf/view/editorview/PhysicsEditor","vwf/view/editorview/PerformanceManager","vwf/view/editorview/JSONPrompt","touch.js","vwf/view/editorview/panelEditor"], function(module, version, view, alertify, Menubar) {
+define(["module", "version", "vwf/view", "vwf/view/editorview/lib/alertify.js-0.3.9/src/alertify", "vwf/view/editorview/angular-app", "vwf/view/editorview/Menubar", "vwf/view/editorview/ObjectPools", "vwf/view/editorview/LocationTools", "vwf/view/editorview/WindowResize", "vwf/view/editorview/_PermissionsManager", "vwf/view/editorview/InputSetup", "vwf/view/editorview/SaveLoadTimer", "vwf/view/editorview/TouchHandler", "vwf/view/editorview/SidePanel", "vwf/view/editorview/Toolbar", "vwf/view/editorview/ChatSystemGUI", "vwf/view/editorview/PrimitiveEditor", "vwf/view/editorview/MaterialEditor", "vwf/view/editorview/Notifier", "vwf/view/editorview/ScriptEditor", "vwf/view/editorview/Editor", "vwf/view/editorview/_3DRIntegration", "vwf/view/editorview/HeirarchyManager", "vwf/view/editorview/DataManager", "vwf/view/editorview/UserManager", "vwf/view/editorview/help", "vwf/view/editorview/SideTabs", "vwf/view/editorview/wireeditor", "vwf/view/editorview/selectionEditor", "vwf/view/editorview/UndoManager", "vwf/view/editorview/Publisher", "vwf/view/editorview/EntityLibrary", "vwf/view/editorview/PhysicsEditor","vwf/view/editorview/PerformanceManager","vwf/view/editorview/JSONPrompt","touch.js","vwf/view/editorview/panelEditor"], function(module, version, view, alertify, angular_app, Menubar) {
     return view.load(module, {
         // == Module Definition ====================================================================
 
@@ -127,9 +127,8 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/lib/alertify.js-0.
                 this.addManager(_DataManager);
                 this.addManager(_Editor);
 
-				Menubar.updateMenuState();
-
-
+				angular_app.initialize();
+				this.addManager(angular_app);
             }
         },
         managers: [], //list of objects that need notification of events
@@ -270,7 +269,7 @@ function InitializeEditor() {
         require("vwf/view/editorview/Toolbar").initialize();
 
         require("vwf/view/editorview/Menubar").initialize();
-        _EditorView.addManager(require("vwf/view/editorview/Menubar"));
+        //_EditorView.addManager(require("vwf/view/editorview/Menubar"));
         require("vwf/view/editorview/SideTabs").initialize();
         
         $(document.head).append('<script type="text/javascript" src="vwf/view/localization/translate.js"></script>');

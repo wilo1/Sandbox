@@ -4,26 +4,26 @@ mixin menus_head
 mixin menus_body
 
 	#toolbar
-	#smoothmenu1.ddsmoothmenu(style="display: none; z-index: 100; position: fixed; width: 100%; border-bottom: 1px solid #666666;"): ul
+	#smoothmenu1.ddsmoothmenu(ng-controller='MenuController', style="display: none; z-index: 100; position: fixed; width: 100%; border-bottom: 1px solid #666666;"): ul
 		li
 			a#MenuFile File
 			ul
-				li: a#MenuLogIn
+				li(ng-class='{"disabled": loggedIn}'): a#MenuLogIn
 					.glyphicon.glyphicon-log-in
 					| Log In
-				li: a#MenuLogOut
+				li(ng-class='{"disabled": !loggedIn}'): a#MenuLogOut
 					.glyphicon.glyphicon-log-out
 					| Log Out
 				li: a#MenuSaveNow
 					.glyphicon.glyphicon-floppy-disk
 					| Save Now
-				li: a#MenuShareWorld
+				li(ng-class='{"disabled": isExample}'): a#MenuShareWorld
 					.glyphicon.glyphicon-share
 					| Share
-				li: a#SetThumbnail
+				li(ng-class='{"disabled": isExample || !userIsOwner}'): a#SetThumbnail
 					.glyphicon.glyphicon-picture
 					| Set World Thumbnail
-				li: a#TestSettings
+				li(ng-class='{"disabled": isExample || !userIsOwner}'): a#TestSettings
 					.glyphicon.glyphicon-globe
 					| World Settings (ctrl+9)
 				li: a#TestLaunch
@@ -41,16 +41,16 @@ mixin menus_body
 					| Redo (ctrl-y)
 				li(style='border-bottom: 3px solid gray')
 
-				li: a#MenuCopy
+				li(ng-class='{"disabled": !selection}'): a#MenuCopy
 					.glyphicon.glyphicon-share-copy
 					| Copy (ctrl-c)
 				li: a#MenuPaste
 					.glyphicon.glyphicon-share-paste
 					| Paste (ctrl-v)
-				li: a#MenuDuplicate
+				li(ng-class='{"disabled": !selection}'): a#MenuDuplicate
 					.glyphicon.glyphicon-share-duplicate
 					| Duplicate (ctrl-s)
-				li: a#MenuDelete
+				li(ng-class='{"disabled": !selection}'): a#MenuDelete
 					.glyphicon.glyphicon-share-trash
 					| Delete (del)
 				li(style='border-bottom: 3px solid gray')
@@ -109,7 +109,7 @@ mixin menus_body
 			a#MenuCamera Camera
 			ul
 				
-				li: a#MenuFocusSelected
+				li(ng-class='{"disabled": !selection}'): a#MenuFocusSelected
 					.glyphicon.glyphicon-screenshot
 					| Focus Selected
 				li
@@ -140,7 +140,7 @@ mixin menus_body
 						li: a#MenuCameraFly Fly
 						li: a#MenuCameraDeviceOrientation DeviceOrientation
 
-		li
+		li(ng-class='{"disabled": !selection}')
 			a#MenuHierarchy Hierarchy
 			ul
 				li: a#MenuSetParent
@@ -158,13 +158,13 @@ mixin menus_body
 						li: a#MenuGroup
 							.glyphicon.glyphicon-oil
 							| Group
-						li: a#MenuUngroup
+						li(ng-class='{"disabled": !isGroup}'): a#MenuUngroup
 							.glyphicon.glyphicon-duplicate
 							| Ungroup
-						li: a#MenuOpenGroup
+						li(ng-class='{"disabled": !isGroup}'): a#MenuOpenGroup
 							.glyphicon.glyphicon-resize-full
 							| Open Group
-						li: a#MenuCloseGroup
+						li(ng-class='{"disabled": !isGroup}'): a#MenuCloseGroup
 							.glyphicon.glyphicon-resize-small
 							| Close Group
 
@@ -264,30 +264,30 @@ mixin menus_body
 						.glyphicon.glyphicon-save
 						| Create New Asset
 					ul
-						li: a#MenuAssetsSaveAsEntity
+						li(ng-class='{"disabled": !selection}'): a#MenuAssetsSaveAsEntity
 							.glyphicon.glyphicon-book
 							| From Sel. Entity
-						li: a#MenuAssetsSaveAsMaterial
+						li(ng-class='{"disabled": !hasMaterial}'): a#MenuAssetsSaveAsMaterial
 							.glyphicon.glyphicon-tint
 							| From Sel. Material
-						li: a#MenuAssetsSaveAsBehavior
+						li(ng-class='{"disabled": !isBehavior}'): a#MenuAssetsSaveAsBehavior
 							.glyphicon.glyphicon-cog
 							| From Sel. Behavior
 						li: a#MenuAssetsSaveAsFile
 							.glyphicon.glyphicon-hdd
 							| From File
-				li
+				li(ng-class='{"disabled": !isEntityAsset || !isMaterialAsset}')
 					a#MenuAssetsSave
 						.glyphicon.glyphicon-floppy-save
 						| Refresh Asset
 					ul
-						li: a#MenuAssetsSaveEntity
+						li(ng-class='{"disabled": !isEntityAsset}'): a#MenuAssetsSaveEntity
 							.glyphicon.glyphicon-book
 							| From Sel. Entity
-						li: a#MenuAssetsSaveMaterial
+						li(ng-class='{"disabled": !isMaterialAsset}'): a#MenuAssetsSaveMaterial
 							.glyphicon.glyphicon-tint
 							| From Sel. Material
-						li: a#MenuAssetsSaveBehavior
+						li(ng-class='{"disabled": !isEntityAsset || !isBehavior}'): a#MenuAssetsSaveBehavior
 							.glyphicon.glyphicon-cog
 							| From Sel. Behavior
 				li: a#MenuManageAssets
