@@ -383,10 +383,22 @@ define(function() {
 				this.appendThreeChildDOM(VWFChildren.children[i], 'VWFChildren', 'vwf');
 
 
+			//only show the scenenode children of an asset
+			var node = _Editor.GetSelectedVWFID();
+			var found = false;
+			while(node)
+			{
+				if(node == 'asset-vwf')
+					found = true;
+				node = vwf.prototype(node)
+			}
+			if(found)
+			{
 			var THREEChildren = HierarchyManager.getTHREEChildren();
 			for (var i = 0; i < THREEChildren.children.length; i++)
 				this.appendThreeChildDOM(THREEChildren.children[i], 'THREEChildren', 'three');
 
+			}
 
 			if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
 		}
@@ -458,6 +470,7 @@ define(function() {
 			
 		}
 		this.deletedNode = function(id) {
+			debugger;
 				debounce(this.BuildGUI, 500);
 		}
 		this.satProperty = function(id,propname,val)
