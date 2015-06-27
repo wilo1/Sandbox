@@ -611,6 +611,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
                             hits[i].release();
                         }
                         //now to find all glyphs intersected
+                        //be sure not to allow select of scene this way
                         {
                             var glyphs = $('.glyph');
                             for(var i = 0; i < glyphs.length; i++)
@@ -618,7 +619,8 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
                                 
                                 if(hitTest( $(this.selectionMarquee),$(glyphs[i])))
                                 {
-                                    vwfhits.push($(glyphs[i]).attr('vwfid'));
+                                    if($(glyphs[i]).attr('vwfid') !== vwf.application())
+                                        vwfhits.push($(glyphs[i]).attr('vwfid'));
                                 }
                             }
 
