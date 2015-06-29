@@ -95,29 +95,29 @@ module.exports.hookupUtils = function(browser) {
 	});	
 	browser.addCommand("$keydown", function(cssSelector, key) {
 		var cb = arguments[arguments.length -1];
-		browser.execute(function(c, k) {
+        browser.execute(function(c, k) {
 			var e = $.Event("keydown");
 			e.which = e.keyCode = k.charCodeAt(0);
-			return $(c).trigger(e);
-		}, cssSelector, key, function(err, jqObj)
-		{
-			cb(null, jqObj);
-		});
+        	return $(c).trigger(e);
+        }, cssSelector, key, function(err, jqObj)
+        {
+        	cb(null, jqObj);
+        });
 	});
 	browser.addCommand("$keyup", function(cssSelector, key) {
 		var cb = arguments[arguments.length -1];
-		browser.execute(function(c, k) {
+        browser.execute(function(c, k) {
 			var e = $.Event("keyup");
 			e.which = e.keyCode = k.charCodeAt(0);
-			return $(c).trigger(e);
-		}, cssSelector, key, function(err, jqObj)
-		{
-			cb(null, jqObj);
-		});
+        	return $(c).trigger(e);
+        }, cssSelector, key, function(err, jqObj)
+        {
+        	cb(null, jqObj);
+        });
 	});
 	browser.addCommand("$keypress", function(cssSelector, key) {
 		var cb = arguments[arguments.length -1];
-		browser.execute(function(c, k) {
+        browser.execute(function(c, k) {
 			var e = $.Event("keypress");
 			e.which = e.keyCode = k.charCodeAt(0);
 			return $(c).trigger(e);
@@ -128,7 +128,7 @@ module.exports.hookupUtils = function(browser) {
 	});
 	browser.addCommand("saveDataBeforeUnload", function(){
 		var cb = arguments[arguments.length -1];
-		browser.execute(function(){
+        browser.execute(function(){
 			window.onbeforeunload = function(){};
 			if(_UserManager.GetCurrentUserName() && _DataManager.getInstanceData().publishSettings.persistence){
 				_DataManager.saveToServer(true);
@@ -142,6 +142,7 @@ module.exports.hookupUtils = function(browser) {
 		});
 	});	
 	browser.addCommand("hasViewNode", function(nodeName) {
+
 		var cb = arguments[arguments.length -1];
         browser.execute(function(a) {
 			try{

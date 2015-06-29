@@ -58,6 +58,13 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 		$('#MenuDelete').parent()
 			.toggleClass('disabled', !selection);
 
+		$('#MenuCopy').parent()
+			.toggleClass('disabled', !selection);
+		$('#MenuDuplicate').parent()
+			.toggleClass('disabled', !selection);
+		$('#MenuDelete').parent()
+			.toggleClass('disabled', !selection);
+
 		$('#MenuAssetsSaveAsEntity').parent()
 			.toggleClass('disabled', !selection);
 		$('#MenuAssetsSaveAsMaterial').parent()

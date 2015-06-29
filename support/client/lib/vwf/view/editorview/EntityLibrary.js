@@ -64,8 +64,12 @@ define(function() {
    
         $('#EntityLibraryMain').append("<div id='EntityLibraryAccordion'></div>");
 
-        $('entitylibraryclose').click(function(){
-            _EntityLibrary.hide();
+        $('#entitylibrarytray').click(function() {
+            //Pop up load by url prompt on hamburger icon
+            $('#MenuCreateLoadMeshURL').click();
+        })
+        $('#entitylibraryclose').click(function(){
+            EntityLibrary.hide();
         })
         this.buildGUI = function()
         {
