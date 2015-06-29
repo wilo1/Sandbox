@@ -1012,8 +1012,14 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
                 _dView.setRenderModeStereo()
             });
              $('#MenuViewRenderVR').click(function(e) {
-                _dView.setRenderModeVR();
-                require("vwf/view/threejs/editorCameraController").setCameraMode('VR');
+                
+                if (navigator.getVRDevices) {
+                        _dView.setRenderModeVR();
+                        require("vwf/view/threejs/editorCameraController").setCameraMode('VR');
+                }else
+                {
+                    alertify.alert("WebVR is not supported on this browser.");
+                }
             });
     
             $('#TestSettings').click(function(e) {
