@@ -456,6 +456,14 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                         }
 
                     }
+                    if(window._Editor && this.nodes[i] && window._Editor.isSelected(i))
+                    {
+                        this.nodes[i].lastAnimationFrame = null;
+                        this.nodes[i].thisAnimationFrame = null;
+                        this.nodes[i].lastTickTransform = null;
+                        this.nodes[i].lastFrameInterp = null;
+                        this.nodes[i].thisTickTransform = null;
+                    }
                 }
 
 
@@ -858,7 +866,10 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                 if (threeObject instanceof THREE.Scene) {
                     if (propertyName == 'skyColorBlend') {
                         if (window._dSky && _dSky.material)
+                        {
+                        
                             _dSky.material.uniforms.colorBlend.value = propertyValue;
+                        }
                     }
                     if (propertyName == 'skyFogBlend') {
                         if (window._dSky && _dSky.material)
