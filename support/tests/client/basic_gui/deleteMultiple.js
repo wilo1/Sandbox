@@ -17,51 +17,30 @@ module.exports = {
 		browser.loadBlankScene();
 
 		//Create 10 boxes by button
-		// for (var i = 1; i <= 10; i++) {
+		for (var i = 1; i <= 10; i++) {
 			browser
 			.pause(6000)
-			.nextGUID("box1")
+			.nextGUID("box" + i)
 			.$click('#MenuCreateBoxicon');
-			
-			browser
-			.pause(6000)
-			.nextGUID("box2")
-			.$click('#MenuCreateBoxicon');
-			
-			browser
-			.pause(6000)
-			.nextGUID("box3")
-			.$click('#MenuCreateBoxicon');
-			
-			browser
-			.pause(6000)
-			.nextGUID("box4")
-			.$click('#MenuCreateBoxicon');
-			
-			browser
-			.pause(6000)
-			.nextGUID("box5")
-			.$click('#MenuCreateBoxicon');
-			
-		// }
+		}
 		
-		browser.pause(990000).then(finished(passed, outStr, true));
-/*		
+
+		
 		//Verify boxes
 		//if the tenth box exists I find it reasonable to assume
 		//1 through 9 made it as well
 		browser.pause(10000)
 		.then(function() {
-			testUtils.assertNodeExists("Box10", function(assertStatus, msg){
+			testUtils.assertNodeExists("box10", function(assertStatus, msg){
 				passed = passed && !!assertStatus;
-				outStr += "Box10 exists: " + msg + "; ";
-				
+				outStr += "box10 exists: " + msg + "; ";
+				browser.pause(9000).then(finished(passed, outStr, true));
 			});
 		})
 		
 		//Select two nodes
 		.pause(6000)
-		.selectNodes(["Box1", "Box2"], function(err, r) {
+		.selectNodes(["box1", "box2"], function(err, r) {
 			if(!err && r) {
 				outStr += "Nodes are selected. ";
 			} else {
@@ -78,7 +57,7 @@ module.exports = {
 		
 		//Select three nodes
 		.pause(6000)
-		.selectNodes(["Box3", "Box4", "Box5"], function(err, r) {
+		.selectNodes(["box3", "box4", "box5"], function(err, r) {
 			if(!err && r) {
 				outStr += "Nodes are selected. ";
 			} else {
@@ -127,18 +106,18 @@ module.exports = {
 		//Verify deletion of Boxes - this can wait until the end
 		.pause(6000).then(function() {
 			for(var j = 1; j <= 5; j++) {
-				testUtils.assertNodeExists("Box" + j, function(assertStatus, msg){
+				testUtils.assertNodeExists("box" + j, function(assertStatus, msg){
 					passed = passed && !assertStatus;
-					outStr += "Box" +j+ " deleted: " + msg + "; ";
+					outStr += "box" +j+ " deleted: " + msg + "; ";
 				});
 			}
 		})
 		//Verify existence of other Boxes
 		.pause(6000).then(function() {
 			for(var k = 6; k <=10; k++) {
-				testUtils.assertNodeExists("Box" + k, function(assertStatus, msg){
+				testUtils.assertNodeExists("box" + k, function(assertStatus, msg){
 					passed = passed && !!assertStatus;
-					outStr += "Box" +k+ " exists: " + msg + "; ";
+					outStr += "box" +k+ " exists: " + msg + "; ";
 					
 				});
 			} i 
@@ -153,6 +132,6 @@ module.exports = {
 			// testUtils.assertNodeExists(Box)
 		// });
 		//Wait a second...
-*/		
+		
 	}
 };

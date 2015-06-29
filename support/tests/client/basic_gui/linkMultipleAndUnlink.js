@@ -12,7 +12,8 @@
 //Plane: the former parent will have no children
 
 module.exports = {
-	'Link Multiple Prims to Another Then Unlink Them (A20, 22)': function (browser, finished) {
+	'Link Multiple Prims and Unlink (A20, 22)':
+	function (browser, finished) {
 		global.browser = browser;
 		var testUtils = require('../../utils/testUtils.js'),
 			passed = true,
@@ -72,7 +73,6 @@ module.exports = {
 		//Get the children
 		.pause(2000)
 		.getSelectedNodes(function (err, r) {
-			console.log(r.length + " B");
 			for (var i = 0, len = r.length; i < len; i++) {
 				nodes.push(r[i]);
 			}
