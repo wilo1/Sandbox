@@ -44,8 +44,15 @@
     "twitter_callback_url": "http://localhost:3000/adl/sandbox/auth/twitter/callback",
     "google_client_id": null,
     "google_client_secret": null,
-    "google_callback_url": "http://localhost:3000/adl/sandbox/auth/google/callback"
-    "branding"
+    "google_callback_url": "http://localhost:3000/adl/sandbox/auth/google/callback",
+    
+    "branding": {
+        "title":"",
+        "logo":"",
+        "tagline":"",
+        "footer":""
+    },
+    "appPath" : "/adl/sandbox",   // the URL to show at the application page. 
 
 	"hostAssets": true,
 	// if not hosting assets, provide an remote asset server URL
