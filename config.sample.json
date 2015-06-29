@@ -46,18 +46,24 @@
     "google_client_secret": null,
     "google_callback_url": "http://localhost:3000/adl/sandbox/auth/google/callback",
     
+    //customize the header, footer, title and logo for the site
     "branding": {
         "title":"",
         "logo":"",
         "tagline":"",
         "footer":""
     },
-    "appPath" : "/adl/sandbox",   // the URL to show at the application page. 
+    "appPath" : "/adl/sandbox",   // the URL to show at the application page. Replaces all "/adl/sandbox" on the front end
 
 	"hostAssets": true,
 	// if not hosting assets, provide an remote asset server URL
 	"remoteAssetServerURL": "",
     // data storage location (relative to Sandbox root) of the integrated asset server
     "assetDataDir": "assets",
-	"assetSessionHeader": "X-Session-Cookie"
+	"assetSessionHeader": "X-Session-Cookie",
+
+    //the load balancer can route connections to multiple servers on one domain
+    //do not use with cluster server
+    "loadBalancer" : "url_to_balancer",
+    "loadBalancerKey" : "Key set up for load balancer"
 }
