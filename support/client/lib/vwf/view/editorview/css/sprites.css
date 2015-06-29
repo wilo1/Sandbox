@@ -141,13 +141,13 @@ background-origin: content-box !important;
 	height: 25px;
 }
 
-.login{
+.logout{
 	background-position: -145px -29px ;
 	width: 25px;
 	height: 25px;
 }
 
-.logout{
+.login{
 	background-position: -117px -29px ;
 	width: 25px;
 	height: 25px;

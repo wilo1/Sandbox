@@ -8,12 +8,16 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 
 		$(document).on('selectionChanged', function(e,node){
 			$rootScope.fields.selectedNode = node;
-			$rootScope.$apply();
+			try {
+				$rootScope.$apply();
+			} catch(e){}
 		});
 
 		$(document).on('setstatecomplete', function(){
 			$rootScope.fields.worldIsReady = true;
-			$rootScope.$apply();
+			try {
+				$rootScope.$apply();
+			} catch(e){}
 		});
 	}]);
 

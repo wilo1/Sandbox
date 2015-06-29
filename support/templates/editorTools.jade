@@ -2,15 +2,18 @@ include ./menus
 include ./manageAssets
 include ./statusbar
 include ./3DRIntegration
+include ./toolbar
 
 mixin editorTools_head
 	+menus_head
+	+toolbar_head
 	+manageAssets_head
 	+statusbar_head
 	+3DRIntegration_head
 
 mixin editorTools_body
 	+menus_body
+	+toolbar_body
 	+manageAssets_body
 	+statusbar_body
 	+3DRIntegration_body
