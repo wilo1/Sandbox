@@ -838,6 +838,15 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
             $('#MenuCreateParticlesBasic').click(function(e) {
                 _Editor.createParticleSystem('basic', _Editor.GetInsertPoint(), document.PlayerNumber);
             });
+            $('#MenuCreateParticlesSpray').click(function(e) {
+                _Editor.createParticleSystem('spray', _Editor.GetInsertPoint(), document.PlayerNumber);
+            });
+            $('#MenuCreateParticlesDust').click(function(e) {
+                _Editor.createParticleSystem('dust', _Editor.GetInsertPoint(), document.PlayerNumber);
+            });
+            $('#MenuCreateParticlesAtmospheric').click(function(e) {
+                _Editor.createParticleSystem('atmospheric', _Editor.GetInsertPoint(), document.PlayerNumber);
+            });
             $('#MenuCreateLightPoint').click(function(e) {
                 _Editor.createLight('point', _Editor.GetInsertPoint(), document.PlayerNumber);
             });
