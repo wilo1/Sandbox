@@ -62,9 +62,5 @@
     "assetDataDir": "assets",
 	"assetSessionHeader": "X-Session-Cookie",
 
-    //the load balancer can route connections to multiple servers on one domain
-    //do not use with cluster server
-    "loadBalancer" : "url_to_balancer",
-    "loadBalancerKey" : "Key set up for load balancer",
-    "host":"own public URL - needed by balancer"
+
 }
