@@ -1820,7 +1820,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
 						startAlpha: 1, endAlpha: 0.5, alphaRange: 0, alphaTest: 0.75
 					};
 				break;
-				case 'dust':
+				case 'suspended':
 					props = {
 						emitterType: 'box', emitterSize: [10,10,10], solver: 'AnalyticShader', velocityMode: 'cartesian',
 						particleCount: 200, maxRate: 0.75, minLifeTime: 1, maxLifeTime: 168,

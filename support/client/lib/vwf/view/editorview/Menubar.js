@@ -841,8 +841,8 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
             $('#MenuCreateParticlesSpray').click(function(e) {
                 _Editor.createParticleSystem('spray', _Editor.GetInsertPoint(), document.PlayerNumber);
             });
-            $('#MenuCreateParticlesDust').click(function(e) {
-                _Editor.createParticleSystem('dust', _Editor.GetInsertPoint(), document.PlayerNumber);
+            $('#MenuCreateParticlesSuspended').click(function(e) {
+                _Editor.createParticleSystem('suspended', _Editor.GetInsertPoint(), document.PlayerNumber);
             });
             $('#MenuCreateParticlesAtmospheric').click(function(e) {
                 _Editor.createParticleSystem('atmospheric', _Editor.GetInsertPoint(), document.PlayerNumber);
