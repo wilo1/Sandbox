@@ -21,10 +21,10 @@ mixin toolbar_body
 			ng-class='{"icondisabled": !fields.selectedNode, "iconselected": xfSelected === "scale"}')
 		.seperator
 
-		.icon.worldspace(toolbar-select='spaceSelected = "world"', title='Use World Coordinates', ng-click='triggerMenu("MenuWorld")'
-			ng-class='{"icondisabled": !fields.selectedNode, "iconselected": spaceSelected === "world"}')
-		.icon.localspace(toolbar-select='spaceSelected = "local"', title='Use Local Coordinates', ng-click='triggerMenu("MenuLocal")'
-			ng-class='{"icondisabled": !fields.selectedNode, "iconselected": spaceSelected === "local"}')
+		.icon.worldspace(title='Use World Coordinates', ng-click='triggerMenu("MenuWorld")'
+			ng-class='{"icondisabled": !fields.selectedNode, "iconselected": fields.coordSpaceSelected === "world"}')
+		.icon.localspace(title='Use Local Coordinates', ng-click='triggerMenu("MenuLocal")'
+			ng-class='{"icondisabled": !fields.selectedNode, "iconselected": fields.coordSpaceSelected === "local"}')
 		.seperator
 
 		.icon.pick(title='Select by clicking', ng-click='triggerMenu("MenuSelectPick")')

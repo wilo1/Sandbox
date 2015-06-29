@@ -82,7 +82,7 @@ var lightgreenBoundingBoxMaterial = new THREE.LineBasicMaterial();
     lightgreenBoundingBoxMaterial.color.g = .7;
     lightgreenBoundingBoxMaterial.color.b = .7;
 
-define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(Log, ProgressBar) {
+define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/editorview/angular-app"], function(Log, ProgressBar, angularapp) {
     var originalGizmoPos;
     var Editor = {};
     var isInitialized = false;
@@ -3187,12 +3187,12 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             SelectMode = e;
             $('#StatusPickMode').text('Pick: ' + e);
             if (e == 'Pick') {
-                $('#MenuSelectPickicon').addClass('iconselected')
+                //$('#MenuSelectPickicon').addClass('iconselected')
                 $('#glyphOverlay').show();
 
             } else {
 
-                $('#MenuSelectPickicon').removeClass('iconselected')
+                //$('#MenuSelectPickicon').removeClass('iconselected')
                 $('#glyphOverlay').hide();
 
             }
@@ -3213,12 +3213,16 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             CoordSystem = e;
             if (e == WorldCoords) {
                 $('#StatusCoords').text('World Coords');
-                $('#MenuWorldicon').addClass('iconselected')
-                $('#MenuLocalicon').removeClass('iconselected');
+				setTimeout(function(){
+					angularapp.root.fields.coordSpaceSelected = 'world';
+					angularapp.root.$apply();
+				}, 0);
             } else {
                 $('#StatusCoords').text('Local Coords');
-                $('#MenuWorldicon').removeClass('iconselected');
-                $('#MenuLocalicon').addClass('iconselected')
+				setTimeout(function(){
+					angularapp.root.fields.coordSpaceSelected = 'local';
+					angularapp.root.$apply();
+				}, 0);
             }
         }.bind(this);
         this.GetMoveGizmo = function(e) {

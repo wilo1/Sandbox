@@ -63,7 +63,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 	app.controller('ToolbarController', ['$scope', function($scope)
 	{
 		$scope.xfSelected = 'move';
-		$scope.spaceSelected = 'local';
+		$scope.fields.coordSpaceSelected = 'world';
 		$scope.cameraSelected = 'orbit';
 
 		$scope.triggerMenu = function(menuId)
