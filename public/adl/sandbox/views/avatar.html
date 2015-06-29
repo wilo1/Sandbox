@@ -47,18 +47,18 @@ var buf = new Uint32Array(1);
         }
  </script>   
 <div id="content" class="row" style="margin:10px auto;float:none;text-align:center;">
-	<div class="col-md-9" style="margin:10px auto;float:none;text-align:center;">
-		<div class="col-md-7" data-bind="foreach:avatarInfo">
+	<div class="col-xs-12 col-md-9" style="margin:10px auto;float:none;text-align:center;">
+		<div class="col-xs-12 col-md-7" data-bind="foreach:avatarInfo">
 			<!-- ko foreach: $root.makeAvatarArr($data) -->
 			
-				<div class="col-md-3">
+				<div class="col-xs-3">
 					<div class="avatarchoice" data-bind="click:function(data, e){$root.handleAvatarClick({data:data, parent:$parent}, e)}, attr:{id:$parent.model+'_' + $data.join('-')}">
 						<img data-bind="attr:{src:'./avatars/' + $parent.texture + $data[0] +'-'+ $data[1] +'.png'}" class="avatarPortrait">
 					</div>
 				</div>
 			<!-- /ko -->
 		</div>
-		<div class="col-md-5" style="background:none;box-shadow:none;">
+		<div class="col-xs-5" style="background:none;box-shadow:none;">
 			<div style="margin: 0;">
 				<!--<img data-bind="attr:{src:currentAvatar()?'./avatars/' + currentAvatar().parent.texture + currentAvatar().data[0] +'-'+ currentAvatar().data[1] +'.png':''}"></img>-->
 				<div id="previewRender" style="margin: 0 auto; margin-top:100px;" data-bind="style: {'visibility':!spinnerVisible()?'visible':'invisibile'}"></div>
