@@ -32,7 +32,8 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 			isExample = !!_DataManager.getInstanceData().isExample,
 			userIsOwner = _UserManager.GetCurrentUserName() != _DataManager.getInstanceData().owner,
 			worldIsPersistent = _DataManager.getInstanceData().publishSettings.persistence,
-			worldIsSinglePlayer = _DataManager.getInstanceData().publishSettings.SinglePlayer;
+			worldIsSinglePlayer = _DataManager.getInstanceData().publishSettings.SinglePlayer,
+			worldHasTerrain = !!window._dTerrain;
 
 		$('#MenuLogIn').parent()
 			.toggleClass('disabled', loggedIn);
@@ -46,6 +47,9 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 			.toggleClass('disabled', isExample || !userIsOwner);
 		$('#TestLaunch').parent()
 			.toggleClass('disabled', !(worldIsPersistent && userIsOwner) || worldIsSinglePlayer || isExample);
+
+		$('#MenuCreateTerrainGrass').parent()
+			.toggleClass('disabled', !worldHasTerrain);
 
 		$('#MenuCopy').parent()
 			.toggleClass('disabled', !selection);
@@ -980,12 +984,14 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
             });
     
             $('#MenuCreateTerrainGrass').click(function(e) {
-                if (!_dTerrain) {
+				try {
+	                var parent = _dTerrain.ID;
+				}
+				catch(e){
                     alertify.alert('The scene must first contain a terrain object');
-                    return
-                }
-                var parent = _dTerrain.ID;
-    
+                    return;
+				}
+
                 var GrassProto = {
                     extends: 'http://vwf.example.com/node3.vwf',
                     properties: {}
@@ -997,13 +1003,6 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
                 GrassProto.properties.DisplayName = _Editor.GetUniqueName('Grass');
                 _Editor.createChild(parent, GUID(), GrassProto, null, null);
     
-            });
-    
-            $('#MenuCreateTerrainDecorator').click(function(e) {
-                if (!_dTerrain) {
-                    alertify.alert('The scene must first contain a terrain object');
-                    return
-                }
             });
     
             $('#MenuViewRenderNormal').click(function(e) {
