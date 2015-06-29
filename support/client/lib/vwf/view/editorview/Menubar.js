@@ -1016,13 +1016,22 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
     
             $('#MenuViewRenderNormal').click(function(e) {
                 _dView.setRenderModeNormal();
+                require("vwf/view/threejs/editorCameraController").getController('Orbit').orbitPoint(newintersectxy);
+                require("vwf/view/threejs/editorCameraController").setCameraMode('Orbit');
+                require("vwf/view/threejs/editorCameraController").updateCamera();
             });
             $('#MenuViewRenderStereo').click(function(e) {
                 _dView.setRenderModeStereo()
             });
              $('#MenuViewRenderVR').click(function(e) {
-                _dView.setRenderModeVR();
-                require("vwf/view/threejs/editorCameraController").setCameraMode('VR');
+                
+                if (navigator.getVRDevices) {
+                        _dView.setRenderModeVR();
+                        require("vwf/view/threejs/editorCameraController").setCameraMode('VR');
+                }else
+                {
+                    alertify.alert("WebVR is not supported on this browser.");
+                }
             });
     
             $('#TestSettings').click(function(e) {
