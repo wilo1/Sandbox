@@ -1053,7 +1053,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
             list = $('#smoothmenu1').find('[id]');
     
             //make every clicked menu item close all menus
-            // $('#smoothmenu1').find('[id]').filter(':only-child').click(function(){ddsmoothmenu.closeall({type:'click',target:'asd'})});
+            $('#smoothmenu1 li').not('li:has(ul)').click(function(e){ddsmoothmenu.closeall({type:'mouseleave'})});
     	},
 
 		calledMethod: function(id, evtname, data)
