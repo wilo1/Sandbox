@@ -16,18 +16,22 @@ mixin menus_body
 				li: a#MenuSaveNow
 					.glyphicon.glyphicon-floppy-disk
 					| Save Now
-				li(ng-class='{"disabled": isExample}'): a#MenuShareWorld
-					.glyphicon.glyphicon-share
-					| Share
-				li(ng-class='{"disabled": isExample || !userIsOwner}'): a#SetThumbnail
-					.glyphicon.glyphicon-picture
-					| Set World Thumbnail
-				li(ng-class='{"disabled": isExample || !userIsOwner}'): a#TestSettings
-					.glyphicon.glyphicon-globe
-					| World Settings (ctrl+9)
-				li: a#TestLaunch
-					.glyphicon.glyphicon-play
-					| Play World (ctrl+0)
+				li(ng-class='{"disabled": isExample}')
+					a#MenuShareWorld(title="Share a link to this world with your colleagues")
+						.glyphicon.glyphicon-share
+						| Share
+				li(ng-class='{"disabled": isExample || !userIsOwner}')
+					a#SetThumbnail(title="Take a screenshot and designate it as the public thumbnail")
+						.glyphicon.glyphicon-picture
+						| Set World Thumbnail
+				li(ng-class='{"disabled": isExample || !userIsOwner}')
+					a#TestSettings(title="Change the publish settings of this world")
+						.glyphicon.glyphicon-globe
+						| World Settings (ctrl+9)
+				li(ng-class='{"disabled": worldIsNotLaunchable}')
+					a#TestLaunch(title="Load the world as if it were published")
+						.glyphicon.glyphicon-play
+						| Play World (ctrl+0)
 
 		li
 			a#MenuEdit Edit
@@ -40,91 +44,99 @@ mixin menus_body
 					| Redo (ctrl-y)
 				li(style='border-bottom: 3px solid gray')
 
-				li(ng-class='{"disabled": !selection}'): a#MenuCopy
-					.glyphicon.glyphicon-share-copy
-					| Copy (ctrl-c)
-				li: a#MenuPaste
+				li(ng-class='{"disabled": !selection}')
+					a#MenuCopy(title="Copy the currently selected object(s) to the internal clipboard")
+						.glyphicon.glyphicon-share-copy
+						| Copy (ctrl-c)
+				li: a#MenuPaste(title="Paste previously copied object(s) from the internal clipboard")
 					.glyphicon.glyphicon-share-paste
 					| Paste (ctrl-v)
-				li(ng-class='{"disabled": !selection}'): a#MenuDuplicate
-					.glyphicon.glyphicon-share-duplicate
-					| Duplicate (ctrl-s)
-				li(ng-class='{"disabled": !selection}'): a#MenuDelete
-					.glyphicon.glyphicon-share-trash
-					| Delete (del)
+				li(ng-class='{"disabled": !selection}')
+					a#MenuDuplicate(title="Duplicate currently selected object(s)")
+						.glyphicon.glyphicon-share-duplicate
+						| Duplicate (ctrl-s)
+				li(ng-class='{"disabled": !selection}')
+					a#MenuDelete(title="Delete currently selected object(s)")
+						.glyphicon.glyphicon-share-trash
+						| Delete (del)
 				li(style='border-bottom: 3px solid gray')
 
-				li: a#MenuShare
+				li: a#MenuShare(title="Specify which users are authorized to modify the world")
 					.glyphicon.glyphicon-share-share
 					| Set Permissions
 				li
 					a#MenuSelect Select
 					ul
-						li: a#MenuSelectName
+						li: a#MenuSelectName(title="Select objects by type and name")
 							.glyphicon.glyphicon-list
 							| Select By Name
-						li: a#MenuSelectPick
+						li: a#MenuSelectPick(title="Select objects with the mouse (default)")
 							.glyphicon.glyphicon-screenshot
 							| Pick (q)
-						li: a#MenuSelectNone
+						li: a#MenuSelectNone(title="Deselect selected object(s)")
 							.glyphicon.glyphicon-unchecked
 							| Select None
-						li: a#MenuSelectScene
+						li: a#MenuSelectScene(title="Select the scene node")
 							.glyphicon.glyphicon-film
 							| Select Scene
 
 				li
 					a#MenuTransforms Transform
 					ul
-						li: a#MenuMove
+						li: a#MenuMove(title="Enable the move tool on the currently selected object(s)")
 							.glyphicon.glyphicon-move
 							| Move (w)
-						li: a#MenuRotate
+						li: a#MenuRotate(title="Enable the rotate tool on the currently selected object(s)")
 							.glyphicon.glyphicon-repeat
 							| Rotate (e)
-						li: a#MenuScale
+						li: a#MenuScale(title="Enable the scale tool on the currently selected object(s)")
 							.glyphicon.glyphicon-fullscreen
 							| Scale (r)
-						li: a#MenuMulti
+						li: a#MenuMulti(title="Enable all transform tools on the currently selected object(s)")
 							.glyphicon.glyphicon-screenshot
 							| Multi (t)
 						li(style='border-bottom: 3px solid gray')
 
-						li: a#MenuLocal Local Coords
-						li: a#MenuWorld World Coords
+						li: a#MenuLocal(title="Present transform tools with respect to selected object's local transform")
+							| Local Coords
+						li: a#MenuWorld(title="Present transform tools with respect to world (global) coordinates")
+							| World Coords
 						li(style='border-bottom: 3px solid gray')
 
 						li
 							a#MenuSnaps Snaps
 							ul
-								li: a#MenuSnapLarge Large
-								li: a#MenuSnapMedium Medium
-								li: a#MenuSnapSmall Small
-								li: a#MenuSnapOff Off
+								li: a#MenuSnapLarge(title="Transform changes snap in large increments") Large
+								li: a#MenuSnapMedium(title="Transform changes snap in medium increments") Medium
+								li: a#MenuSnapSmall(title="Transform changes snap in small increments") Small
+								li: a#MenuSnapOff(title="Turns off transform snapping") Off
 						li(style='border-bottom: 3px solid gray')
-						li(style='z-index: 100'): a#ResetTransforms Reset Transforms
+						li
+							a#ResetTransforms(title="Reset selected object(s) back to the default position, rotation, and scale")
+								| Reset Transforms
 
 		li
 			a#MenuCamera Camera
 			ul
 				
-				li(ng-class='{"disabled": !selection}'): a#MenuFocusSelected
-					.glyphicon.glyphicon-screenshot
-					| Focus Selected
+				li(ng-class='{"disabled": !selection}')
+					a#MenuFocusSelected(title="Focus editor viewport on the currently selected object(s)")
+						.glyphicon.glyphicon-screenshot
+						| Focus Selected
 				li
 					a Camera Sharing
 					ul
-						li: a#MenuCameraShare
+						li: a#MenuCameraShare(title="Begin broadcasting editor viewport")
 							.glyphicon.glyphicon-share
 							| Share Camera View
-						li: a#MenuCameraReceive
+						li: a#MenuCameraReceive(title="Begin viewing remote viewport broadcast, if available")
 							.glyphicon.glyphicon-share
 							| Receive Camera Broadcasts
-						li: a#MenuCameraReceive Cancel
+						li: a#MenuCameraReceive(title="Stop viewing remote viewport broadcast")
 							.glyphicon.glyphicon-share
 							| Stop Receiving Camera Broadcasts
 
-				li: a#MenuActivateCamera
+				li: a#MenuActivateCamera(title="Choose which camera to view in editor viewport")
 					.glyphicon.glyphicon-video
 					| Activate Camera
 				li
@@ -132,40 +144,44 @@ mixin menus_body
 						.glyphicon.glyphicon-new-window
 						| Default Cameras
 					ul
-						li: a#MenuCameraOrbit Orbit
-						li: a#MenuCameraFree Free
-						li: a#MenuCamera3RDPerson Avatar View
-						li: a#MenuCameraNavigate Navigate
-						li: a#MenuCameraFly Fly
-						li: a#MenuCameraDeviceOrientation DeviceOrientation
+						li: a#MenuCameraOrbit(title="Camera mode that supports rotation around a fixed point") Orbit
+						li: a#MenuCameraFree(title="Camera mode that emulates a first person view") Free
+						li: a#MenuCamera3RDPerson(title="Camera mode that orients itself behind your avatar") Avatar View
+						li: a#MenuCameraNavigate(title="Camera mode best suited to navigate around large regions of space") Navigate
+						li: a#MenuCameraFly(title="Camera mode that moves forward at a set speed") Fly
+						li: a#MenuCameraDeviceOrientation(title="Camera mode that uses mobile device's sensors to control viewport, if available")
+							| DeviceOrientation
 
 		li(ng-class='{"disabled": !selection}')
 			a#MenuHierarchy Hierarchy
 			ul
-				li: a#MenuSetParent
+				li: a#MenuSetParent(title="Link the currently selected object(s) to a single parent object")
 					.glyphicon.glyphicon-link
 					| Link
-				li: a#MenuRemoveParent
+				li: a#MenuRemoveParent(title="Decouple selected object(s) from its parent")
 					.glyphicon.glyphicon-link
 					| Unlink
-				li: a#MenuSelectParent
+				li: a#MenuSelectParent(title="Select the parent of the currently selected object(s)")
 					.glyphicon.glyphicon-arrow-up
 					| Select Parent
 				li
 					a#MenuGrouping Grouping
 					ul
-						li: a#MenuGroup
+						li: a#MenuGroup(title="Treat all of the selected objects as one object")
 							.glyphicon.glyphicon-oil
 							| Group
-						li(ng-class='{"disabled": !isGroup}'): a#MenuUngroup
-							.glyphicon.glyphicon-duplicate
-							| Ungroup
-						li(ng-class='{"disabled": !isGroup}'): a#MenuOpenGroup
-							.glyphicon.glyphicon-resize-full
-							| Open Group
-						li(ng-class='{"disabled": !isGroup}'): a#MenuCloseGroup
-							.glyphicon.glyphicon-resize-small
-							| Close Group
+						li(ng-class='{"disabled": !isGroup}')
+							a#MenuUngroup(title="Break selected group back into individual objects")
+								.glyphicon.glyphicon-duplicate
+								| Ungroup
+						li(ng-class='{"disabled": !isGroup}')
+							a#MenuOpenGroup(title="Enable selection of grouped objects")
+								.glyphicon.glyphicon-resize-full
+								| Open Group
+						li(ng-class='{"disabled": !isGroup}')
+							a#MenuCloseGroup(title="Disable selection of grouped objects")
+								.glyphicon.glyphicon-resize-small
+								| Close Group
 
 		li
 			a#MenuCreate Create
@@ -173,87 +189,91 @@ mixin menus_body
 				li
 					a#MenuPrimitives Primitives
 					ul
-						li: a#MenuCreateEmpty Empty
-						li: a#MenuCreateSphere Sphere
-						li: a#MenuCreateBox Box
-						li: a#MenuCreatePlane Plane
-						li: a#MenuCreateCylinder Cylinder
-						li: a#MenuCreateCone Cone
-						li: a#MenuCreateText Text
-						li: a#MenuCreateTorus Torus
+						li: a#MenuCreateEmpty(title="Create an empty VWF node") Empty
+						li: a#MenuCreateSphere(title="Create a sphere") Sphere
+						li: a#MenuCreateBox(title="Create a box") Box
+						li: a#MenuCreatePlane(title="Create a plane") Plane
+						li: a#MenuCreateCylinder(title="Create a cylinder") Cylinder
+						li: a#MenuCreateCone(title="Create a cone") Cone
+						li: a#MenuCreateText(title="Create customizable text") Text
+						li: a#MenuCreateTorus(title="Create a donut shape") Torus
 				li
 					a#MenuShapes Shapes
 					ul
-						li: a#MenuCreateLine Line
-						li: a#MenuCreateCircle Circle
-						li: a#MenuCreateStar Star
-						li: a#MenuCreateRectangle Rectangle
-						li: a#MenuCreateLSection L Section
-						li: a#MenuCreateTSection T Section
+						li: a#MenuCreateLine(title="Create a line") Line
+						li: a#MenuCreateCircle(title="Create a circle") Circle
+						li: a#MenuCreateStar(title="Create a star") Star
+						li: a#MenuCreateRectangle(title="Create a rectangle") Rectangle
+						li: a#MenuCreateLSection(title="Create an L-shaped section") L Section
+						li: a#MenuCreateTSection(title="Create a T-shaped section") T Section
 				li
 					a#MenuModifiers Modifiers
 					ul
-						li: a#MenuCreateBend Bend
-						li: a#MenuCreateTwist Twist
-						li: a#MenuCreateTaper Taper
-						li: a#MenuCreatePerlinNoise Perlin Noise
-						li: a#MenuCreateSimplexNoise Simplex Noise
-						li: a#MenuCreateOffset Offset
-						li: a#MenuCreateStretch Stretch
-						li: a#MenuCreatePush Push
-						li: a#MenuCreateUVMap UVMap
-						li: a#MenuCreateCenterPivot Center Pivot
-						li: a#MenuCreateExtrude Extrude
-						li: a#MenuCreatePathExtrude Path Extrude
-						li: a#MenuCreateLathe Lathe
+						li: a#MenuCreateBend(title="Add a Bend modifier to selected object") Bend
+						li: a#MenuCreateTwist(title="Add a Twist modifier to selected object") Twist
+						li: a#MenuCreateTaper(title="Add a Taper modifier to selected object") Taper
+						li: a#MenuCreatePerlinNoise(title="Add a Perlin Noise modifier to selected object") Perlin Noise
+						li: a#MenuCreateSimplexNoise(title="Add a Simplex Noise modifier to selected object") Simplex Noise
+						li: a#MenuCreateOffset(title="Add an Offset modifier to selected object") Offset
+						li: a#MenuCreateStretch(title="Add a Stretch modifier to selected object") Stretch
+						li: a#MenuCreatePush(title="Add a Push modifier to selected object") Push
+						li: a#MenuCreateUVMap(title="Add a UV Map modifier to selected object") UVMap
+						//li: a#MenuCreateCenterPivot(title="Add a Center Pivot modifier to selected object") Center Pivot
+						li: a#MenuCreateExtrude(title="Add an Extrude modifier to selected object") Extrude
+						li: a#MenuCreatePathExtrude(title="Add a Path Extrude modifier to selected object") Path Extrude
+						li: a#MenuCreateLathe(title="Add a Lathe modifier to selected object") Lathe
 				li
 					a#MenuBehaviors Behaviors
 					ul
-						li: a#MenuCreateBlankBehavior New Behavior
-						li: a#MenuCreateBehaviorRotator Rotator
-						li: a#MenuCreateBehaviorOrbit Orbit
-						li: a#MenuCreateBehaviorHyperlink Hyper link
-						li: a#MenuCreateBehaviorHoverlabel Hover label
-						li: a#MenuCreateBehaviorPathFollow Path Follow
-						li: a#MenuCreateBehaviorClampToGround Clamp To Ground
-						li: a#MenuCreateBehaviorLookat LookAt
-						li: a#MenuCreateBehaviorSeek Seek
+						li: a#MenuCreateBlankBehavior(title="Add an empty VWF behavior node to selected object") New Behavior
+						li: a#MenuCreateBehaviorRotator(title="Add a Rotator behavior to selected object") Rotator
+						li: a#MenuCreateBehaviorOrbit(title="Add an Orbit behavior to selected object") Orbit
+						li: a#MenuCreateBehaviorHyperlink(title="Add a Hyperlink to selected object") Hyper link
+						li: a#MenuCreateBehaviorHoverlabel(title="Add a Hover label to selected object") Hover label
+						li: a#MenuCreateBehaviorPathFollow(title="Add a Path Follow behavior to selected object") Path Follow
+						li: a#MenuCreateBehaviorClampToGround(title="Add a Clamp To Ground behavior to selected object") Clamp To Ground
+						li: a#MenuCreateBehaviorLookat(title="Add a LookAt behavior to selected object") LookAt
+						li: a#MenuCreateBehaviorSeek(title="Add a Seek behavior to selected object") Seek
 				li
 					a#MenuPhysics Physics
 					ul
-						li: a#MenuPhysicsPointConstraint Point Constraint
-						li: a#MenuPhysicsHingeConstraint Hinge Constraint
-						li: a#MenuPhysicsSliderConstraint Slider Constraint
-						li: a#MenuPhysicsFixedConstraint Fixed Constraint
+						li: a#MenuPhysicsPointConstraint(title="Rotation of connected objects occur around a single pivot point") Point Constraint
+						li: a#MenuPhysicsHingeConstraint(title="Rotation of connected objects occur around a single axis (or hinge)") Hinge Constraint
+						li: a#MenuPhysicsSliderConstraint(title="Connected objects are restricted to only translation along a single axis") Slider Constraint
+						li: a#MenuPhysicsFixedConstraint(title="Restrict local rotation and local translation of connected objects") Fixed Constraint
 				li
 					a#MenuLights Lights
 					ul
-						li: a#MenuCreateLightPoint Point
-						li: a#MenuCreateLightSpot Spot
-						li: a#MenuCreateLightDirectional Directional
+						li: a#MenuCreateLightPoint(title="Create a point light") Point
+						li: a#MenuCreateLightSpot(title="Create a spot light") Spot
+						li: a#MenuCreateLightDirectional(title="Create a directional light") Directional
 				li
 					a#MenuParticles Particles
 					ul
-						li: a#MenuCreateParticlesBasic Basic
+						li: a#MenuCreateParticlesBasic(title="Create a basic particle emitter") Basic
+						li: a#MenuCreateParticlesSpray(title="Create a spray particle emitter") Spray
+						li: a#MenuCreateParticlesSuspended(title="Create a suspended (ambient dust) particle emitter") Suspended
+						li: a#MenuCreateParticlesAtmospheric(title="Create an atomspheric (precipitation) particle emitter") Atmospheric
 				li
 					a#MenuCameras Cameras
 					ul
-						li: a#MenuCreateCameraPerspective Perspective
+						li: a#MenuCreateCameraPerspective(title="Create a new perspective camera") Perspective
 				li
 					a#Terrain Terrain
 					ul
-						li: a#MenuCreateTerrain Terrain
-						li: a#MenuCreateTerrainGrass Grass
+						li: a#MenuCreateTerrain(title="Generate a random terrain with rolling hills") Terrain
+						li(ng-class='{"disabled": !worldHasTerrain}')
+							a#MenuCreateTerrainGrass(title="Generate grass on an existing terrain") Grass
 				li
 					a#GUI GUI Elements
 					ul
-						li: a#MenuCreateGUIDialog Dialog
-						li: a#MenuCreateGUIButton Button
-						li: a#MenuCreateGUILabel Label
-						li: a#MenuCreateGUISlider Slider
-						li: a#MenuCreateGUICheck Checkbox
-						li: a#MenuCreateGUIPanel Panel
-						li: a#MenuCreateGUIImage Image
+						li: a#MenuCreateGUIDialog(title="Create a basic dialog box that is optionally added to a selected panel") Dialog
+						li: a#MenuCreateGUIButton(title="Create a button that is optionally added to a selected panel") Button
+						li: a#MenuCreateGUILabel(title="Create a label that is optionally added to a selected panel") Label
+						li: a#MenuCreateGUISlider(title="Create a slider that is optionally added to a selected panel") Slider
+						li: a#MenuCreateGUICheck(title="Create a checkbox that is optionally added to a selected panel") Checkbox
+						li: a#MenuCreateGUIPanel(title="Create a panel that is optionally added to a selected panel") Panel
+						li: a#MenuCreateGUIImage(title="Create an image that is optionally added to a selected panel") Image
 
 		li
 			a#MenuAssets Assets
@@ -263,16 +283,19 @@ mixin menus_body
 						.glyphicon.glyphicon-save
 						| Create New Asset
 					ul
-						li(ng-class='{"disabled": !selection}'): a#MenuAssetsSaveAsEntity
-							.glyphicon.glyphicon-book
-							| From Sel. Entity
-						li(ng-class='{"disabled": !hasMaterial}'): a#MenuAssetsSaveAsMaterial
-							.glyphicon.glyphicon-tint
-							| From Sel. Material
-						li(ng-class='{"disabled": !isBehavior}'): a#MenuAssetsSaveAsBehavior
-							.glyphicon.glyphicon-cog
-							| From Sel. Behavior
-						li: a#MenuAssetsSaveAsFile
+						li(ng-class='{"disabled": !selection}')
+							a#MenuAssetsSaveAsEntity(title="Create a new reusable asset from the selected entity")
+								.glyphicon.glyphicon-book
+								| From Sel. Entity
+						li(ng-class='{"disabled": !hasMaterial}')
+							a#MenuAssetsSaveAsMaterial(title="Create a new reusable asset from the selected entity's material")
+								.glyphicon.glyphicon-tint
+								| From Sel. Material
+						li(ng-class='{"disabled": !isBehavior}')
+							a#MenuAssetsSaveAsBehavior(title="Create a new reusable asset from the selected behavior")
+								.glyphicon.glyphicon-cog
+								| From Sel. Behavior
+						li: a#MenuAssetsSaveAsFile(title="Creates a new reusable asset via file upload")
 							.glyphicon.glyphicon-hdd
 							| From File
 				li(ng-class='{"disabled": !isEntityAsset || !isMaterialAsset}')
@@ -280,30 +303,33 @@ mixin menus_body
 						.glyphicon.glyphicon-floppy-save
 						| Refresh Asset
 					ul
-						li(ng-class='{"disabled": !isEntityAsset}'): a#MenuAssetsSaveEntity
-							.glyphicon.glyphicon-book
-							| From Sel. Entity
-						li(ng-class='{"disabled": !isMaterialAsset}'): a#MenuAssetsSaveMaterial
-							.glyphicon.glyphicon-tint
-							| From Sel. Material
-						li(ng-class='{"disabled": !isEntityAsset || !isBehavior}'): a#MenuAssetsSaveBehavior
-							.glyphicon.glyphicon-cog
-							| From Sel. Behavior
-				li: a#MenuManageAssets
+						li(ng-class='{"disabled": !isEntityAsset}')
+							a#MenuAssetsSaveEntity(title="Overwrite selected entity's source asset with current version")
+								.glyphicon.glyphicon-book
+								| From Sel. Entity
+						li(ng-class='{"disabled": !isMaterialAsset}')
+							a#MenuAssetsSaveMaterial(title="Overwrite selected entity material's source asset with current version")
+								.glyphicon.glyphicon-tint
+								| From Sel. Material
+						li(ng-class='{"disabled": !isEntityAsset || !isBehavior}')
+							a#MenuAssetsSaveBehavior(title="Overwrite selected behavior's source asset with current version")
+								.glyphicon.glyphicon-cog
+								| From Sel. Behavior
+				li: a#MenuManageAssets(title="Open the Manage Assets dialog")
 					.glyphicon.glyphicon-cloud
 					| Manage Your Assets
 				li(style='border-bottom: 3px solid gray')
 
-				li: a#MenuCreateLoadMeshURL
+				li: a#MenuCreateLoadMeshURL(title="Import a mesh hosted on a remote server")
 					.glyphicon.glyphicon-cloud-download
 					| Load Mesh By URL
 				li
 					a#MenuAssets3DR 3DR
 					ul
-						li: a#MenuAssets3DRUpload
+						li: a#MenuAssets3DRUpload(title="Open file upload dialog to host mesh on the 3D Repository")
 							.glyphicon.glyphicon-cloud-upload
 							| Upload Mesh to 3DR
-						li: a#MenuAssets3DRBrowse
+						li: a#MenuAssets3DRBrowse(title="Search for and import remote assets from the 3D Repository")
 							.glyphicon.glyphicon-tree-deciduous
 							| Browse 3D Repository
 
@@ -313,70 +339,70 @@ mixin menus_body
 				li
 					a#MenuLocation Location
 					ul
-						li: a#LocationGoToPosition Go to Position...
-						li: a#LocationGoToPlacemark Go to Placemark...
-						li: a#LocationAddPlacemark Add Placemark...
-						li: a#LocationMoveToGround Move to ground
-				li: a#MenuAlign
+						li: a#LocationGoToPosition(title="Move avatar to specified location") Go to Position...
+						li: a#LocationGoToPlacemark(title="Move avatar to existing placemark") Go to Placemark...
+						li: a#LocationAddPlacemark(title="Create a placemark at avatar's current position") Add Placemark...
+						li: a#LocationMoveToGround(title="Move avatar to ground if there is a terrain or to ground plane otherwise") Move to ground
+				li: a#MenuAlign(title="Align two objects with respect to their bounds")
 					.glyphicon.glyphicon-object-align-bottom
 					| Align
-				li: a#MenuBlockPainter
+				li: a#MenuBlockPainter(title="'Paint' a textured cube in voxel style")
 					.glyphicon.glyphicon-equalizer
 					| Block Painter
-				li: a#MenuSplineTools
+				li: a#MenuSplineTools(title="Freely manipulate a line's vertices")
 					.glyphicon.glyphicon-pencil
 					| Spline Tools
-				li: a#ToolsShowID
+				li: a#ToolsShowID(title="Display the currently selected object's VWF ID")
 					.glyphicon.glyphicon-console
 					| Show ID
-				li: a#ToolsShowVWF
+				li: a#ToolsShowVWF(title="View the currently selected object's entity definition JSON")
 					.glyphicon.glyphicon-console
 					| Show VWF Entity Definition
-				li: a#ToolsShowVWFSaveData
+				li: a#ToolsShowVWFSaveData(title="View the Sandbox's scene definition JSON")
 					.glyphicon.glyphicon-console
 					| Show Sandbox Scene Definition
 
 		li
 			a#MenuWindows Windows
 			ul
-				li: a#MenuChat
+				li: a#MenuChat(title="Open the global chat dialog")
 					.glyphicon.glyphicon-comment
 					| Chat
-				li: a#MenuUsers
+				li: a#MenuUsers(title="Open list of other players in this world in the sidebar")
 					.glyphicon.glyphicon-user
 					| Users
-				li: a#MenuMaterialEditor
+				li: a#MenuMaterialEditor(title="Open the material definition widget in sidebar")
 					.glyphicon.glyphicon-tint
 					| Material Editor
-				li: a#MenuScriptEditor
+				li: a#MenuScriptEditor(title="Open the Sandbox script editor")
 					.glyphicon.glyphicon-console
 					| Script Editor
-				li: a#MenuObjectProperties
+				li: a#MenuObjectProperties(title="Open the object properties widget in sidebar")
 					.glyphicon.glyphicon-tasks
 					| Object Properties
-				li: a#MenuHierarchyManager
+				li: a#MenuHierarchyManager(title="Open the hierarchy widget in sidebar")
 					.glyphicon.glyphicon-sort-by-attributes-alt
 					| Show Hierarchy
-				li: a#MenuPhysicsEditor
+				li: a#MenuPhysicsEditor(title="Open the physics widget in sidebar")
 					.glyphicon.glyphicon-wrench
 					| Physics Editor
 
 		li
 			a#MenuRendering Rendering
 			ul
-				li: a#MenuViewHideTools Hide Tools
-				li: a#MenuViewToggleWireframe Toggle Wireframe
-				li: a#MenuViewToggleBones Toggle Bone Display
-				li: a#MenuViewGlyphs Toggle Glyphs
-				li: a#MenuViewFullscreen Toggle Full Screen
-				li: a#MenuViewTogglePhysics Toggle Physics Display
-				li: a#MenuViewStats Toggle Stats
-				li: a#MenuViewInterpolation Toggle Interpolation
-				li: a#MenuViewOctree Toggle Octree Display
-				li: a#MenuViewRenderNormal Normal Rendering
-				li: a#MenuViewRenderStereo Stereo Rendering
-				li: a#MenuViewRenderVR VR Rendering
-				li: a#MenuViewTabletDemo Tablet Demo Mode
+				li: a#MenuViewHideTools(title="Hide all authoring tools including menu and toolbars") Hide Tools
+				li: a#MenuViewToggleWireframe(title="Toggle wireframe mode for all objects in the scene") Toggle Wireframe
+				li: a#MenuViewToggleBones(title="Toggle the display of skeleton overlay if available") Toggle Bone Display
+				li: a#MenuViewGlyphs(title="Toggle icons for lights, cameras, particles, etc.") Toggle Glyphs
+				li: a#MenuViewFullscreen(title="Toggle full screen mode (F11)") Toggle Full Screen
+				li: a#MenuViewTogglePhysics(title="Toggle display of physics collision meshes") Toggle Physics Display
+				li: a#MenuViewStats(title="Toggle display of FPS counter and graph") Toggle Stats
+				li: a#MenuViewInterpolation(title="Smooths animations by effectively increasing the framerate via interpolation") Toggle Interpolation
+				li: a#MenuViewOctree(title="Display octree subdivision lines") Toggle Octree Display
+				li: a#MenuViewRenderNormal(title="Revert back to default rendering mode") Normal Rendering
+				li: a#MenuViewRenderStereo(title="Render scene in side-by-side steroscopic mode") Stereo Rendering
+				li: a#MenuViewRenderVR(title="Render scene using WebVR APIs, if available") VR Rendering
+				li: a#MenuViewTabletDemo(title="Render scene for mobile device VR (Google Cardboard)") Tablet Demo Mode
 
 		li
 			a#MenuHelp Help

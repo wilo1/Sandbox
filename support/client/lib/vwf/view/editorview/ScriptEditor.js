@@ -638,6 +638,7 @@ define(function() {
 									paramstr = '()';
 								paramstr = paramstr.substr(0, paramstr.length - 1) + ')';
 								_ScriptEditor.setSelectedMethod(name, 'function ' + name + paramstr + '{\n\n console.log("got here"); \n\n}');
+								_ScriptEditor.SaveMethodClicked();
 							});
 						}
 
@@ -693,6 +694,7 @@ define(function() {
 								if (paramcount == 0)
 									paramstr = '()';
 								_ScriptEditor.setSelectedEvent(name, 'function ' + name + paramstr + '{\n\n console.log("got here"); \n\n}');
+								_ScriptEditor.SaveEventClicked();
 							});
 						}
 

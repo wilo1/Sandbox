@@ -38,7 +38,8 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			$scope.userIsOwner = _UserManager.GetCurrentUserName() === instanceData.owner;
 			$scope.worldIsPersistent = instanceData.publishSettings.persistence;
 			$scope.worldIsSinglePlayer = instanceData.publishSettings.SinglePlayer;
-			$scope.worldIsLaunchable = !($scope.worldIsPersistent && $scope.userIsOwner) || $scope.worldIsSinglePlayer || $scope.isExample;
+			$scope.worldIsNotLaunchable = !($scope.worldIsPersistent && $scope.userIsOwner) || $scope.worldIsSinglePlayer || $scope.isExample;
+			$scope.worldHasTerrain = !!window._dTerrain;
 
 			//console.log('UserIsOwner:', $scope.userIsOwner);
 		});
@@ -781,6 +782,15 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
             $('#MenuCreateParticlesBasic').click(function(e) {
                 _Editor.createParticleSystem('basic', _Editor.GetInsertPoint(), document.PlayerNumber);
             });
+            $('#MenuCreateParticlesSpray').click(function(e) {
+                _Editor.createParticleSystem('spray', _Editor.GetInsertPoint(), document.PlayerNumber);
+            });
+            $('#MenuCreateParticlesSuspended').click(function(e) {
+                _Editor.createParticleSystem('suspended', _Editor.GetInsertPoint(), document.PlayerNumber);
+            });
+            $('#MenuCreateParticlesAtmospheric').click(function(e) {
+                _Editor.createParticleSystem('atmospheric', _Editor.GetInsertPoint(), document.PlayerNumber);
+            });
             $('#MenuCreateLightPoint').click(function(e) {
                 _Editor.createLight('point', _Editor.GetInsertPoint(), document.PlayerNumber);
             });
@@ -927,12 +937,14 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
             });
     
             $('#MenuCreateTerrainGrass').click(function(e) {
-                if (!_dTerrain) {
+				try {
+	                var parent = _dTerrain.ID;
+				}
+				catch(e){
                     alertify.alert('The scene must first contain a terrain object');
-                    return
-                }
-                var parent = _dTerrain.ID;
-    
+                    return;
+				}
+
                 var GrassProto = {
                     extends: 'http://vwf.example.com/node3.vwf',
                     properties: {}
@@ -946,22 +958,24 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
     
             });
     
-            $('#MenuCreateTerrainDecorator').click(function(e) {
-                if (!_dTerrain) {
-                    alertify.alert('The scene must first contain a terrain object');
-                    return
-                }
-            });
-    
             $('#MenuViewRenderNormal').click(function(e) {
                 _dView.setRenderModeNormal();
+                require("vwf/view/threejs/editorCameraController").getController('Orbit').orbitPoint(newintersectxy);
+                require("vwf/view/threejs/editorCameraController").setCameraMode('Orbit');
+                require("vwf/view/threejs/editorCameraController").updateCamera();
             });
             $('#MenuViewRenderStereo').click(function(e) {
                 _dView.setRenderModeStereo()
             });
              $('#MenuViewRenderVR').click(function(e) {
-                _dView.setRenderModeVR();
-                require("vwf/view/threejs/editorCameraController").setCameraMode('VR');
+                
+                if (navigator.getVRDevices) {
+                        _dView.setRenderModeVR();
+                        require("vwf/view/threejs/editorCameraController").setCameraMode('VR');
+                }else
+                {
+                    alertify.alert("WebVR is not supported on this browser.");
+                }
             });
     
             $('#TestSettings').click(function(e) {
@@ -977,13 +991,8 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
                 $('#MenuViewFullscreen').click();
             });
     
-    
-    
-    
-            list = $('#smoothmenu1').find('[id]');
-    
             //make every clicked menu item close all menus
-            // $('#smoothmenu1').find('[id]').filter(':only-child').click(function(){ddsmoothmenu.closeall({type:'click',target:'asd'})});
+            $('#smoothmenu1 li').not('li:has(ul)').click(function(e){ddsmoothmenu.closeall({type:'mouseleave'})});
     	}
     };
 });

@@ -129,7 +129,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
         var CurrentY = [0, 1, 0];
         var CurrentX = [1, 0, 0];
         var RotateSnap = 5 * 0.0174532925;
-        var MoveSnap = .2;
+        var MoveSnap = .25;
         var ScaleSnap = .15;
         var oldxrot = 0;
         var oldyrot = 0;
@@ -574,6 +574,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                             hits[i].release();
                         }
                         //now to find all glyphs intersected
+                        //be sure not to allow select of scene this way
                         {
                             var glyphs = $('.glyph');
                             for(var i = 0; i < glyphs.length; i++)
@@ -581,7 +582,8 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                                 
                                 if(hitTest( $(this.selectionMarquee),$(glyphs[i])))
                                 {
-                                    vwfhits.push($(glyphs[i]).attr('vwfid'));
+                                    if($(glyphs[i]).attr('vwfid') !== vwf.application())
+                                        vwfhits.push($(glyphs[i]).attr('vwfid'));
                                 }
                             }
 
@@ -1537,6 +1539,16 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                                 transform[12] += gizoffset[0];
                                 transform[13] += gizoffset[1];
                                 transform[14] += gizoffset[2];
+                              
+                                //when moving in world space, snap directly to worldspace.
+                                //Note that you can't do this in local space, because local space snaps might 
+                                //not fall nicely on worldspace snaps
+                                if(CoordSystem == WorldCoords)
+                                {
+                                    transform[12] = this.SnapTo(transform[12],MoveSnap);
+                                    transform[13] = this.SnapTo(transform[13],MoveSnap);
+                                    transform[14] = this.SnapTo(transform[14],MoveSnap);
+                                }
                                 lastpos[s] = [transform[12], transform[13], transform[14]];
                                 var success = this.setTransformCallback(SelectedVWFNodes[s].id, transform);
 
@@ -1712,7 +1724,11 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                 var dxy2 = this.intersectLinePlane(ray, campos, [0, 0, 0], [0, 0, 1]);
                 var newintersectxy2 = MATH.addVec3(campos, MATH.scaleVec3(ray, dxy2));
                 newintersectxy2[2] += .01;
-                return newintersectxy[2] > newintersectxy2[2] ? newintersectxy : newintersectxy2;
+                var finalpos = newintersectxy[2] > newintersectxy2[2] ? newintersectxy : newintersectxy2;
+                finalpos[0] = this.SnapTo(finalpos[0],MoveSnap)
+                finalpos[1] = this.SnapTo(finalpos[1],MoveSnap)
+                finalpos[2] = this.SnapTo(finalpos[2],MoveSnap)
+                return finalpos;
             }
         }
         this.createChild = function(parent, name, proto, uri, callback) {
@@ -1754,6 +1770,48 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                     DisplayName: self.GetUniqueName('ParticleSystem')
                 }
             };
+
+			var props = {};
+			switch(type){
+				case 'spray':
+					props = {
+						emitterType: 'point', solver: 'AnalyticShader', velocityMode: 'cartesian',
+						particleCount: 200, maxRate: 0.75, minLifeTime: 1, maxLifeTime: 1,
+						minVelocity: [-1,-1,2], maxVelocity: [1,1,5],
+						minAcceleration: [0,0,-9.82], maxAcceleration: [0,0,-9.82],
+						startSize: 0.04, endSize: 0.04, sizeRange: 0.02,
+						startAlpha: 1, endAlpha: 0.5, alphaRange: 0, alphaTest: 0.75
+					};
+				break;
+				case 'suspended':
+					props = {
+						emitterType: 'box', emitterSize: [10,10,10], solver: 'AnalyticShader', velocityMode: 'cartesian',
+						particleCount: 200, maxRate: 0.75, minLifeTime: 1, maxLifeTime: 168,
+						minVelocity: [-0.01,-0.01,-0.01], maxVelocity: [0.01,0.01,0.01],
+						minAcceleration: [0,0,0], maxAcceleration: [0,0,0],
+						startSize: 0.03, endSize: 0.03, sizeRange: 0,
+						startAlpha: 0.5, endAlpha: 0.25, alphaRange: 0, alphaTest: 0.28,
+						startColor_noAplha: [0.43,0.43,0.43], endColor_noAplha: [0.43,0.43,0.43]
+					};
+				break;
+				case 'atmospheric':
+					props = {
+						emitterType: 'box', emitterSize: [10,10,10], solver: 'AnalyticShader', velocityMode: 'cartesian',
+						particleCount: 1000, maxRate: 1, minLifeTime: 1, maxLifeTime: 1,
+						minVelocity: [-1,-1,-5], maxVelocity: [1,1,-15],
+						minAcceleration: [0,0,0], maxAcceleration: [0,0,0],
+						startSize: 0.02, endSize: 0, sizeRange: 0,
+						startAlpha: 1, endAlpha: 1, alphaRange: 0, alphaTest: 0.5,
+						startColor_noAplha: [1,1,1], endColor_noAplha: [1,1,1]
+					};
+				break;
+
+			}
+
+			for(var i in props){
+				proto.properties[i] = props[i];
+			}
+
             var newname = GUID();
             this.createChild('index-vwf', newname, proto, null, null);
             this.SelectOnNextCreate([newname]);
