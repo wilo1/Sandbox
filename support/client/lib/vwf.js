@@ -1159,25 +1159,30 @@ this.isSimulating = function(nodeID)
 }
 this.simulationStateUpdate = function(nodeID,member,state)
 {
-    if(!nodes.existing[nodeID]) return;
-    if(this.isSimulating(nodeID)) return;
-    for (var i in state)
-        this.setProperty(nodeID,i,state[i]);
-}
-this.postSimulationStateUpdate = function(nodeID)
-{
-    if(!nodes.existing[nodeID]) return;
-    var action = "simulationStateUpdate";
-    var props = this.propertyDataUpdates[nodeID];
-    if(props)
-        this.send(nodeID,action,"null",[props]);
+    for(var nodeID in state)
+    {
+        if(!nodes.existing[nodeID]) return;
+        if(this.isSimulating(nodeID)) return;
+        for (var i in state)
+            this.setProperty(nodeID,i,state[nodeID][i]);
+    }
 }
 this.postSimulationStateUpdates = function()
 {
+
+    var updates = {};
     for(var i = 0; i < this.nodesSimulating.length; i++)
     {
-        this.postSimulationStateUpdate(this.nodesSimulating[i]);
+        var nodeID = this.nodesSimulating[i];
+        var props = this.propertyDataUpdates[nodeID];
+        if(props)
+            updates[nodeID] = props;
+        var action = "simulationStateUpdate";
+        
     }
+    var payload = JSON.stringify(updates);
+    
+    this.send(vwf.application(),action,"null",payload);
     this.propertyDataUpdates = {};
 }
 this.propertyUpdated = function(id,name,val)
@@ -1186,6 +1191,7 @@ this.propertyUpdated = function(id,name,val)
     {
         if(!this.propertyDataUpdates[id])
             this.propertyDataUpdates[id] = {};
+        if(val.constructor != Array && name == "transform") debugger;
         this.propertyDataUpdates[id][name] = val;
     }
 }

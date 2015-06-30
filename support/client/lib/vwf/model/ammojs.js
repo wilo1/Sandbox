@@ -1422,7 +1422,7 @@ define(["module", "vwf/model", "vwf/configuration"], function(module, model, con
                    // if(vwf.isSimulating(node.id))
                     {    
                         if (node.body && node.initialized === true && node.mass > 0 && node.getActivationState() != 2) {
-                            vwf.setProperty(node.id, 'transform', node.getTransform({}));
+                            vwf.setProperty(node.id, 'transform', node.getTransform([]));
                             //so, we were setting these here in order to inform the kernel that the property changed. Can we not do this, and 
                             //rely on the getter? that would be great....
                             vwf.setProperty(node.id, '___physics_activation_state', node.getActivationState());
