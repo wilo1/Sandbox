@@ -139,7 +139,8 @@ routesMap = {
     },
     'avatar': {
         avatar: true,
-        requiresLogin: true
+        requiresLogin: true,
+		layout: 'plain'
     },
     'create': {
         requiresLogin: true

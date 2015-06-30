@@ -30,7 +30,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 			loggedIn = !!_UserManager.GetCurrentUserName(),
 			hasAvatar = !!(loggedIn && _UserManager.GetAvatarForClientID(vwf.moniker())),
 			isExample = !!_DataManager.getInstanceData().isExample,
-			userIsOwner = _UserManager.GetCurrentUserName() != _DataManager.getInstanceData().owner,
+			userIsOwner = _UserManager.GetCurrentUserName() == _DataManager.getInstanceData().owner,
 			worldIsPersistent = _DataManager.getInstanceData().publishSettings.persistence,
 			worldIsSinglePlayer = _DataManager.getInstanceData().publishSettings.SinglePlayer,
 			worldHasTerrain = !!window._dTerrain;
@@ -845,6 +845,15 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
             $('#MenuCreateParticlesBasic').click(function(e) {
                 _Editor.createParticleSystem('basic', _Editor.GetInsertPoint(), document.PlayerNumber);
             });
+            $('#MenuCreateParticlesSpray').click(function(e) {
+                _Editor.createParticleSystem('spray', _Editor.GetInsertPoint(), document.PlayerNumber);
+            });
+            $('#MenuCreateParticlesSuspended').click(function(e) {
+                _Editor.createParticleSystem('suspended', _Editor.GetInsertPoint(), document.PlayerNumber);
+            });
+            $('#MenuCreateParticlesAtmospheric').click(function(e) {
+                _Editor.createParticleSystem('atmospheric', _Editor.GetInsertPoint(), document.PlayerNumber);
+            });
             $('#MenuCreateLightPoint').click(function(e) {
                 _Editor.createLight('point', _Editor.GetInsertPoint(), document.PlayerNumber);
             });
@@ -1014,13 +1023,22 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
     
             $('#MenuViewRenderNormal').click(function(e) {
                 _dView.setRenderModeNormal();
+                require("vwf/view/threejs/editorCameraController").getController('Orbit').orbitPoint(newintersectxy);
+                require("vwf/view/threejs/editorCameraController").setCameraMode('Orbit');
+                require("vwf/view/threejs/editorCameraController").updateCamera();
             });
             $('#MenuViewRenderStereo').click(function(e) {
                 _dView.setRenderModeStereo()
             });
              $('#MenuViewRenderVR').click(function(e) {
-                _dView.setRenderModeVR();
-                require("vwf/view/threejs/editorCameraController").setCameraMode('VR');
+                
+                if (navigator.getVRDevices) {
+                        _dView.setRenderModeVR();
+                        require("vwf/view/threejs/editorCameraController").setCameraMode('VR');
+                }else
+                {
+                    alertify.alert("WebVR is not supported on this browser.");
+                }
             });
     
             $('#TestSettings').click(function(e) {
@@ -1042,7 +1060,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
             list = $('#smoothmenu1').find('[id]');
     
             //make every clicked menu item close all menus
-            // $('#smoothmenu1').find('[id]').filter(':only-child').click(function(){ddsmoothmenu.closeall({type:'click',target:'asd'})});
+            $('#smoothmenu1 li').not('li:has(ul)').click(function(e){ddsmoothmenu.closeall({type:'mouseleave'})});
     	},
 
 		calledMethod: function(id, evtname, data)
