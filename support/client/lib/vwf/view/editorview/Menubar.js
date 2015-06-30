@@ -30,7 +30,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 			loggedIn = !!_UserManager.GetCurrentUserName(),
 			hasAvatar = !!(loggedIn && _UserManager.GetAvatarForClientID(vwf.moniker())),
 			isExample = !!_DataManager.getInstanceData().isExample,
-			userIsOwner = _UserManager.GetCurrentUserName() != _DataManager.getInstanceData().owner,
+			userIsOwner = _UserManager.GetCurrentUserName() == _DataManager.getInstanceData().owner,
 			worldIsPersistent = _DataManager.getInstanceData().publishSettings.persistence,
 			worldIsSinglePlayer = _DataManager.getInstanceData().publishSettings.SinglePlayer,
 			worldHasTerrain = !!window._dTerrain;
