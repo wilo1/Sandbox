@@ -38,8 +38,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 		});
 
 		$scope.lookUpHandler = function(e){
-			//ddsmoothmenu.closeall({type:'mouseleave'});
-			$(e.currentTarget).trigger('mouseleave');
+			$('#ddsmoothmenu li').trigger('mouseleave');
 			$scope.handlers[e.currentTarget.id](e);
 		}
 

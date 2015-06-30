@@ -1,0 +1,25 @@
+mixin EntityLibrary_head
+	block
+
+mixin EntityLibrary_body
+
+	#EntityLibrary(style='display: none', ng-controller='EntityLibraryController')
+
+		#EntityLibrarySideTab(ng-click='isOpen ? hide() : show()') Library
+
+		#EntityLibraryMain
+
+			#entitylibrarytitle.ui-dialog-titlebar.ui-widget-header.ui-corner-all.ui-helper-clearfix(style='padding:3px 4px 3px 4px; font:1.5em sans-serif; font-weight: bold;')
+				.headericon.properties
+				span#entitylibrarytitletext.ui-dialog-title Content Libraries
+				#entitylibrarytray.glyphicon.glyphicon-align-justify
+				a#entitylibraryclose.ui-dialog-titlebar-close.ui-corner-all(href='#', ng-click='hide()', role='button', style="display: inline-block;float: right;")
+					span.ui-icon.ui-icon-closethick close
+
+			#EntityLibraryAccordion
+				h3.modifiersection(ng-repeat-start='(libName, lib) in staticLibs')
+					a(href="#"): strong {{libName}}
+				.modifiersection(ng-repeat-end)
+					.libraryasset(ng-repeat='asset in lib')
+						img(ng-src='{{asset.preview}}', draggable=true)
+						div {{asset.name}}

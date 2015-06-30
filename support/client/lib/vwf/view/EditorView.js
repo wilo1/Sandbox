@@ -78,7 +78,7 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/lib/alertify.js-0.
                     window._WireEditor = require("vwf/view/editorview/wireeditor").getSingleton();
                     window._SelectionEditor = require("vwf/view/editorview/selectionEditor").getSingleton();
                     window._UndoManager = require("vwf/view/editorview/UndoManager").getSingleton();
-                    window._EntityLibrary = require("vwf/view/editorview/EntityLibrary").getSingleton();
+                    require("vwf/view/editorview/EntityLibrary").initialize();
                     require("vwf/view/editorview/JSONPrompt").initialize();
 
                     this.addManager(_ScriptEditor);
@@ -91,7 +91,6 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/lib/alertify.js-0.
                     this.addManager(_WireEditor);
                     this.addManager(HierarchyManager);
                     this.addManager(_Publisher);
-                    this.addManager(_EntityLibrary);
                     this.addManager(_PhysicsEditor);
                     
                 }
