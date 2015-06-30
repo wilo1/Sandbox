@@ -1159,11 +1159,12 @@ this.isSimulating = function(nodeID)
 }
 this.simulationStateUpdate = function(nodeID,member,state)
 {
+    state = JSON.parse(state);
     for(var nodeID in state)
     {
         if(!nodes.existing[nodeID]) return;
         if(this.isSimulating(nodeID)) return;
-        for (var i in state)
+        for (var i in state[nodeID])
             this.setProperty(nodeID,i,state[nodeID][i]);
     }
 }
@@ -1191,7 +1192,7 @@ this.propertyUpdated = function(id,name,val)
     {
         if(!this.propertyDataUpdates[id])
             this.propertyDataUpdates[id] = {};
-        if(val.constructor != Array && name == "transform") debugger;
+
         this.propertyDataUpdates[id][name] = val;
     }
 }
