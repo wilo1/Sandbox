@@ -80,13 +80,14 @@ function prettyWorldURL(req, res, next)
             {
                var worldURL = worlds[0]._key;
                worldURL = worldURL.replace(/_/g,'/');
+               worldURL = worldURL.replace('/adl/sandbox', global.configuration.appPath)
                _302(worldURL,res);
                return;
             }
             //If there are more than one, create a page with links to each
             if(worlds && Object.keys(worlds).length > 1)
             {
-              worlds = Object.keys(worlds);
+              //worlds = Object.keys(worlds);
               
               res.writeHead(200, {
                 "Content-Type": "text/html",
@@ -101,11 +102,12 @@ function prettyWorldURL(req, res, next)
             
               
                //create a link for each world
-               for(var i = 0; i < worlds.length; i++)
+               for(var i =0; i < worlds.length; i++)
                {
-                var worldURL = worlds[i];
+               
+                var worldURL = worlds[i]._key;
                 worldURL = worldURL.replace(/_/g,'/');
-                
+                worldURL = worldURL.replace('/adl/sandbox', global.configuration.appPath)
                 res.write(  "<a href='"+worldURL+"'>"+worldURL+"</a><br/>" );
                 
                }
@@ -125,7 +127,15 @@ function prettyWorldURL(req, res, next)
         else
           next();
       }
-
+//allow setup of server to display a URL that does not include they /adl/sandbox by internally rewriting a configurable string to 
+//adl/sandbox
+function customAppUrl (req,res,next)
+{
+    var teststring = global.appPath;
+    req.url = req.url.replace(teststring,'/adl/sandbox');
+    
+    next();
+}
 //check the URL for the version string. IF the version string is found and we are using versioning and the url contains the current version string, then
 //serve. Otherwise, redirect to the proper version
 //this is to defeat client caches
@@ -178,6 +188,7 @@ exports.versioning = versioning;
 exports.prettyWorldURL = prettyWorldURL;
 exports.waitForAllBody = waitForAllBody;
 exports.CORSSupport = CORSSupport;
+exports.customAppUrl = customAppUrl;
 exports.setDAL = function(d)
 {
 DAL = d;

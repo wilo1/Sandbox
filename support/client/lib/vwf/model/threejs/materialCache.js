@@ -31,6 +31,31 @@ function MaterialCache() {
             var oldmat = mesh.material;
             var newmat = this.getMaterialbyDef(oldmat && oldmat.refCount == 1 ? oldmat : null, def);
 
+            //test for shader compile fail, and set in simple mode if failed
+            if( newmat){
+                var testmats = [newmat];
+                if(newmat.materials)
+                    testmats = newmat.materials;
+                var passed = true;
+                for(var i in testmats)
+                {
+                    if (window._dRenderer)
+                    {
+                        _dRenderer.initMaterial(testmats[i], _dScene.__lights, _dScene.fog, mesh);
+                        var status = _dRenderer.context.getProgramParameter(testmats[i].program.program, _dRenderer.context.LINK_STATUS);
+                        passed = passed && status;
+                    }
+                }
+
+                if ( !passed ) {
+                    console.error('Error linking material, falling back');
+                    //this line will cause the setting manager to remember the setting. lets not do that right now
+                    //_SettingsManager.setKey('useSimpleMaterials',true);
+                    _SettingsManager.settings['useSimpleMaterials'] = true;
+                    newmat = this.getMaterialbyDef(oldmat && oldmat.refCount == 1 ? oldmat : null, def);
+                }
+            }
+
             if (oldmat == newmat) return;
 
             //so, since the loader now does not clone materails on load, it's possible that the material is shared by other meshes
@@ -67,8 +92,11 @@ function MaterialCache() {
             	for(var j = 0; j < maxIndex +1; j++)
             		if(!newmat.materials[j])
             			newmat.materials[j] = newmat.materials[0];
+                mesh.geometry.groupsNeedUpdate = true
             }
-            	mesh.material = newmat;
+            mesh.material = newmat;
+            
+
             if (mesh.material && mesh.material.refCount === undefined)
                 mesh.material.refCount = 0;
             if (mesh.material)
@@ -1020,14 +1048,14 @@ function MaterialCache() {
                     var tfm = new THREE.Matrix3(layer.scalex, 0, layer.offsetx, 0, layer.scaley, layer.offsety, 0, 0, 1);
                     transform.push.apply(transform, tfm.elements);
 
-                } else if (layer.mapTo == 2 && _dRenderer.supportsStandardDerivatives()) {
+                } else if (window._dRenderer && layer.mapTo == 2 && _dRenderer.supportsStandardDerivatives()) {
                     currentmat.bumpMap = true;
                     currentmat.uniforms.bumpMap.value = _SceneManager.getTexture(layer.src);
                     currentmat.uniforms.bumpScale.value = value.layers[i].alpha;
                 } else if (layer.mapTo == 3) {
                     currentmat.lightMap = true;
                     currentmat.uniforms.lightMap.value = _SceneManager.getTexture(layer.src);
-                } else if (layer.mapTo == 4 && _dRenderer.supportsStandardDerivatives()) {
+                } else if (window._dRenderer && layer.mapTo == 4 && _dRenderer.supportsStandardDerivatives()) {
                     currentmat.normalMap = true;
                     currentmat.uniforms.normalMap.value = _SceneManager.getTexture(layer.src);
                     currentmat.uniforms.normalScale.value = new THREE.Vector2(value.layers[i].alpha, value.layers[i].alpha);

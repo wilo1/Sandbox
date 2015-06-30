@@ -476,6 +476,14 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             }
 
             delete this.nodes[nodeID];
+            //be sure to clear the watchable cache of entries 
+            for (var i in jsDriverSelf.__WatchableCache)
+            {
+                if( i.indexOf(nodeID) === 0)
+                {
+                    delete jsDriverSelf.__WatchableCache[i];
+                }
+            }
 
         },
 
@@ -492,7 +500,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             if (node) {
 
                 node.children.push(child);
-                node.children[childName] = child; // TODO: conflict if childName is parseable as a number
+                node.children[parseInt(childName) ? "node-" + childName : childName] = child; 
 
                 node.hasOwnProperty(childName) || // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
                 (node[childName] = child);
@@ -798,7 +806,16 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
         setWatchableValue: function(id, propertyName, value, dotNotation) {
             //when we set the value of a watchable, we need to update the cache. 
             // this is all moved into setproperty anyway, no?
-            var masterid = dotNotation.substring(0, (dotNotation.indexOf('.') + 1 || dotNotation.indexOf('[') + 1) - 1)
+            
+            
+            var masteriddot = dotNotation.substring(0, dotNotation.indexOf('.'))
+            var masteridbrac = dotNotation.substring(0, dotNotation.indexOf('['))
+            var masterid = masteriddot;
+            if(masterid.length ==0  || masteridbrac.length < masteriddot.length && masteridbrac.length > 0)
+                masterid = masteridbrac;
+
+          
+            
             masterid = masterid || dotNotation;
             if (this.__WatchableCache[masterid]) {
 
@@ -1252,6 +1269,20 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             }
 
         },
+        tryCallMethod: function(node,body,methodName,methodParameters)
+        {
+             try {
+                    var ret = body.apply(node, methodParameters);
+                    if (ret && ret.internal_val) return ret.internal_val;
+                    return ret;
+                } catch (e) {
+                    console.warn(e.toString() + " Node:'" + (node.properties.DisplayName || node.id) + "' during: '" + methodName + "' with '" + JSON.stringify(methodParameters) + "'");
+                    //            this.logger.warn( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
+                    //              "exception:", utility.exceptionMessage( e ) );
+                    return;
+                }
+
+        },
         callingMethod: function(nodeID, methodName, methodParameters) {
 
 
@@ -1333,15 +1364,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             var body = node.private.bodies && node.private.bodies[methodName];
 
             if (body) {
-                try {
-                    var ret = body.apply(node, methodParameters);
-                    if (ret && ret.internal_val) return ret.internal_val;
-                    return ret;
-                } catch (e) {
-                    console.warn(e.toString() + " Node:'" + (node.properties.DisplayName || nodeID) + "' during: '" + methodName + "' with '" + JSON.stringify(methodParameters) + "'");
-                    //            this.logger.warn( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
-                    //              "exception:", utility.exceptionMessage( e ) );
-                }
+               return this.tryCallMethod(node,body,methodName,methodParameters);
             }
 
             //call the method on the child behaviors

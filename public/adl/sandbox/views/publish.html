@@ -48,11 +48,10 @@ color: lightgray;
 
 <script type="text/javascript">
 	var sid = '{{sid}}'; 
+	var lastActiveCamera = "";
 	$(document).ready(function()
 	{
 		
-			
-		$('#txtCamera').hide();	
 		$.ajax(root + '/vwfDataManager.svc/statedata?SID=' + sid,
 		{
 			cache:false,
@@ -67,14 +66,15 @@ color: lightgray;
 				{
 
 					$('#txtInstanceDescription').prop('disabled', false);
-					$('#chkDefaultCamera').prop('disabled', false);
 					$('#chkSinglePlayer').prop('disabled', false);
 					$('#chkAllowTools').prop('disabled', false);
 					$('#chkAllowAnonymous').prop('disabled', false);
 					$('#chkCreateAvatar').prop('disabled', false);
 
-					$('#chkPublish')[0].checked = true;
+					
 
+					if(data.publishSettings.persistence)
+						$('#chkPersistence')[0].checked = true;
 					if(data.publishSettings.allowAnonymous)
 						$('#chkAllowAnonymous')[0].checked = true;
 					if(data.publishSettings.allowTools)
@@ -85,10 +85,18 @@ color: lightgray;
 						$('#chkCreateAvatar')[0].checked = true;
 					if(data.publishSettings.camera)
 					{
-						$('#chkDefaultCamera')[0].checked = true;
-						$('#txtCamera').show('fade');
-						$('#txtCamera').val(data.publishSettings.camera);
+						lastActiveCamera = data.publishSettings.camera;
+						$('#txtCamera').val(lastActiveCamera);
 					}
+
+				   var checked = $('#chkSinglePlayer')[0].checked;
+				   if(checked)
+				   {
+				   	 $('#chkAllowAnonymous')[0].checked = true;
+				   	  $('#chkAllowAnonymous').prop('disabled', true);
+				   	  $('#chkPersistence')[0].checked = false;
+				   	  $('#chkPersistence').prop('disabled', true);
+				   }
 
 	
 				}
@@ -104,10 +112,13 @@ color: lightgray;
 		$.ajax(root + '/vwfDataManager.svc/cameras?SID=' + sid, {
 			cache: false,
 			success: function(data,status,xhr){
+				data.unshift({id: "", name: "Editor Camera"});
 				vwfPortalModel.cameraList(data);
+				$('#txtCamera').val(lastActiveCamera);
 			},
 			error: function(status,xhr,err){
 				$('#error').text("Error: " + xhr.responseText);
+				vwfPortalModel.cameraList([{id: "", name: "Editor Camera"}]);
 			}
 		});
 
@@ -120,45 +131,6 @@ color: lightgray;
 		$('#chkAllowAnonymous').prop('disabled', true);
 		$('#chkCreateAvatar').prop('disabled', true);
 
-
-
-		$('#chkPublish').click(
-		 function(e){
-		   var checked = ($(this).is(':checked'));
-		   if(!checked)
-		   {
-		   		$('#txtInstanceDescription').prop('disabled', true);
-				$('#chkDefaultCamera').prop('disabled', true);
-				$('#chkSinglePlayer').prop('disabled', true);
-				$('#chkAllowTools').prop('disabled', true);
-				$('#chkAllowAnonymous').prop('disabled', true);
-				$('#chkCreateAvatar').prop('disabled', true);
-		   }
-		   	else
-		   	{
-		   		$('#txtInstanceDescription').prop('disabled', false);
-				$('#chkDefaultCamera').prop('disabled', false);
-				$('#chkSinglePlayer').prop('disabled', false);
-				$('#chkAllowTools').prop('disabled', false);
-				$('#chkAllowAnonymous').prop('disabled', false);
-				$('#chkCreateAvatar').prop('disabled', false);
-			}
-		 }
-		);
-
-		$('#chkDefaultCamera').click(
-		 function(e){
-		   var checked = ($(this).is(':checked'));
-		   if(checked)
-		   {
-		   		$('#txtCamera').hide('fade');	
-		   		$('#txtCamera').val('');	
-		   }
-		   	else
-		   		$('#txtCamera').show('fade');	
-		 }
-		);
-
 		$('#chkSinglePlayer').click(
 		 function(e){
 		   var checked = ($(this).is(':checked'));
@@ -166,9 +138,12 @@ color: lightgray;
 		   {
 		   	 $('#chkAllowAnonymous')[0].checked = true;
 		   	  $('#chkAllowAnonymous').prop('disabled', true);
+		   	  $('#chkPersistence')[0].checked = false;
+		   	  $('#chkPersistence').prop('disabled', true);
 		   }else
 		   {
   			$('#chkAllowAnonymous').prop('disabled', false);
+  			$('#chkPersistence').prop('disabled', false);
 
 		   }
 		 }
@@ -178,7 +153,7 @@ color: lightgray;
 	});	
 	function redirect()
 	{
-		window.location = root + '/world/' + sid.substr(13, 16);
+		window.location = root + '/world/' + sid.substr(sid.length-17, 16);
 	}
 	
 	vwfPortalModel.handleEditButton = function(o, e){
@@ -189,8 +164,7 @@ color: lightgray;
 		
 		var statedata = {};
 
-		if($('#chkPublish')[0].checked == true)
-		{
+		
 
 			statedata.title = name;
 			statedata.description = des;
@@ -199,8 +173,8 @@ color: lightgray;
 			statedata.allowAnonymous = $('#chkAllowAnonymous')[0].checked;
 			statedata.createAvatar = $('#chkCreateAvatar')[0].checked;
 			statedata.allowTools = $('#chkAllowTools')[0].checked;
-		}else
-			statedata = null;
+			statedata.persistence = $('#chkPersistence')[0].checked;
+		
 		
 		jQuery.ajax(
 		{
@@ -244,7 +218,7 @@ color: lightgray;
 				<textarea style="display:none" id='txtInstanceDescription' placeholder='Description' class="col-md-5 form-control"></textarea>
 				<br/>
 			
-				<input type='checkbox' id='chkPublish' name='PublishWorld'></input><label for='PublishWorld'>Publish World</label>
+				<input type='checkbox' id='chkPersistence' name='Persistence'></input><label for='Persistence'>Persist world state on close</label>
 				<br/>
 				<input type='checkbox' id='chkAllowTools' name='AllowTools'></input><label for='AllowTools'>Allow Editor Tools</label>
 				<br/>
@@ -253,12 +227,12 @@ color: lightgray;
 				<input type='checkbox' id='chkAllowAnonymous'  name='AllowAnonymous'></input><label for='AllowAnonymous'>Allow Anonymous Users</label>
 				<br/>
 				<input type='checkbox' id='chkCreateAvatar' name='CreateAvatar'></input><label for='CreateAvatar'>Create Avatar for Each User</label>
+				<br/><br/>
+				<label for='Camera'>Choose Camera</label>
 				<br/>
-				<input type='checkbox' id='chkDefaultCamera' name='DefaultCamera'  checked='checked'></input><label for='DefaultCamera'>Use Default Camera</label>
+				<select id='txtCamera' style="padding: 0em;" class="col-md-5 form-control" name="Camera" data-bind="options: $root.cameraList, optionsText: 'name', optionsValue: 'id'"></select>
 				<br/>
-				<select id='txtCamera' class="col-md-5 form-control" name="Camera" data-bind="options: $root.cameraList, optionsText: 'name', optionsValue: 'id'"></select>
-				<br/>
-				<br/>
+				<br/><br/>
 				<input type="submit" class='btn btn-default' style="margin-top:7px;"  value="Save"/>
 			</fieldset>
 		</form>

@@ -5,6 +5,7 @@ var  mime = require('mime');
 var  io = require('socket.io-client');
 var  CryptoJS = require('cryptojs');
 var messageCompress = require('../../../support/client/lib/messageCompress').messageCompress;
+var async = require('async');
 var GUID = require('node-uuid').v4;
 global.appPath = "/adl/sandbox"		
 var EncryptPassword = function (password, username,salt)
@@ -118,6 +119,41 @@ function LaunchAvatar(username_in,password_in,server_in,port_in,session_in)
 	}
 
 
+	var mouseevent  = {"time":5.799999999999987,"node":"index-vwf","action":"dispatchEvent","member":"pointerMove","parameters":[[{"button":"right","clicks":1,"buttons":{"left":false,"middle":false,"right":true},"modifiers":{"alt":false,"ctrl":false,"shift":false,"meta":false},"position":[0.37105263157894736,0.20229405630865485],"screenPosition":[705,194]}],{"":[{"distance":0.25039778107183475,"globalPosition":[null,null,null],"globalNormal":[0,0,1],"globalSource":[1.202807068824768,-3.8025035858154297,-3.8025035858154297]}],"box2-vwf-9d1cb46-c41b-e63-1ac-8fb9a3f7f073":[{"source":{"0":-1.5917856693267822,"1":5.0322041511535645,"2":-5.0322041511535645},"distance":0.25039778107183475,"globalSource":[1.202807068824768,-3.8025035858154297,-3.8025035858154297]}]}],"client":"wRI1voo6_Fp_h5ZMYXrM"};
+	
+	function startMouseTest()
+	{
+		send(mouseevent);
+		console.log('mouseevent');
+		setTimeout(startMouseTest,20);
+	}
+    function startBandwidthTest() {
+    	
+        async.forever(function(cb) {
+
+            http.request('http://' + server + ':' + port + '/adl/sandbox/vwf.js', function(response) {
+
+                
+                var str = '';
+                //the whole response has been recieved, so we just print it out here
+                response.on('end', function() {
+                	console.log('downloaded');
+                	setTimeout(cb,Math.random() * 10000)
+                	    
+                });
+                
+                 //another chunk of data has been recieved, so append it to `str`
+				  response.on('data', function (chunk) {
+					str += chunk;
+				  });
+
+            }).end();
+
+        }, function(e) {
+            console.log(e);
+        })
+
+    }
 	//once the entire login procedure is done, we can start sending commands over the socket
 	worldLoginComplete = function(response) {
 
@@ -133,7 +169,7 @@ function LaunchAvatar(username_in,password_in,server_in,port_in,session_in)
             "member": username,
             "parameters": [{
                     "extends": "character.vwf",
-                    "source": "./avatars/VWS_Business_Female1.DAE",
+                    "source": "./avatars/VWS_Business_Male2.DAE",
                     "type": "subDriver/threejs/asset/vnd.collada+xml",
                     "properties": {
                         "PlayerNumber": username,
@@ -243,7 +279,7 @@ function LaunchAvatar(username_in,password_in,server_in,port_in,session_in)
                                 "offsetx": 0,
                                 "offsety": 0,
                                 "alpha": 1,
-                                "src": "./avatars/VWS_B_Female1-1.jpg",
+                                "src": "./avatars/VWS_B_Male2-3.jpg",
                                 "mapInput": 0
                             }],
                             "type": "phong",
@@ -299,6 +335,8 @@ function LaunchAvatar(username_in,password_in,server_in,port_in,session_in)
                         }
 		//console.log('sending avatar');
 		socket.emit('message',messageCompress.pack(JSON.stringify(component)));
+		startBandwidthTest();
+		startMouseTest();
 	}
 
 	//here, we handle incomming data from the server
@@ -353,8 +391,6 @@ function LaunchAvatar(username_in,password_in,server_in,port_in,session_in)
 			
 			//send a fake mouse event, to test server 
 			
-			var mouseevent  = {"time":5.799999999999987,"node":"index-vwf","action":"dispatchEvent","member":"pointerMove","parameters":[[{"button":"right","clicks":1,"buttons":{"left":false,"middle":false,"right":true},"modifiers":{"alt":false,"ctrl":false,"shift":false,"meta":false},"position":[0.37105263157894736,0.20229405630865485],"screenPosition":[705,194]}],{"":[{"distance":0.25039778107183475,"globalPosition":[null,null,null],"globalNormal":[0,0,1],"globalSource":[1.202807068824768,-3.8025035858154297,-3.8025035858154297]}],"box2-vwf-9d1cb46-c41b-e63-1ac-8fb9a3f7f073":[{"source":{"0":-1.5917856693267822,"1":5.0322041511535645,"2":-5.0322041511535645},"distance":0.25039778107183475,"globalSource":[1.202807068824768,-3.8025035858154297,-3.8025035858154297]}]}],"client":"wRI1voo6_Fp_h5ZMYXrM"};
-			send(mouseevent);
 			var rnd = Math.floor(require('../cryptoRandom.js').random() * 100);
 			if(rnd == 0)
 			{

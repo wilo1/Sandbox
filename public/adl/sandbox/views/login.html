@@ -47,16 +47,18 @@
 				redirect();
 			}else
 			{
-				$('#txtusername').val('');
+				//$('#txtusername').val('');
 				$('#txtpassword').val('');
+				$('#txtpassword').focus();
 				vwfPortalModel.errorText("Error: Please ensure your username and password are both correct");
 			}
 			
 		});
 		xhr.addEventListener("error",function()
 		{
-			$('#txtusername').val('');
+			//$('#txtusername').val('');
 			$('#txtpassword').val('');
+			$('#txtpassword').focus();
 			
 			vwfPortalModel.errorText("Error: Please ensure your username and password are both correct");
 
@@ -93,7 +95,7 @@
 				<legend style="padding-bottom:5px;"></legend>
 			</fieldset>
 		</form>
-		<a href='signup' class='' style=""  value="" >{{#translate}}Sign Up{{/translate}}</a><span style="margin-left:3em" />
+		<a href='signup' class='' style=""  value="" >{{#translate}}Sign Up Now »{{/translate}}</a><span style="margin-left:3em" />
 		<a href='forgotPassword' class='' style=""  value="" >{{#translate}}Forgot your password?{{/translate}}</a>
 	</div>
 </div>

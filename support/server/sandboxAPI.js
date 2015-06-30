@@ -22,10 +22,14 @@ var sessions = require('./sessions');
 var mailTools = require('./mailTools');
 var xapi = require('./xapi');
 var logger = require('./logger');
+var libraryFormatter = require('./libraryFormatter.js');
+
 // default path to data. over written by setup flags
 //generate a random id.
 var GUID = require('node-uuid')
 	.v4;
+
+
 //simple functio to write a response
 function respond(response, status, message)
 	{
@@ -658,7 +662,7 @@ function CopyInstance(URL, SID, response)
 		SID = SID ? SID : URL.query.SID;
 		if (SID.length == 16)
 		{
-			SID = global.appPath.replace(/\//g, "_") + '_' + SID + '_';
+			SID = "/adl/sandbox".replace(/\//g, "_") + '_' + SID + '_';
 		}
 		DAL.copyInstance(SID, URL.loginData.UID, function(newId)
 		{
@@ -764,7 +768,7 @@ function GetStateList(URL, SID, response)
 		SID = SID ? SID : URL.query.SID;
 		if (SID.length == 16)
 		{
-			SID = global.appPath.replace(/\//g, "_") + '_' + SID + '_';
+			SID = "/adl/sandbox".replace(/\//g, "_") + '_' + SID + '_';
 		}
 		DAL.getStatesFilelist(SID, function(fileList)
 		{
@@ -785,12 +789,29 @@ function RestoreBackupState(URL, SID, response)
 		}
 		if (SID.length == 16)
 		{
-			SID = global.appPath.replace(/\//g, "_") + '_' + SID + '_';
+			SID = "/adl/sandbox".replace(/\//g, "_") + '_' + SID + '_';
 		}
-		DAL.restoreBackup(SID, statename, function(success)
+
+		DAL.getInstance(SID, function(state)
 		{
-			if (success) respond(response, 200, JSON.stringify("Success"));
-			else respond(response, 500, 'Unable to restore backup');
+			if (!state)
+			{
+				respond(response, 500, 'State ID is incorrect');
+				return;
+			}
+			//Make sure that the logged in user is the owner of the world they are trying to publish
+			if (state.owner != URL.loginData.UID)
+			{
+				respond(response, 500, 'You must be the owner of a world you publish');
+				return;
+			}
+
+			require('./reflector.js').closeInstance(SID);
+			DAL.restoreBackup(SID, statename, function(success)
+			{
+				if (success) respond(response, 200, JSON.stringify("Success"));
+				else respond(response, 500, 'Unable to restore backup');
+			});
 		});
 	}
 	//Publish the world to a new world
@@ -814,7 +835,7 @@ function Publish(URL, SID, publishdata, response)
 	SID = SID ? SID : URL.query.SID;
 	if (SID.length == 16)
 	{
-		SID = global.appPath.replace(/\//g, "_") + '_' + SID + '_';
+		SID ="/adl/sandbox".replace(/\//g, "_") + '_' + SID + '_';
 	}
 	logger.debug(SID, 2);
 	DAL.getInstance(SID, function(state)
@@ -830,9 +851,11 @@ function Publish(URL, SID, publishdata, response)
 			respond(response, 500, 'You must be the owner of a world you publish');
 			return;
 		}
-		if (Object.keys(publishdata)
-			.length == 0)
-			publishdata = null;
+		if (Object.keys(publishdata).length == 0)
+		{
+			respond(response, 500, 'Settings format incorrect');
+			return;
+		}
 		var publishSettings = null;
 		//The settings  for the published state. 
 		//have to handle these in the client side code, with some enforcement at the server
@@ -844,25 +867,25 @@ function Publish(URL, SID, publishdata, response)
 			var allowAnonymous = publishdata.allowAnonymous;
 			var createAvatar = publishdata.createAvatar;
 			var allowTools = publishdata.allowTools;
+			var persistence = publishdata.persistence;
 			publishSettings = {
 				singlePlayer: singlePlayer,
 				camera: camera,
 				allowAnonymous: allowAnonymous,
 				createAvatar: createAvatar,
-				allowTools: allowTools
+				allowTools: allowTools,
+				persistence: persistence,
 			};
 		}
+		require('./reflector.js').closeInstance(SID);
 		//publish the state, and get the new id for the pubished state
 		DAL.Publish(SID, publishSettings, function(newId)
 		{
 			if (publishSettings)
 			{
-				xapi.sendStatement(URL.loginData.UID, xapi.verbs.published, newId);
+				xapi.sendStatement(URL.loginData.UID, xapi.verbs.modified, newId);
 			}
-			else
-			{
-				xapi.sendStatement(URL.loginData.UID, xapi.verbs.unpublished, newId);
-			}
+			
 			//get the db entry for the published state
 			DAL.getInstance(newId, function(statedata)
 			{
@@ -904,7 +927,7 @@ function SaveThumbnail(URL, SID, body, response)
 	var automatic = URL.query.auto;
 	if (SID.length == 16)
 	{
-		SID = global.appPath.replace(/\//g, "_") + '_' + SID + '_';
+		SID = "/adl/sandbox".replace(/\//g, "_") + '_' + SID + '_';
 	}
 	DAL.getInstance(SID, function(state)
 	{
@@ -956,7 +979,7 @@ function GetThumbnail(request, SID, response)
 	SID = SID ? SID : request.url.query.SID;
 	if (SID.length == 16)
 	{
-		SID = global.appPath.replace(/\//g, "_") + '_' + SID + '_';
+		SID = "/adl/sandbox".replace(/\//g, "_") + '_' + SID + '_';
 	}
 	global.FileCache.ServeFile(request, datapath + libpath.sep + "States" + libpath.sep + SID + libpath.sep + "thumbnail.png", response, request.url);
 }
@@ -1034,6 +1057,7 @@ function DeleteState(URL, SID, response)
 		}
 		else
 		{
+			require('./reflector.js').closeInstance(SID);
 			DAL.deleteInstance(SID, function()
 			{
 				xapi.sendStatement(URL.loginData.UID, xapi.verbs.destroyed, SID, state.title, state.description);
@@ -1264,7 +1288,7 @@ function createState(URL, data, response)
 		statedata.title = data.title;
 		statedata.description = data.description;
 		statedata.lastUpdate = (new Date());
-		var id = global.appPath.replace(/\//g, "_") + '_' + makeid() + '_';
+		var id = "/adl/sandbox".replace(/\//g, "_") + '_' + makeid() + '_';
 		DAL.createInstance(id, statedata, function()
 		{
 			respond(response, 200, 'Created state ' + id);
@@ -1425,9 +1449,18 @@ function serve(request, response)
 			UID = URL.loginData.UID;
 		if (URL.query.UID)
 			UID = URL.query.UID;
+
+		//rewrite the SID so the phycial path is always /adl/sandbox, even if clientside code computes a different instanceiID
+		if(URL.query.SID)
+		{
+			 URL.query.SID = URL.query.SID.replace(global.appPath,'/adl/sandbox')
+			 URL.query.SID = URL.query.SID.replace(global.appPath.replace(/\//g,'_'),'/adl/sandbox')
+		}
 		var SID = URL.query.SID;
 		if (SID)
+		{
 			SID = SID.replace(/[\\,\/]/g, '_');
+		}
 		//Normalize the path for max/unix
 		pathAfterCommand = pathAfterCommand.replace(/\//g, libpath.sep);
 		var basedir = datapath + libpath.sep;
@@ -1475,6 +1508,11 @@ function serve(request, response)
 				case "3drtexture":
 					{
 						_3DR_proxy.proxyTexture(URL, response);
+					}
+					break;
+				case "apppath":
+					{
+						respond(response, 200, global.appPath);
 					}
 					break;
 				case "3drthumbnail":
@@ -1688,6 +1726,32 @@ function serve(request, response)
 				case "getassets":
 					{
 						assetPreload.getAssets(request, response, URL);
+					}
+					break;
+				case "saspath":
+					{
+						if(global.configuration.hostAssets){
+							response.send(global.configuration.assetAppPath);
+						}
+						else {
+							response.send(global.configuration.remoteAssetServerURL);
+						}
+					}
+					break;
+				case "library":
+					{
+						if( /my-entities$/.test(pathAfterCommand) )
+							libraryFormatter.entitiesToLibrary(UID, 'entity', response);
+						else if( /my-materials$/.test(pathAfterCommand) )
+							libraryFormatter.entitiesToLibrary(UID, 'material', response);
+						else if( /my-behaviors$/.test(pathAfterCommand) )
+							libraryFormatter.entitiesToLibrary(UID, 'behavior', response);
+						else if( /my-textures$/.test(pathAfterCommand) )
+							libraryFormatter.entitiesToLibrary(UID, 'texture', response);
+						else if( /my-models$/.test(pathAfterCommand) )
+							libraryFormatter.entitiesToLibrary(UID, 'model', response);
+						else
+							_404(response);
 					}
 					break;
 				default:

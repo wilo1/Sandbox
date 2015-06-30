@@ -165,7 +165,7 @@ function _FileCache() {
         //the whole process insensitive, even if the filesystem is. Note: probably doing a lot of 
         //unnecessary work if we could know that the filesystem is not sensitive, maybe from a config value
         path = resolveCase(path);
-
+        if(!path){ callback(null); return;}
         path = libpath.normalize(path);
 
         //here, we see if there is a build file that matches, but is under the build directory
@@ -235,9 +235,9 @@ function _FileCache() {
                                     FileCache.files.push(newentry);
 
                                     //minify is currently not compatable with auto-watch of files
-                                    if (!FileCache.minify) {
+                                    if (!FileCache.minify && !global.configuration.cluster) {
                                         //reload files that change on disk
-                                        console.warn('new watcher');
+                                        
                                         var watcher = fs.watch(path, {}, function(event, filename) {
 
 
@@ -248,6 +248,7 @@ function _FileCache() {
                                         });
                                         watcher.entry = newentry;
                                         watcher.on('error', function(e) {
+                                            console.log(filename + "WATCHER ERROR", e);
                                             this.close();
                                         })
                                     }

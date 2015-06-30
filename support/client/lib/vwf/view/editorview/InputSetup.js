@@ -8,6 +8,9 @@ define({
 		$('#vwf-root').click(function(e){_Editor.click(e)});
 		$('#index-vwf').mouseleave(function(e){_Editor.mouseleave(e)});
 		$('#vwf-root').mousemove(function(e){_Editor.mousemove(e)});
+
+		$('#index-vwf').on('dblclick',function(e){_Editor.dblclick(e)});
+
 		$('#index-vwf').attr('tabindex',0);
 		$('#index-vwf').on('touchstart',function(e){
 			e.preventDefault();
@@ -53,6 +56,18 @@ define({
 				
 			}
 		});
+		$('#vwf-root').keypress(function(e) {
+			
+            if (e.charCode == 92) {
+                if (!_EditorView.needTools()) return;
+                if (toolsOpen()){
+                    hideTools();
+            		alertify.alert('Press the \\ (backslash) key to unhide the editor tools.');
+				}
+                else
+                    showTools();
+            }
+        });
 		$(window).keypress(function(e)
 		{
 			

@@ -52,6 +52,7 @@ function getStats(cb)
 
 function getUser(id, cb)
 {
+ 
     getUsers(function(UserIndex)
     {
         if (UserIndex && UserIndex.indexOf(id) != -1)
@@ -472,6 +473,29 @@ function getInstance(id, cb)
 {
     DB.get(id, function(err, doc, key)
     {
+        //sanitize the metadata. Used to be that doc.publishSettings could be null. Now these are manditory, and 
+        //filled with default values on load
+        if (doc) {
+            if (!doc.publishSettings)
+                doc.publishSettings = {};
+            if (doc.publishSettings.allowAnonymous === undefined)
+                doc.publishSettings.allowAnonymous = false;
+
+            if (doc.publishSettings.SinglePlayer === undefined)
+                doc.publishSettings.SinglePlayer = false;
+
+            if (doc.publishSettings.camera === undefined)
+                doc.publishSettings.camera = null;
+
+            if (doc.publishSettings.createAvatar === undefined)
+                doc.publishSettings.createAvatar = true;
+
+            if (doc.publishSettings.allowTools === undefined)
+                doc.publishSettings.allowTools = true;
+
+            if (doc.publishSettings.persistence === undefined)
+                doc.publishSettings.persistence = true;
+        }
         cb(doc);
     });
 }
@@ -700,10 +724,11 @@ function saveInstanceState(id, data, cb)
                 {
                     getInstance(id, function(state)
                     {
+
                         updateInstance(id,
                         {
                             lastUpdate: (new Date()),
-                            updates: 1 + state.updates,
+                            updates: 1 + (state? state.updates : 0),
                             objects: parsedData.length
                         }, function()
                         {
@@ -807,7 +832,10 @@ function deleteInstance(id, cb)
             {
                 // if it does not exist, goto next in series
                 if (!inst)
+                {
                     cb2();
+                    return;
+                }
                 var children = inst.children || [];
                 // for each child
                 async.eachSeries(children, function(item, cb3)
@@ -1394,7 +1422,7 @@ function copyInstance(id, arg2, arg3)
     {
         if (instance)
         {
-            var newId = global.appPath.replace(/\//g, "_") + '_' + makeid() + '_';
+            var newId = "/adl/sandbox".replace(/\//g, "_") + '_' + makeid() + '_';
             if (!instance.children)
                 instance.children = [];
             instance.children.push(newId);
@@ -1548,59 +1576,45 @@ function getStates(cb, start, count)
     searchStatesInner(search, cb, start, count)
 }
 
-function searchStatesInner(query, found, start, count)
-{
+function searchStatesInner(query, found, start, count) {
     if (!start) start = 0;
     if (!count) count = 10000000;
-    var index = DB.find_raw(
-    {
+    DB.find_advanced({
         _key: 'StateIndex'
-    }, function(err, data)
-    {
-        if (err)
-        {
+    },0,{},1, function(err, data) {
+        if (err) {
             found(null)
             return;
         }
         var states = data[0].val;
-        DB.find_raw(
-            {
-                $and: [
-                    {
-                        _key:
-                        {
+        DB.find_advanced({
+                $and: [{
+                        _key: {
                             $in: states
                         }
                     },
                     query
                 ]
-            })
-            .sort(
-            {
+            }, start, {
                 lastUpdate: 1
-            })
-            .skip(start)
-            .limit(count)
-            .exec(
-                function(err, data)
-                {
-                    if (err)
-                    {
-                        found(null)
-                        return;
+            }, count,
+
+
+            function(err, data) {
+                if (err) {
+                    found(null)
+                    return;
+                }
+                var ret = {};
+                for (var i in data) {
+                    if (states.indexOf(data[i]._key) != -1) {
+                        var s = JSON.parse(JSON.stringify(data[i].val));
+                        s.id = data[i]._key;
+                        ret[data[i]._key] = s;
                     }
-                    var ret = {};
-                    for (var i in data)
-                    {
-                        if (states.indexOf(data[i]._key) != -1)
-                        {
-                            var s = JSON.parse(JSON.stringify(data[i].val));
-                            s.id = data[i]._key;
-                            ret[data[i]._key] = s;
-                        }
-                    }
-                    found(ret);
-                });
+                }
+                found(ret);
+            });
     });
 }
 
@@ -1656,7 +1670,8 @@ function startup(callback)
     async.series([
         function(cb)
         {
-            require('./DB_nedb.js')
+            console.log(global.configuration.DB_driver);
+            require(global.configuration.DB_driver)
                 .new(DBTablePath, function(_DB)
                 {
                     DB = _DB;
@@ -1669,6 +1684,7 @@ function startup(callback)
         {
             DB.get('UserIndex', function(err, UserIndex)
             {
+
                 if (!UserIndex)
                     DB.save('UserIndex', [], function(err, data, key)
                     {

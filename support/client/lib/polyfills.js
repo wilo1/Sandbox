@@ -1,7 +1,9 @@
 var fills = {
     setup: function() {
 
+
         this.secureCryptoPRGN();
+        this.GUID();
         this.performanceNow();
         this.errorHandler();
         this.websocket();
@@ -11,6 +13,7 @@ var fills = {
         this.setImmediate();
         this.functionBind();
         this._deepEquals();
+        this.debounce();
         window.ToSafeID = function(value) {
             return value.replace(/[^A-Za-z0-9]/g, "");
         }
@@ -36,15 +39,54 @@ var fills = {
 
 
     },
+    debounce:function()
+    {
+    	function debounce(func, wait, immediate) {
+			var timeout;
+			return function() {
+				var context = this, args = arguments;
+				var later = function() {
+					timeout = null;
+					if (!immediate) func.apply(context, args);
+				};
+				var callNow = immediate && !timeout;
+				clearTimeout(timeout);
+				timeout = setTimeout(later, wait);
+				if (callNow) func.apply(context, args);
+			};
+		};
+		window.debounce = debounce;
+    },
+    GUID: function()
+    {
+        window.GUID = function(){
+
+            //override randomness for testing. NEVER USE THIS
+            if(window.GUID.nextGUID)
+            {
+                var guid = window.GUID.nextGUID;
+                delete window.GUID.nextGUID;
+                return guid;
+            }
+            var S4 = function() {
+                return Math.floor(Math.SecureRandom() * 0x10000 /* 65536 */ ).toString(16);
+            };
+            //can we generate nicer GUID? does it really have to be so long?
+            return 'N'+S4()+S4();
+            return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+        }
+    },
     _deepEquals: function() {
         Object.deepEquals = function(x, y) {
             if (x === y) return true;
             // if both x and y are null or undefined and exactly the same
 
-            if (!(x instanceof Object) || !(y instanceof Object)) return false;
+            if (!(x instanceof Object) || !(y instanceof Object)) 
+                return false;
             // if they are not strictly equal, they both need to be Objects
 
-            if (x.constructor !== y.constructor) return false;
+            if (x.constructor !== y.constructor) 
+                return false;
             // they must have the exact same prototype chain, the closest we can do is
             // test there constructor.
             var keys = Object.keys(x);
@@ -53,23 +95,27 @@ var fills = {
                 if (!x.hasOwnProperty(p)) continue;
                 // other properties were tested using x.constructor === y.constructor
 
-                if (!y.hasOwnProperty(p)) return false;
+                if (!y.hasOwnProperty(p)) 
+                    return false;
                 // allows to compare x[ p ] and y[ p ] when set to undefined
 
                 if (x[p] === y[p]) continue;
                 // if they have the same strict value or identity then they are equal
 
-                if (typeof(x[p]) !== "object") return false;
+                if (typeof(x[p]) !== "object") 
+                    return false;
                 // Numbers, Strings, Functions, Booleans must be strictly equal
 
-                if (!Object.deepEquals(x[p], y[p])) return false;
+                if (!Object.deepEquals(x[p], y[p])) 
+                    return false;
                 // Objects and Arrays must be tested recursively
             }
 
             keys = Object.keys(y);
             for (var i=0; i < keys.length; i++) {
                 var p = keys[i];
-                if (y.hasOwnProperty(p) && !x.hasOwnProperty(p)) return false;
+                if (y.hasOwnProperty(p) && !x.hasOwnProperty(p)) 
+                    return false;
                 // allows x[ p ] to be set to undefined
             }
             return true;
@@ -524,18 +570,18 @@ var fills = {
 
                     if (performance.now() - lastError > 5000) {
                         if (xhr.status != 200) {
-                            if (window.alertify)
-                                alertify.error('Sorry, an error has occured, but could not be logged');
+                            if (console.error)
+                                console.error('Sorry, an error has occured, but could not be logged');
                         } else
-                        if (window.alertify)
-                            alertify.error('Sorry, an error has occured and was logged to the server.');
+                        if (console.error)
+                            console.error('Sorry, an error has occured and was logged to the server.');
                         lastError = performance.now();
                     }
                 },
                 error: function(e) {
                     if (performance.now() - lastError > 5000) {
-                        if (window.alertify)
-                            alertify.error('Sorry, an error has occured, but could not be logged');
+                        if (console.error)
+                            console.error('Sorry, an error has occured, but could not be logged');
                         lastError = performance.now();
                     }
                 },

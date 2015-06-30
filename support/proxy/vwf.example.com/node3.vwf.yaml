@@ -197,10 +197,11 @@ properties:
                         z = x[2];
                         x = x[0];
                     }
-                    var transform = self.transform;
+                    var transform = self.transform.internal_val;
                     transform[12] = x;
                     transform[13] = y;
                     transform[14] = z;
+                    self.transform = transform;
                 },
                 rotate:function(x,y,z,coordinateSystem)
                 {
@@ -256,6 +257,22 @@ properties:
                 getRotation: function()
                 {
                     var m = self.transform.internal_val;
+                    var x = Math.atan2(m[9], m[10]);
+                    var y = Math.atan2(-m[8], Math.sqrt(m[9] * m[9] + m[10] * m[10]));
+                    var z = Math.atan2(m[4], m[0]);
+                    
+                    var euler = [x,y,z];
+
+                    euler[0] *= 57.2957795;
+                    euler[1] *= 57.2957795;
+                    euler[2] *= 57.2957795;
+                    
+                    return euler;
+                
+                },
+                getWorldRotation: function()
+                {
+                    var m = self.worldTransform.internal_val;
                     var x = Math.atan2(m[9], m[10]);
                     var y = Math.atan2(-m[8], Math.sqrt(m[9] * m[9] + m[10] * m[10]));
                     var z = Math.atan2(m[4], m[0]);

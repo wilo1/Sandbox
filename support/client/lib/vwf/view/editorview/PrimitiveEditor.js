@@ -4,8 +4,20 @@ define(function() {
     return {
         getSingleton: function() {
             if (!isInitialized) {
+                
+               
+                var baseclass = require("vwf/view/editorview/panelEditor");
+                //var base = new baseclass('hierarchyManager','Hierarchy','hierarchy',false,true,'#sidepanel')
+                //base.init();
+                //$.extend(HierarchyManager,base);
+                baseclass(PrimEditor,'PrimitiveEditor','Properties','properties',true,true,'#sidepanel')
+                
+                PrimEditor.init()
                 initialize.call(PrimEditor);
+                PrimEditor.bind()
                 isInitialized = true;
+
+               
             }
             return PrimEditor;
         }
@@ -26,7 +38,7 @@ define(function() {
 	    }
 
 
-        $('#sidepanel').append("<div id='PrimitiveEditor'>" + "<div id='primeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span id='primeditortitletext' class='ui-dialog-title' id='ui-dialog-title-Players'>Object Properties</span></div>" +
+        $('#' + this.contentID).append(
             '<div id="accordion" style="height:100%;overflow:hidden">' +
             '<h3><a href="#">Flags</a></h3>' +
             '<div>' +
@@ -66,11 +78,10 @@ define(function() {
             "</div>" +
             '</div>' +
             '</div>');
-        $('#primeditortitle').append('<a id="primitiveeditorclose" href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button" style="display: inline-block;float: right;"><span class="ui-icon ui-icon-closethick">close</span></a>');
-        $('#primeditortitle').prepend('<div class="headericon properties" />');
-        $('#primitiveeditorclose').click(function() {
-            _PrimitiveEditor.hide();
-        });
+        
+        
+        
+       
         $('.TransformEditorInput').spinner();
         $('#isStatic').change(function(e) {
             _PrimitiveEditor.setProperty('selection', 'isStatic', this.checked)
@@ -102,23 +113,7 @@ define(function() {
             }
             _PrimitiveEditor.setProperty(_Editor.GetSelectedVWFNode().id, 'DisplayName', $(this).val());
         });
-        $('#PrimitiveEditor').css('border-bottom', '5px solid #444444')
-        $('#PrimitiveEditor').css('border-left', '2px solid #444444')
-        //$('#PrimitiveEditor').resizable({
-        //    maxHeight: 550,
-        //    maxWidth: 320,
-        //    minHeight: 150,
-        //    minWidth: 320
-        //});
-        //$('#PrimitiveEditor').dialog({title:'Primitive Editor',autoOpen:false, 
-        //	resize:function(){
-        //		$( "#accordion" ).accordion( "resize" );
-        //		this.updateOtherWindows();
-        //	}.bind(this),
-        //	close:function(){
-        //		this.updateOtherWindows();
-        //	}.bind(this)
-        //});
+        
         $("#accordion").accordion({
             fillSpace: true,
             heightStyle: "content",
@@ -127,34 +122,7 @@ define(function() {
             }
         });
         $(".ui-accordion-content").css('height', 'auto');
-        this.show = function() {
-            $('#MenuObjectPropertiesicon').addClass('iconselected');
-            //$('#PrimitiveEditor').dialog('open');
-            //$('#PrimitiveEditor').dialog('option','position',[1282,40]);
-            $('#PrimitiveEditor').prependTo($('#PrimitiveEditor').parent());
-            $('#PrimitiveEditor').show('blind', function() {
-                if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
-            });
-            showSidePanel();
-            this.SelectionChanged(null, _Editor.GetSelectedVWFNode());
-            this.open = true;
-
-        }
-        this.hide = function() {
-            //$('#PrimitiveEditor').dialog('close');
-            if (this.isOpen()) {
-                $('#PrimitiveEditor').hide('blind', function() {
-                    if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
-                    if (!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible')) hideSidePanel();
-                });
-
-            }
-            $('#MenuObjectPropertiesicon').removeClass('iconselected');
-        }
-        this.isOpen = function() {
-            //return $("#PrimitiveEditor").dialog( "isOpen" )
-            return $('#PrimitiveEditor').is(':visible')
-        }
+       
         this.setProperty = function(id, prop, val, skipUndo) {
             //prevent the handlers from firing setproperties when the GUI is first setup;
             if (this.inSetup) return;
@@ -205,105 +173,107 @@ define(function() {
                 alertify.alert('calling methods on multiple selections is not supported');
             }
         }
+        this.BuildGUI = function()
+        {
+           
+            var node = _Editor.getNode(this.selectedID);
+            if(!node) return;
 
-        this.SelectionChanged = function(e, node) {
-            try {
-                this.currentWidgets = {};
-                if (node) {
-                    this.inSetup = true;
-                    this.clearPropertyEditorDialogs();
-                    var lastTab = $("#accordion").accordion('option', 'active');
-                    $("#accordion").accordion('destroy');
-                    $("#accordion").children('.modifiersection').remove();
-                    //update to ensure freshness
-                    node = _Editor.getNode(node.id);
-                    node.properties = vwf.getProperties(node.id);
-                    if (!node.properties) return;
-
-
-
-                    $('#ui-dialog-title-ObjectProperties').text(vwf.getProperty(node.id, 'DisplayName') + " Properties");
-                    $('#dispName').val(vwf.getProperty(node.id, 'DisplayName') || node.id);
-
-                    this.addPropertyEditorDialog(node.id, 'DisplayName', $('#dispName'), 'text');
-
-                    $('#primeditortitletext').text($('#dispName').val() + ' Properties')
-
-                    if ($('#dispName').val() == "") {
-                        $('#dispName').val(node.name);
-                    }
-                    $('#dispOwner').val(vwf.getProperty(node.id, 'owner'));
-
-                    if (vwf.getProperty(node.id, 'isStatic')) {
-                        $('#isStatic').prop('checked', 'checked');
-                    } else {
-                        $('#isStatic').prop('checked', '');
-                    }
-
-                    if (vwf.getProperty(node.id, 'visible')) {
-                        $('#isVisible').prop('checked', 'checked');
-                    } else {
-                        $('#isVisible').prop('checked', '');
-                    }
-
-                    if (vwf.getProperty(node.id, 'inheritScale')) {
-                        $('#inheritScale').prop('checked', 'checked');
-                    } else {
-                        $('#inheritScale').prop('checked', '');
-                    }
-
-                    if (vwf.getProperty(node.id, 'isDynamic')) {
-                        $('#isDynamic').prop('checked', 'checked');
-                    } else {
-                        $('#isDynamic').prop('checked', '');
-                    }
-                    if (vwf.getProperty(node.id, 'castShadows')) {
-                        $('#castShadows').prop('checked', 'checked');
-                    } else {
-                        $('#castShadows').prop('checked', '');
-                    }
-                    if (vwf.getProperty(node.id, 'isSelectable')) {
-                        $('#isSelectable').prop('checked', 'checked');
-                    } else {
-                        $('#isSelectable').prop('checked', '');
-                    }
-                    if (vwf.getProperty(node.id, 'passable')) {
-                        $('#passable').prop('checked', 'checked');
-                    } else {
-                        $('#passable').prop('checked', '');
-                    }
-                    if (vwf.getProperty(node.id, 'receiveShadows')) {
-                        $('#receiveShadows').prop('checked', 'checked');
-                    } else {
-                        $('#receiveShadows').prop('checked', '');
-                    }
-                    $('#BaseSectionTitle').text(node.properties.type || "Type" + ": " + node.id);
-                    this.SelectionTransformed(null, node);
-                    this.setupAnimationGUI(node, true);
-                    this.setupEditorData(node, true);
-                    this.recursevlyAddPrototypes(node);
-                    this.recursevlyAddModifiers(node);
-                    this.addBehaviors(node);
-                    $("#accordion").accordion({
-                        heightStyle: 'fill',
-                        activate: function() {
-                            if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
-                        }
-                    });
-                    $(".ui-accordion-content").css('height', 'auto');
-                    this.inSetup = false;
-
-                    $("#accordion").accordion({
-                        'active': lastTab
-                    });
-                } else {
-                    this.hide();
-                }
-            } catch (e) {
-                console.log(e);
+            this.currentWidgets = {};
+            this.inSetup = true;
+            this.clearPropertyEditorDialogs();
+            var lastTab = 0;
+            try{
+                lastTab = $("#accordion").accordion('option', 'active');
+                $("#accordion").accordion('destroy');
+            }catch(e)
+            {
+                //accordion was not init yet
             }
-        }
+            
+            $("#accordion").children('.modifiersection').remove();
+            //update to ensure freshness
+           
+            node.properties = vwf.getProperties(node.id);
+            if (!node.properties) return;
 
+
+
+            $('#ui-dialog-title-ObjectProperties').text(vwf.getProperty(node.id, 'DisplayName') + " Properties");
+            $('#dispName').val(vwf.getProperty(node.id, 'DisplayName') || node.id);
+
+            this.addPropertyEditorDialog(node.id, 'DisplayName', $('#dispName'), 'text');
+
+            
+
+            if ($('#dispName').val() == "") {
+                $('#dispName').val(node.name);
+            }
+            $('#dispOwner').val(vwf.getProperty(node.id, 'owner'));
+
+            if (vwf.getProperty(node.id, 'isStatic')) {
+                $('#isStatic').prop('checked', 'checked');
+            } else {
+                $('#isStatic').prop('checked', '');
+            }
+
+            if (vwf.getProperty(node.id, 'visible')) {
+                $('#isVisible').prop('checked', 'checked');
+            } else {
+                $('#isVisible').prop('checked', '');
+            }
+
+            if (vwf.getProperty(node.id, 'inheritScale')) {
+                $('#inheritScale').prop('checked', 'checked');
+            } else {
+                $('#inheritScale').prop('checked', '');
+            }
+
+            if (vwf.getProperty(node.id, 'isDynamic')) {
+                $('#isDynamic').prop('checked', 'checked');
+            } else {
+                $('#isDynamic').prop('checked', '');
+            }
+            if (vwf.getProperty(node.id, 'castShadows')) {
+                $('#castShadows').prop('checked', 'checked');
+            } else {
+                $('#castShadows').prop('checked', '');
+            }
+            if (vwf.getProperty(node.id, 'isSelectable')) {
+                $('#isSelectable').prop('checked', 'checked');
+            } else {
+                $('#isSelectable').prop('checked', '');
+            }
+            if (vwf.getProperty(node.id, 'passable')) {
+                $('#passable').prop('checked', 'checked');
+            } else {
+                $('#passable').prop('checked', '');
+            }
+            if (vwf.getProperty(node.id, 'receiveShadows')) {
+                $('#receiveShadows').prop('checked', 'checked');
+            } else {
+                $('#receiveShadows').prop('checked', '');
+            }
+            $('#BaseSectionTitle').text(node.properties.type || "Type" + ": " + node.id);
+            this.SelectionTransformed(null, node);
+            this.setupAnimationGUI(node, true);
+            this.setupEditorData(node,node.id, true,vwf.getProperty(node.id, 'EditorData'));
+            this.recursevlyAddPrototypes(node);
+            this.recursevlyAddModifiers(node);
+            this.addBehaviors(node);
+            $("#accordion").accordion({
+                heightStyle: 'fill',
+                activate: function() {
+                    if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
+                }
+            });
+            $(".ui-accordion-content").css('height', 'auto');
+            this.inSetup = false;
+
+            $("#accordion").accordion({
+                'active': lastTab
+            });
+        }
         this.recursevlyAddPrototypes = function(node) {
             
             
@@ -317,7 +287,7 @@ define(function() {
             //we want to set them on the current node
             node.id = oldID;
 
-            this.setupEditorData(node, false);
+            this.setupEditorData(node,currentID, false,vwf.getProperty(currentID, 'EditorData'));
             node.id = currentID; // careful not to recurse forever
             this.recursevlyAddPrototypes(node);
                 
@@ -336,7 +306,7 @@ define(function() {
 			//$("#"+node.children[i].id+"Amount").slider('value',vwf.getProperty(node.children[i].id,'amount'));
 			*/
                 if (vwf.getProperty(node.children[i].id, 'isModifier') == true) {
-                    this.setupEditorData(node.children[i], false);
+                    this.setupEditorData(node.children[i],node.children[i].id, false,vwf.getProperty(node.children[i].id, 'EditorData'));
                     this.recursevlyAddModifiers(node.children[i]);
                 }
             }
@@ -354,7 +324,7 @@ define(function() {
 			//$("#"+node.children[i].id+"Amount").slider('value',vwf.getProperty(node.children[i].id,'amount'));
 			*/
                 if (isBehavior(node.children[i].id)) {
-                    this.setupEditorData(node.children[i], false);
+                    this.setupEditorData(node.children[i],node.children[i].id, false,vwf.getProperty(node.children[i].id, 'EditorData'));
                 }
             }
         }
@@ -546,18 +516,18 @@ define(function() {
 
             }
         }
-        this.setupEditorData = function(node, wholeselection) {
-            var nodeid = node.id;
+        this.setupEditorData = function(node,panelid, wholeselection,editordata) {
+            
             if (wholeselection && _Editor.getSelectionCount() > 1) nodeid = 'selection';
-            var editordata = vwf.getProperty(node.id, 'EditorData');
-
+            
+            var nodeid = node.id;
             editordatanames = [];
             for (var i in editordata) {
                 editordatanames.push(i);
             }
             if (editordatanames.length == 0) return;
             editordatanames.sort();
-            section = '<h3 class="modifiersection" ><a href="#"><div style="font-weight:bold;display:inline">' + (vwf.getProperty(node.id, 'type') || "Type") + ": </div>" + (node.properties.DisplayName || "None") + '</a></h3>' + '<div class="modifiersection" id="basicSettings' + nodeid + '">' + '</div>';
+            section = '<h3 class="modifiersection" ><a href="#"><div style="font-weight:bold;display:inline">' + (vwf.getProperty(node.id, 'type') || "Type") + ": </div>" + (node.properties.DisplayName || "None") + '</a></h3>' + '<div class="modifiersection" id="basicSettings' + panelid + '">' + '</div>';
            
             $("#accordion").append(section);
 
@@ -566,25 +536,25 @@ define(function() {
                 var i = editordatanames[j];
                 //if multiple editorData properties up the prototype chain have the same editor objects, skip
                 
-                if(this.currentWidgets[i]) continue;
-                this.currentWidgets[i] = true;
+                if(this.currentWidgets[nodeid + i]) continue;
+                this.currentWidgets[nodeid + i] = true;
                 addedWidget = true;
                 if (editordata[i].type == 'sectionTitle') {
                     var inputstyle = "";
-                    $('#basicSettings' + nodeid).append('<div style="" class = "EditorDataSectionTitle">' + editordata[i].displayname + ': </div>');
+                    $('#basicSettings' + panelid).append('<div style="" class = "EditorDataSectionTitle">' + editordata[i].displayname + ': </div>');
                 }
                 if (editordata[i].type == 'label') {
  
 
-                    $('#basicSettings' + nodeid).append('<div id="' + nodeid + editordata[i].property + 'value"></div>');
+                    $('#basicSettings' + panelid).append('<div id="' + nodeid + editordata[i].property + 'value"></div>');
                     this.addPropertyEditorDialog(node.id, editordata[i].property, $('#' + nodeid + editordata[i].property + 'value'), 'label');
                     var val = vwf.getProperty(node.id, editordata[i].property);
                     $('#' + nodeid + editordata[i].property + 'value').text(val);
                 }
                 if (editordata[i].type == 'slider') {
                     var inputstyle = "";
-                    $('#basicSettings' + nodeid).append('<div class="editorSliderLabel">' + editordata[i].displayname + ': </div>');
-                    $('#basicSettings' + nodeid).append('<input class="primeditorinputbox" style="' + inputstyle + '" type="" id="' + nodeid + editordata[i].property + 'value"></input>');
+                    $('#basicSettings' + panelid).append('<div class="editorSliderLabel">' + editordata[i].displayname + ': </div>');
+                    $('#basicSettings' + panelid).append('<input class="primeditorinputbox" style="' + inputstyle + '" type="" id="' + nodeid + editordata[i].property + 'value"></input>');
                     //	$('#' + nodeid + editordata[i].property + 'value').val(vwf.getProperty(node.id, editordata[i].property));
                     //	$('#' + nodeid + editordata[i].property + 'value').change(this.primPropertyTypein);
                     $('#' + nodeid + editordata[i].property + 'value').attr("nodename", nodeid);
@@ -602,11 +572,11 @@ define(function() {
                     $('#' + nodeid + editordata[i].property + 'value').spinner('value', vwf.getProperty(node.id, editordata[i].property));
                     $('#' + nodeid + editordata[i].property + 'value').parent().css('float', 'right');
 
-                    $('#basicSettings' + nodeid).append('<div id="' + nodeid + i + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/>');
+                    $('#basicSettings' + panelid).append('<div id="' + nodeid + i + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/>');
                     var val = vwf.getProperty(node.id, editordata[i].property);
                     if (val == undefined) val = 0;
                     $('#' + nodeid + i).slider({
-                        step: parseFloat(editordata[i].step),
+                        step: parseFloat(editordata[i].step) || 1,
                         min: parseFloat(editordata[i].min),
                         max: parseFloat(editordata[i].max),
                         slide: this.primPropertySlide,
@@ -619,7 +589,7 @@ define(function() {
                     this.addPropertyEditorDialog(node.id, editordata[i].property, $('#' + nodeid + editordata[i].property + 'value'), 'text');
                 }
                 if (editordata[i].type == 'check') {
-                    $('#basicSettings' + nodeid).append('<div><input style="vertical-align: middle" type="checkbox" id="' + i + nodeid + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/><div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">' + editordata[i].displayname + ': </div></div>');
+                    $('#basicSettings' + panelid).append('<div><input style="vertical-align: middle" type="checkbox" id="' + i + nodeid + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/><div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">' + editordata[i].displayname + ': </div></div>');
                     var val = vwf.getProperty(node.id, editordata[i].property);
                     $('#' + i + nodeid).click(this.primPropertyChecked);
                     if (val == true) {
@@ -631,7 +601,7 @@ define(function() {
                 }
                 if (editordata[i].type == 'button') {
 
-                    $('#basicSettings' + nodeid).append('<div id="' + nodeid + i + '" nodename="' + nodeid + '" methodname="' + editordata[i].method + '"/>');
+                    $('#basicSettings' + panelid).append('<div id="' + nodeid + i + '" nodename="' + nodeid + '" methodname="' + editordata[i].method + '"/>');
                     $('#' + nodeid + i).button({
                         label: editordata[i].label
                     });
@@ -645,8 +615,8 @@ define(function() {
                 if (editordata[i].type == 'choice') {
 
 
-                    //	$('#basicSettings' + nodeid).append('<input type="button" style="width: 100%;font-weight: bold;" id="' + nodeid + i + '" nodename="' + nodeid + '" propname="' +  editordata[i].property + '"/>');
-                    $('#basicSettings' + nodeid).append('<div><div class="editorSliderLabel">' + editordata[i].displayname + ': </div>' + '<select id="' + nodeid + i + '" style="float:right;clear:right" ' + ' nodename="' + nodeid + '" propname="' + editordata[i].property + '"" ></select></div>');
+                    //	$('#basicSettings' + panelid).append('<input type="button" style="width: 100%;font-weight: bold;" id="' + nodeid + i + '" nodename="' + nodeid + '" propname="' +  editordata[i].property + '"/>');
+                    $('#basicSettings' + panelid).append('<div><div class="editorSliderLabel">' + editordata[i].displayname + ': </div>' + '<select id="' + nodeid + i + '" style="float:right;clear:right" ' + ' nodename="' + nodeid + '" propname="' + editordata[i].property + '"" ></select></div>');
 
                     $('#' + nodeid + i).val(editordata[i].displayname + ": " + editordata[i].labels[vwf.getProperty(node.id, editordata[i].property)]);
                     $('#' + nodeid + i).attr('index', i);
@@ -681,15 +651,15 @@ define(function() {
                     //$('#'+i).
                 }
                 if (editordata[i].type == 'rangeslider') {
-                    $('#basicSettings' + nodeid).append('<div  class="editorSliderLabel">' + editordata[i].displayname + ': </div>');
-                    $('#basicSettings' + nodeid).append('<div style="display: block;margin: 5px;" id="' + nodeid + i + '" nodename="' + nodeid + '" propnamemax="' + editordata[i].property[2] + '" propnamemin="' + editordata[i].property[1] + '"/>');
+                    $('#basicSettings' + panelid).append('<div  class="editorSliderLabel">' + editordata[i].displayname + ': </div>');
+                    $('#basicSettings' + panelid).append('<div style="display: block;margin: 5px;" id="' + nodeid + i + '" nodename="' + nodeid + '" propnamemax="' + editordata[i].property[2] + '" propnamemin="' + editordata[i].property[1] + '"/>');
                     var setval = vwf.getProperty(node.id, editordata[i].property[0]);
                     var minval = vwf.getProperty(node.id, editordata[i].property[1]);
                     var maxval = vwf.getProperty(node.id, editordata[i].property[2]);
                     var val = [minval || editordata[i].min, maxval || editordata[i].max]
                     $('#' + nodeid + i).slider({
                         range: true,
-                        step: parseFloat(editordata[i].step),
+                        step: parseFloat(editordata[i].step || 1),
                         min: parseFloat(editordata[i].min),
                         max: parseFloat(editordata[i].max),
                         values: val,
@@ -710,6 +680,7 @@ define(function() {
                     });
                 }
                 if (editordata[i].type == 'rangevector') {
+                    if(!editordata[i].step) editordata[i].step = 1;
                     var vecvalchanged = function(e) {
                         var propname = $(this).attr('propname');
                         var component = $(this).attr('component');
@@ -721,9 +692,9 @@ define(function() {
                         var z = $('#' + thisid + 'Z').val();
                         _PrimitiveEditor.setProperty(nodeid, propname, [parseFloat(x), parseFloat(y), parseFloat(z)]);
                     }
-                    $('#basicSettings' + nodeid).append('<div  class="editorSliderLabel">' + editordata[i].displayname + ': </div>');
-                    var baseid = 'basicSettings' + nodeid + i + 'min';
-                    $('#basicSettings' + nodeid).append('<div style="text-align:right"><div style="display:inline" >min:</div> <div style="display:inline-block;">' + '<input id="' + baseid + 'X' + '" component="X" nodename="' + nodeid + '" propname="' + editordata[i].property[0] + '" type="number" step="' + editordata[i].step + '" class="vectorinputfront"/>' + '<input id="' + baseid + 'Y' + '" component="Y" nodename="' + nodeid + '" propname="' + editordata[i].property[0] + '" type="number" step="' + editordata[i].step + '" class="vectorinput"/>' + '<input id="' + baseid + 'Z' + '" component="Z" nodename="' + nodeid + '" propname="' + editordata[i].property[0] + '" type="number" step="' + editordata[i].step + '" class="vectorinput"/>' + '</div></div>');
+                    $('#basicSettings' + panelid).append('<div  class="editorSliderLabel">' + editordata[i].displayname + ': </div>');
+                    var baseid = 'basicSettings' + panelid + i + 'min';
+                    $('#basicSettings' + panelid).append('<div style="text-align:right"><div style="display:inline" >min:</div> <div style="display:inline-block;">' + '<input id="' + baseid + 'X' + '" component="X" nodename="' + nodeid + '" propname="' + editordata[i].property[0] + '" type="number" step="' + editordata[i].step + '" class="vectorinputfront"/>' + '<input id="' + baseid + 'Y' + '" component="Y" nodename="' + nodeid + '" propname="' + editordata[i].property[0] + '" type="number" step="' + editordata[i].step + '" class="vectorinput"/>' + '<input id="' + baseid + 'Z' + '" component="Z" nodename="' + nodeid + '" propname="' + editordata[i].property[0] + '" type="number" step="' + editordata[i].step + '" class="vectorinput"/>' + '</div></div>');
                     var propmin = vwf.getProperty(node.id, editordata[i].property[0]);
                     if (propmin) {
                         $('#' + baseid + 'X').val(propmin[0]);
@@ -733,8 +704,8 @@ define(function() {
                     $('#' + baseid + 'X').change(vecvalchanged);
                     $('#' + baseid + 'Y').change(vecvalchanged);
                     $('#' + baseid + 'Z').change(vecvalchanged);
-                    baseid = 'basicSettings' + nodeid + i + 'max';
-                    $('#basicSettings' + nodeid).append('<div style="text-align:right"><div style="display:inline">max:</div> <div style="display:inline-block;">' + '<input id="' + baseid + 'X' + '" component="X" nodename="' + nodeid + '" propname="' + editordata[i].property[1] + '" type="number" step="' + editordata[i].step + '"  class="vectorinputfront"/>' + '<input id="' + baseid + 'Y' + '" component="Y" nodename="' + nodeid + '" propname="' + editordata[i].property[1] + '" type="number" step="' + editordata[i].step + '"  class="vectorinput"/>' + '<input id="' + baseid + 'Z' + '" component="Z" nodename="' + nodeid + '" propname="' + editordata[i].property[1] + '" type="number" step="' + editordata[i].step + '"  class="vectorinput"/>' + '</div></div>');
+                    baseid = 'basicSettings' + panelid + i + 'max';
+                    $('#basicSettings' + panelid).append('<div style="text-align:right"><div style="display:inline">max:</div> <div style="display:inline-block;">' + '<input id="' + baseid + 'X' + '" component="X" nodename="' + nodeid + '" propname="' + editordata[i].property[1] + '" type="number" step="' + editordata[i].step + '"  class="vectorinputfront"/>' + '<input id="' + baseid + 'Y' + '" component="Y" nodename="' + nodeid + '" propname="' + editordata[i].property[1] + '" type="number" step="' + editordata[i].step + '"  class="vectorinput"/>' + '<input id="' + baseid + 'Z' + '" component="Z" nodename="' + nodeid + '" propname="' + editordata[i].property[1] + '" type="number" step="' + editordata[i].step + '"  class="vectorinput"/>' + '</div></div>');
                     var propmax = vwf.getProperty(node.id, editordata[i].property[1]);
                     if (propmax) {
                         $('#' + baseid + 'X').val(propmax[0]);
@@ -758,8 +729,8 @@ define(function() {
                             _PrimitiveEditor.setProperty(nodeid, propname, [parseFloat(x), parseFloat(y), parseFloat(z)]);
                         }
                         //$('#basicSettings'+nodeid).append('<div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">'+editordata[i].displayname+': </div>');
-                    var baseid = 'basicSettings' + nodeid + i + 'min';
-                    $('#basicSettings' + nodeid).append('<div class="editorSliderLabel"  style="width:100%;text-align: left;margin-top: 4px;" ><div style="display:inline" >' + editordata[i].displayname + ':</div> <div style="display:inline-block;float:right">' + '<input id="' + baseid + 'X' + '" component="X" nodename="' + nodeid + '" propname="' + editordata[i].property + '" type="number" step="' + editordata[i].step + '" class="vectorinputfront"/>' + '<input id="' + baseid + 'Y' + '" component="Y" nodename="' + nodeid + '" propname="' + editordata[i].property + '" type="number" step="' + editordata[i].step + '" class="vectorinput"/>' + '<input id="' + baseid + 'Z' + '" component="Z" nodename="' + nodeid + '" propname="' + editordata[i].property + '" type="number" step="' + editordata[i].step + '" class="vectorinput"/>' + '</div><div style="clear:both"/></div>');
+                    var baseid = 'basicSettings' + panelid + i + 'min';
+                    $('#basicSettings' + panelid).append('<div class="editorSliderLabel"  style="width:100%;text-align: left;margin-top: 4px;" ><div style="display:inline" >' + editordata[i].displayname + ':</div> <div style="display:inline-block;float:right">' + '<input id="' + baseid + 'X' + '" component="X" nodename="' + nodeid + '" propname="' + editordata[i].property + '" type="number" step="' + editordata[i].step + '" class="vectorinputfront"/>' + '<input id="' + baseid + 'Y' + '" component="Y" nodename="' + nodeid + '" propname="' + editordata[i].property + '" type="number" step="' + editordata[i].step + '" class="vectorinput"/>' + '<input id="' + baseid + 'Z' + '" component="Z" nodename="' + nodeid + '" propname="' + editordata[i].property + '" type="number" step="' + editordata[i].step + '" class="vectorinput"/>' + '</div><div style="clear:both"/></div>');
                     var propmin = vwf.getProperty(node.id, editordata[i].property);
                     if (propmin) {
                         $('#' + baseid + 'X').val(propmin[0]);
@@ -771,7 +742,7 @@ define(function() {
                     $('#' + baseid + 'Z').change(vecvalchanged);
                 }
                 if (editordata[i].type == 'map') {
-                    $('#basicSettings' + nodeid).append('<div style="display: block;margin: 5px;" id="' + nodeid + i + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/>');
+                    $('#basicSettings' + panelid).append('<div style="display: block;margin: 5px;" id="' + nodeid + i + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/>');
                     $('#' + nodeid + i).button({
                         label: editordata[i].displayname
                     });
@@ -791,7 +762,7 @@ define(function() {
                     $('#' + nodeid + i).css('text-align','left');
                 }
                 if (editordata[i].type == 'text') {
-                    $('#basicSettings' + nodeid).append('<div style="">' + editordata[i].displayname + '</div><input type="text" style="  background: black;border: 1px inset;display: block;width: 100%;padding: 2px;border-radius: 5px;font-weight: bold;" id="' + nodeid + i + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/>');
+                    $('#basicSettings' + panelid).append('<div style="">' + editordata[i].displayname + '</div><input type="text" style="  background: black;border: 1px inset;display: block;width: 100%;padding: 2px;border-radius: 5px;font-weight: bold;" id="' + nodeid + i + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/>');
                     $('#' + nodeid + i).val(vwf.getProperty(node.id, editordata[i].property));
                     $('#' + nodeid + i).keyup(function() {
                         var propname = $(this).attr('propname');
@@ -801,7 +772,7 @@ define(function() {
                     this.addPropertyEditorDialog(node.id, editordata[i].property, $('#' + nodeid + i), 'text');
                 }
                 if (editordata[i].type == 'prompt') {
-                    $('#basicSettings' + nodeid).append('<div style="">' + editordata[i].displayname + '</div><div type="text" id="' + nodeid + i + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/>');
+                    $('#basicSettings' + panelid).append('<div style="">' + editordata[i].displayname + '</div><div type="text" id="' + nodeid + i + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/>');
                     $('#' + nodeid + i).text(vwf.getProperty(node.id, editordata[i].property));
                     $('#' + nodeid + i).button();
                     $('#' + nodeid + i).css('width','100%');
@@ -820,7 +791,7 @@ define(function() {
                 }
                 if (editordata[i].type == 'nodeid') {
 
-                    $('#basicSettings' + nodeid).append('<div style="margin-top: 5px;margin-bottom: 5px;"><div >' + editordata[i].displayname + '</div><input type="text" style="background: black;display: inline;width: 50%;padding: 2px;border-radius: 5px;font-weight: bold;" id="' + nodeid + editordata[i].property + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/><div  style="float:right;width:45%;height:2em" id="' + nodeid + i + 'button" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/></div><div style="clear:both" />');
+                    $('#basicSettings' + panelid).append('<div style="margin-top: 5px;margin-bottom: 5px;"><div >' + editordata[i].displayname + '</div><input type="text" style="background: black;display: inline;width: 50%;padding: 2px;border-radius: 5px;font-weight: bold;" id="' + nodeid + editordata[i].property + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/><div  style="float:right;width:45%;height:2em" id="' + nodeid + i + 'button" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/></div><div style="clear:both" />');
                     
                    
                     $('#' + nodeid + editordata[i].property).attr('disabled', 'disabled');
@@ -860,7 +831,7 @@ define(function() {
                 }
                 if (editordata[i].type == 'color') {
                     var colorswatchstyle = "margin: 5px;float:right;clear:right;background-color: #FF19E9;width: 25px;height: 25px;border: 2px solid lightgray;border-radius: 3px;display: inline-block;margin-left: 20px;vertical-align: middle;box-shadow: 2px 2px 5px,1px 1px 3px gray inset;background-image: url(vwf/view/editorview/images/select3.png);background-position: center;";
-                    $('#basicSettings' + nodeid).append('<div style="margin-bottom:10px" id="' + nodeid + i + '" />');
+                    $('#basicSettings' + panelid).append('<div style="margin-bottom:10px" id="' + nodeid + i + '" />');
                     $('#' + nodeid + i + '').append('<div style="display:inline-block;margin-bottom: 3px;margin-top: 15px;"  class="editorSliderLabel">' + editordata[i].displayname + ': </div>');
                     $('#' + nodeid + i + '').append('<div id="' + nodeid + i + 'ColorPicker" style="' + colorswatchstyle + '"></div>')
                     var colorval = vwf.getProperty(node.id, editordata[i].property);
@@ -899,30 +870,35 @@ define(function() {
                     $("#accordion").children().last().remove();
                     $("#accordion").children().last().remove();
                 }
-            $('#basicSettings' + nodeid).append('<div style="margin-top: 1em;" nodename="' + node.id + '" id="' + nodeid + 'deletebutton"/>');
-            $('#' + nodeid + 'deletebutton').button({
-                label: 'Delete'
-            });
-            $('#' + nodeid + 'deletebutton').click(this.deleteButtonClicked);
-            $('#basicSettings' + nodeid).append('<div style="margin-top: 1em;" nodename="' + node.id + '" id="' + nodeid + 'selectbutton"/>');
-            $('#' + nodeid + 'selectbutton').button({
-                label: 'Select'
-            });
-            $('#' + nodeid + 'selectbutton').click(this.selectButtonClicked);
-            //remove save button. too confusing
-            // $('#basicSettings' + nodeid).append('<div style="margin-top: 1em;" nodename="' + node.id + '" id="' + nodeid + 'savebutton"/>');
-            // $('#' + nodeid + 'savebutton').button(
-            // {
-            // label: 'Save'
-            // });
-            // $('#' + nodeid + 'savebutton').click(this.saveButtonClicked);
-            $('#basicSettings' + nodeid).append('<div style="margin-top: 1em;" nodename="' + node.id + '" id="' + nodeid + 'copybutton"/>');
-            $('#' + nodeid + 'copybutton').button({
-                label: 'Copy'
-            });
-            $('#' + nodeid + 'copybutton').click(this.copyButtonClicked);
+            if(addedWidget)
+            {   
+                var randomname = GUID();
+                $('#basicSettings' + panelid).append('<div style="margin-top: 1em;" nodename="' + node.id + '" id="' + nodeid + randomname+ 'deletebutton"/>');
+                $('#' + nodeid +randomname+ 'deletebutton').button({
+                    label: 'Delete'
+                });
+                $('#' + nodeid + randomname+'deletebutton').click(this.deleteButtonClicked);
+                $('#basicSettings' + panelid).append('<div style="margin-top: 1em;" nodename="' + node.id + '" id="' + nodeid +randomname+ 'selectbutton"/>');
+                $('#' + nodeid +randomname+ 'selectbutton').button({
+                    label: 'Select'
+                });
+                $('#' + nodeid +randomname+ 'selectbutton').click(this.selectButtonClicked);
+                //remove save button. too confusing
+                // $('#basicSettings' + panelid).append('<div style="margin-top: 1em;" nodename="' + node.id + '" id="' + nodeid + 'savebutton"/>');
+                // $('#' + nodeid + 'savebutton').button(
+                // {
+                // label: 'Save'
+                // });
+                // $('#' + nodeid + 'savebutton').click(this.saveButtonClicked);
+                $('#basicSettings' + panelid).append('<div style="margin-top: 1em;" nodename="' + node.id + '" id="' + nodeid + randomname+'copybutton"/>');
+                $('#' + nodeid +randomname+ 'copybutton').button({
+                    label: 'Copy'
+                });
+                $('#' + nodeid + randomname+'copybutton').click(this.copyButtonClicked);
+            }
         }
         this.deleteButtonClicked = function() {
+            
             if (document.PlayerNumber == null) {
                 _Notifier.notify('You must log in to participate');
                 return;
@@ -936,7 +912,7 @@ define(function() {
                 _Editor.DeleteSelection();
             } else {
                 vwf_view.kernel.deleteNode(id);
-                vwf_view.kernel.callMethod(_Editor.GetSelectedVWFNode().id, 'dirtyStack');
+                //vwf_view.kernel.callMethod(_Editor.GetSelectedVWFNode().id, 'dirtyStack');
                 window.setTimeout(function() {
                     _PrimitiveEditor.SelectionChanged(null, _Editor.GetSelectedVWFNode());
                 }, 500);
@@ -1081,10 +1057,7 @@ define(function() {
             {
             	_PrimitiveEditor.SelectionChanged(null, _Editor.GetSelectedVWFNode());
             }
-            if(_Editor.GetSelectedVWFID() == nodeID && propName == "DisplayName" && this.isOpen())
-            {
-                $('#primeditortitletext').text(propVal);
-            }
+            
 
             
             //if the editordata of a child behavior changes while selected, redraw
@@ -1109,7 +1082,8 @@ define(function() {
         }
         this.SelectionTransformed = function(e, node) {
             try {
-                if (node) {
+                //dont update the spinners when the user is typing in them, but when they drag the gizmo do. 
+                if (node && (vwf.client() !== vwf.moniker()) || $("#index-vwf:focus").length ==1) {
 
                     var mat = vwf.getProperty(node.id, 'transform');
                     var angles = this.rotationMatrix_2_XYZ(mat);
@@ -1138,7 +1112,7 @@ define(function() {
                 //console.log(e);
             }
         }
-        $(document).bind('selectionChanged', this.SelectionChanged.bind(this));
+        
         $(document).bind('modifierCreated', this.SelectionChanged.bind(this));
         $(document).bind('selectionTransformedLocal', this.SelectionTransformed.bind(this));
        
@@ -1176,5 +1150,6 @@ define(function() {
         $('#ScaleZ').on( "keyup",this.scaleChanged.bind(this));
 
         $('#RotationW').hide();
+        this.hide();
     }
 });

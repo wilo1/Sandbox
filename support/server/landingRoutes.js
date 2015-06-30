@@ -11,17 +11,20 @@ doc = false;
 var logger = require('./logger');
 var sessions = require('./sessions');
 
-fs.readdir(__dirname + '/../../public' + root + '/views/help', function(err, files) {
-    var tempArr = [];
+exports.init = function() {
+    root = global.appPath,
+    console.log(root);
+    fs.readdir(__dirname + '/../../public' + '/adl/sandbox' + '/views/help', function(err, files) {
+        var tempArr = [];
 
-    for (var i = 0; i < files.length; i++) {
-        tempArr = files[i].split('.');
-        if (tempArr[1] == 'js') {
-            fileList.push(tempArr[0].toLowerCase());
+        for (var i = 0; i < files.length; i++) {
+            tempArr = files[i].split('.');
+            if (tempArr[1] == 'js') {
+                fileList.push(tempArr[0].toLowerCase());
+            }
         }
-    }
-});
-
+    });
+}
 //localization
 function translate(req) {
     var currentLng = req.locale;
@@ -57,7 +60,7 @@ function getRoot() {
 
 }
 
-exports.acceptedRoutes = ['about','features','demos','createNotLoggedIn', 'home', 'tools', 'performancetest', 'examples', 'settings', 'restore', 'createNew', 'welcome', 'search', 'forgotPassword', 'editProfile', 'updatePassword', 'test', 'avatar', 'sandbox', 'index', 'create', 'signup', 'login', 'logout', 'edit', 'remove', 'history', 'user', 'worlds', 'admin', 'admin/users', 'admin/worlds', 'admin/edit', 'publish'];
+exports.acceptedRoutes = ['about', 'features', 'demos', 'createNotLoggedIn', 'home', 'tools', 'performancetestJavascript', 'performancetestGraphics', 'examples', 'settings', 'restore', 'createNew', 'welcome', 'search', 'forgotPassword', 'editProfile', 'updatePassword', 'test', 'avatar', 'sandbox', 'index', 'create', 'signup', 'login', 'logout', 'edit', 'remove', 'history', 'user', 'worlds', 'admin', 'admin/users', 'admin/worlds', 'admin/edit', 'publish'];
 routesMap = {
     'sandbox': {
         template: 'index'
@@ -68,7 +71,10 @@ routesMap = {
     'tools': {
         layout: 'plain'
     },
-    'performancetest': {
+    'performancetestJavascript': {
+        layout: 'plain'
+    },
+    'performancetestGraphics': {
         layout: 'plain'
     },
     'examples': {
@@ -81,13 +87,13 @@ routesMap = {
         template: 'index'
     },
     'features': {
-       layout: 'plain'
+        layout: 'plain'
     },
     'demos': {
-       layout: 'plain'
+        layout: 'plain'
     },
     'about': {
-       layout: 'plain'
+        layout: 'plain'
     },
     'edit': {
         sid: true,
@@ -136,7 +142,8 @@ routesMap = {
     },
     'avatar': {
         avatar: true,
-        requiresLogin: true
+        requiresLogin: true,
+		layout: 'plain'
     },
     'create': {
         requiresLogin: true
@@ -181,7 +188,7 @@ routesMap = {
 exports.statsHandler = function(req, res, next) {
 
     sessions.GetSessionData(req, function(sessionData) {
-        
+
         var instances = global.instances.instances;
         var allConnections = 0;
         for (var i in instances) {
@@ -194,12 +201,13 @@ exports.statsHandler = function(req, res, next) {
                 states: states,
                 users: users,
                 allConnections: allConnections,
-               
+
                 instances: instances || [],
                 sessionData: sessionData,
                 url: req.url,
                 root: getRoot(),
-                federal_analytics:global.configuration.federal_analytics
+                federal_analytics: global.configuration.federal_analytics,
+                    branding: global.configuration.branding
             };
             res.render('stats', {
                 layout: 'plain'
@@ -211,6 +219,8 @@ exports.statsHandler = function(req, res, next) {
     })
 }
 exports.redirectPasswordEmail = function(req, res, next) {
+    next();
+    return;
     if (req.query && req.query.return) {
         req.session.redirectUrl = req.query.return;
     }
@@ -256,7 +266,8 @@ exports.redirectPasswordEmail = function(req, res, next) {
                     blog: true,
                     doc: true,
                     translate: translate(req),
-                    federal_analytics:global.configuration.federal_analytics
+                    federal_analytics: global.configuration.federal_analytics,
+                    branding: global.configuration.branding
                 };
                 if (user && !user.Email) {
                     res.locals.message = "We've updated our database, and now require email address for users. Please update your email address below.";
@@ -269,7 +280,6 @@ exports.redirectPasswordEmail = function(req, res, next) {
                 next();
             }
         });
-
 
 
     });
@@ -337,7 +347,8 @@ exports.generalHandler = function(req, res, next) {
                     doc: doc,
                     user: user,
                     translate: translate(req),
-                    federal_analytics:global.configuration.federal_analytics
+                    federal_analytics: global.configuration.federal_analytics,
+                    branding: global.configuration.branding
                 };
 
                 //hook up the buttons to show the social media logins
@@ -372,15 +383,16 @@ exports.generalHandler = function(req, res, next) {
     });
 };
 
-exports._404 = function(req, res,next) {
+exports._404 = function(req, res, next) {
 
-console.log('here');
+    console.log('here');
     sessions.GetSessionData(req, function(sessionData) {
         res.locals = {
             sessionData: sessionData,
             url: req.url,
             root: getRoot(),
-            federal_analytics:global.configuration.federal_analytics
+            federal_analytics: global.configuration.federal_analytics,
+            branding: global.configuration.branding
         };
         res.status(404).render('_404');
         next();
@@ -397,7 +409,8 @@ exports.help = function(req, res) {
         sid: root + '/' + (req.query.id ? req.query.id : '') + '/',
         root: getRoot(req),
         script: displayPage + ".js",
-        federal_analytics:global.configuration.federal_analytics
+        federal_analytics: global.configuration.federal_analytics,
+         branding: global.configuration.branding
     };
     res.render('help/template');
 
@@ -434,19 +447,20 @@ function prettyDate(time) {
 exports.world = function(req, res, next) {
 
     sessions.GetSessionData(req, function(sessionData) {
-        DAL.getInstance(global.appPath.replace(/\//g, "_") + "_" + req.params.page + "_", function(doc) {
+        DAL.getInstance("/adl/sandbox".replace(/\//g, "_") + "_" + req.params.page + "_", function(doc) {
             if (!doc) {
                 res.locals = {
                     sessionData: sessionData,
                     url: req.url,
                     root: getRoot(),
-                    federal_analytics:global.configuration.federal_analytics
+                    federal_analytics: global.configuration.federal_analytics,
+                    branding: global.configuration.branding
                 };
                 //res.status(404).render('_404');
                 res.redirect(global.appPath);
                 return;
             }
-            var instance = global.instances ? global.instances.get(global.appPath + "/" + req.params.page + "/") : false;
+            var instance = global.instances ? global.instances.get("/adl/sandbox" + "/" + req.params.page + "/") : false;
             var anonymous = [];
             var users = [];
 
@@ -462,7 +476,6 @@ exports.world = function(req, res, next) {
             var totalusers = anonymous.length + users.length;
 
 
-
             var owner = (sessionData || {}).UID == doc.owner;
             doc.prettyDate = prettyDate(doc.created);
             doc.prettyUpdated = prettyDate(doc.lastUpdate);
@@ -476,7 +489,8 @@ exports.world = function(req, res, next) {
                 users: users,
                 anonymous: anonymous,
                 owner: owner,
-                federal_analytics:global.configuration.federal_analytics
+                federal_analytics: global.configuration.federal_analytics,
+                    branding: global.configuration.branding
             };
             res.render('worldTemplate', {
                 layout: 'plain'
@@ -490,7 +504,7 @@ function ShowSearchPage(mode, req, res, next) {
     sessions.GetSessionData(req, function(sessionData) {
         function foundStates(allinstances) {
 
-           
+
             var results = [];
 
             //clean up and make sure that the data is not null
@@ -508,7 +522,7 @@ function ShowSearchPage(mode, req, res, next) {
                     var inst = allinstances[i];
                     if (!inst) continue;
                     inst.id = i;
-                    inst.shortid = i.substr(global.appPath.length + 1, 16);
+                    inst.shortid = i.substr("/adl/sandbox".length + 1, 16);
                     if (global.instances) {
                         if (global.instances.get(i.replace(/_/g, "/")))
                             results.push(inst);
@@ -524,7 +538,7 @@ function ShowSearchPage(mode, req, res, next) {
                     var inst = allinstances[i];
                     if (!inst) continue;
                     inst.id = i;
-                    inst.shortid = i.substr(global.appPath.length + 1, 16);
+                    inst.shortid = i.substr("/adl/sandbox".length + 1, 16);
                     if (inst.title.toLowerCase().indexOf(search) != -1 || inst.description.toLowerCase().indexOf(search) != -1 || inst.owner.toLowerCase().indexOf(search) != -1 || inst.shortid.toLowerCase().indexOf(search) != -1)
                         results.push(inst);
                 }
@@ -538,7 +552,7 @@ function ShowSearchPage(mode, req, res, next) {
                     var inst = allinstances[i];
                     if (!inst) continue;
                     inst.id = i;
-                    inst.shortid = i.substr(global.appPath.length + 1, 16)
+                    inst.shortid = i.substr("/adl/sandbox".length + 1, 16)
                     if (inst.owner == sessionData.UID)
                         results.push(inst);
                 }
@@ -551,7 +565,7 @@ function ShowSearchPage(mode, req, res, next) {
                     var inst = allinstances[i];
                     if (!inst) continue;
                     inst.id = i;
-                    inst.shortid = i.substr(global.appPath.length + 1, 16)
+                    inst.shortid = i.substr("/adl/sandbox".length + 1, 16)
                     if (inst.featured)
                         results.push(inst);
                 }
@@ -565,7 +579,7 @@ function ShowSearchPage(mode, req, res, next) {
                     var inst = allinstances[i];
                     if (!inst) continue;
                     inst.id = i;
-                    inst.shortid = i.substr(global.appPath.length + 1, 16)
+                    inst.shortid = i.substr("/adl/sandbox".length + 1, 16)
                     results.push(inst);
                 }
                 results.sort(function(a, b) {
@@ -577,7 +591,7 @@ function ShowSearchPage(mode, req, res, next) {
                     var inst = allinstances[i];
                     if (!inst) continue;
                     inst.id = i;
-                    inst.shortid = i.substr(global.appPath.length + 1, 16)
+                    inst.shortid = i.substr("/adl/sandbox".length + 1, 16)
                     results.push(inst);
                 }
                 results.sort(function(a, b) {
@@ -616,7 +630,8 @@ function ShowSearchPage(mode, req, res, next) {
                 previous: previous,
                 hadprev: (previous >= 0),
                 translate: translate(req),
-                federal_analytics:global.configuration.federal_analytics
+                federal_analytics: global.configuration.federal_analytics,
+                    branding: global.configuration.branding
             };
             res.locals[mode] = true;
             res.render('searchResults', {
@@ -627,13 +642,11 @@ function ShowSearchPage(mode, req, res, next) {
         }
 
 
-
         var search = decodeURIComponent(req.params.term).toLowerCase();
         var perpage = req.params.perpage;
         var page = parseInt(req.params.page);
 
         var searchFunc = "";
-
 
 
         if (mode == "featured")
@@ -676,34 +689,32 @@ exports.createNew2 = function(req, res, next) {
             res.redirect(root + '/login?return=createNew/0')
         }
         var template = req.params.template;
-        var normalizedSID = global.appPath.replace(/\//g, "_") + "_" + template + "_";
+        var normalizedSID = "/adl/sandbox".replace(/\//g, "_") + "_" + template + "_";
         logger.debug(normalizedSID);
         DAL.getInstance(normalizedSID, function(worlddata) {
 
-            function postWorldData()
-            {
-            res.locals = {
-                worlddata: worlddata,
-                template: (template == 'noTemplate' ? false : template),
-                root: getRoot(),
-                translate: translate(req),
-                federal_analytics:global.configuration.federal_analytics
-            };
-            res.render('createNew2', {
-                layout: 'plain'
-            });
+            function postWorldData() {
+                res.locals = {
+                    worlddata: worlddata,
+                    template: (template == 'noTemplate' ? false : template),
+                    root: getRoot(),
+                    translate: translate(req),
+                    federal_analytics: global.configuration.federal_analytics,
+                    branding: global.configuration.branding
+                };
+                res.render('createNew2', {
+                    layout: 'plain'
+                });
             }
             logger.debug(worlddata);
-            if(!worlddata)
-            {
+            if (!worlddata) {
                 require('./examples.js').getExampleMetadata(normalizedSID, function(data) {
                     worlddata = data;
-                    if(worlddata) postWorldData();
+                    if (worlddata) postWorldData();
                 });
-            }else
+            } else
                 postWorldData();
 
-           
 
         });
 
@@ -766,14 +777,13 @@ exports.createNew = function(req, res, next) {
                 var inst = allinstances[i];
                 if (!inst) continue;
                 inst.id = i;
-                inst.shortid = i.substr(global.appPath.length + 1, 16)
+                inst.shortid = i.substr("/adl/sandbox".length + 1, 16)
                 if (inst.featured)
                     results.push(inst);
             }
             results.sort(function(a, b) {
                 return Date.parse(b.created || b.lastUpdate) - Date.parse(a.created || a.lastUpdate);
             });
-
 
 
             var total = results.length;
@@ -806,7 +816,8 @@ exports.createNew = function(req, res, next) {
                 previous: previous,
                 hadprev: (previous >= 0),
                 translate: translate(req),
-                federal_analytics:global.configuration.federal_analytics
+                federal_analytics: global.configuration.federal_analytics,
+                    branding: global.configuration.branding
             };
 
             res.render('createNew', {
@@ -899,7 +910,6 @@ exports.handlePostRequest = function(req, res, next) {
                         serveObj[1] = results[2];
                         res.end(JSON.stringify(serveObj));
                     });
-
 
 
                 break;

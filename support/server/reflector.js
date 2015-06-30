@@ -13,6 +13,7 @@ var connect = require('connect'),
     cookie = require('express/node_modules/cookie');
 YAML = require('js-yaml');
 var logger = require('./logger');
+var xapi = require('./xapi');
 function startup(listen)
 {
     //create socket server
@@ -37,7 +38,7 @@ function startup(listen)
                 // save parsedSessionId to handshakeData
                 try
                 {
-                    handshake.cookieData = parseSignedCookie(cookie.parse(handshake.headers.cookie)[global.configuration.sessionKey ? global.configuration.sessionKey : 'virtual'],
+                    handshake.cookieData = parseSignedCookie(cookie.parse(handshake.headers.cookie)['session'],
                         global.configuration.sessionSecret ? global.configuration.sessionSecret : 'unsecure cookie secret');
                 }
                 catch (e)
@@ -72,8 +73,11 @@ function getNamespace(socket)
             var namespace = referer;
             if (namespace[namespace.length - 1] != "/")
                 namespace += "/";
+            //account for customizable client url
+            namespace = namespace.replace(global.appPath,'/adl/sandbox');
             namespace = namespace.substr(namespace.indexOf("/adl/"));
             namespace = namespace.replace(/[\\\/]/g, '_');
+            logger.warn(namespace);
             return namespace;
         }
         catch (e)
@@ -152,7 +156,7 @@ function getBlankScene(state, instanceData, cb)
 {
 
     var state2 = JSON.parse(JSON.stringify(state));
-    fs.readFile("./public" + global.appPath + "/index.vwf.yaml", 'utf8', function(err, blankscene)
+    fs.readFile("./public" + "/adl/sandbox" + "/index.vwf.yaml", 'utf8', function(err, blankscene)
     {
         var err = null;
         try
@@ -193,7 +197,7 @@ function getBlankScene(state, instanceData, cb)
                 }
                 //don't allow the clients to persist between a save/load cycle
                 blankscene.properties['clients'] = null;
-                if (instanceData && instanceData.publishSettings)
+                if (instanceData && instanceData.publishSettings && instanceData.publishSettings.allowTools == false)
                 {
                     blankscene.properties['playMode'] = 'play';
                 }
@@ -287,7 +291,12 @@ function SaveInstanceState(namespace, data, socket)
             return;
         }
         //not allowed to update a published world
-        if (state.publishSettings)
+        if (state.publishSettings.persistence == false)
+        {
+            return;
+        }
+        //not allowed to update a published world
+        if (state.publishSettings.singlePlayer == true)
         {
             return;
         }
@@ -317,51 +326,67 @@ function WebSocketConnection(socket, _namespace)
         if (!socket.loginData.UID && socket.loginData.Username)
             socket.loginData.UID = socket.loginData.Username;
         var namespace = _namespace || getNamespace(socket);
-        socket.on('setNamespace', function(msg)
+        //let the data viewer tool connect, but wait for it to tell us what namespace to join 
+        if(namespace.indexOf('_adl_dataview_') == 0)
         {
-            logger.info(msg.space, 2);
-            WebSocketConnection(socket, msg.space);
-            socket.emit('namespaceSet',
-            {});
-        });
+            socket.on('setNamespace', function(msg)
+            {
+                logger.info(msg.space, 2);
+                WebSocketConnection(socket, msg.space.replace(/[\\\/]/g, '_'));
+                socket.emit('namespaceSet',
+                {});
+            });
+            return;
+        }
 
         socket.on('connectionTest', function(msg)
         {
             socket.emit('connectionTest', msg);
         })
-        DAL.getInstance(namespace, function(instancedata)
-        {
-            if (!instancedata)
+        
+            DAL.getInstance(namespace, function(instancedata)
             {
-                require('./examples.js')
-                    .getExampleMetadata(namespace, function(instancedata)
-                    {
-                        if (instancedata)
+               
+                
+                if (!instancedata)
+                {
+                    require('./examples.js')
+                        .getExampleMetadata(namespace, function(instancedata)
                         {
-                            //if this is a single player published world, there is no need for the server to get involved. Server the world state and tell the client to disconnect
-                            if (instancedata && instancedata.publishSettings && instancedata.publishSettings.singlePlayer)
+                            if (instancedata)
                             {
-                                ServeSinglePlayer(socket, namespace, instancedata)
+                                xapi.sendStatement(socket.loginData.UID, xapi.verbs.joined, namespace,instancedata.title,instancedata.description,namespace);
+                                //if this is a single player published world, there is no need for the server to get involved. Server the world state and tell the client to disconnect
+                                if (instancedata && instancedata.publishSettings && instancedata.publishSettings.singlePlayer)
+                                {
+                                    ServeSinglePlayer(socket, namespace, instancedata)
+                                }
+                                else
+                                    ClientConnected(socket, namespace, instancedata);
                             }
                             else
-                                ClientConnected(socket, namespace, instancedata);
-                        }
-                        else
-                        {
-                            socket.disconnect();
-                            return;
-                        }
-                    });
-                return;
-            }
-            //if this is a single player published world, there is no need for the server to get involved. Server the world state and tell the client to disconnect
-            if (instancedata && instancedata.publishSettings && instancedata.publishSettings.singlePlayer)
-            {
-                ServeSinglePlayer(socket, namespace, instancedata)
-            }
-            else
-                ClientConnected(socket, namespace, instancedata);
-        });
+                            {
+                                socket.disconnect();
+                                return;
+                            }
+                        });
+                    return;
+                }
+
+                if(instancedata)
+                {
+                    xapi.sendStatement(socket.loginData.UID, xapi.verbs.joined, namespace,instancedata.title,instancedata.description,namespace);   
+                }
+                
+                //if this is a single player published world, there is no need for the server to get involved. Server the world state and tell the client to disconnect
+                if (instancedata && instancedata.publishSettings && instancedata.publishSettings.singlePlayer)
+                {
+                    ServeSinglePlayer(socket, namespace, instancedata)
+                }
+                else
+                    ClientConnected(socket, namespace, instancedata);
+            });
+        
     });
 };
 
@@ -379,6 +404,21 @@ function runningInstance(id)
     catch (e)
     {
         logger.error(e.message + ' when opening ' + SandboxAPI.getDataPath() + '//Logs/' + id.replace(/[\\\/]/g, '_'));
+    }
+    this.addClient = function(socket)
+    {
+        this.clients[socket.id] = socket;
+    }
+    this.removeClient = function(socket)
+    {
+        delete this.clients[socket.id];
+    }
+    this.shutdown = function()
+    {
+        for(var i in this.clients)
+            this.clients[i].disconnect();
+        clearInterval(this.timerID);
+        logger.warn('Shutting down ' + this.id)
     }
     this.Log = function(message, level)
     {
@@ -475,34 +515,9 @@ function runningInstance(id)
         };
         this.messageClients(joinMessage);
     }
-    this.GetNextAnonName = function()
+    this.GetNextAnonName = function(socket)
     {
-        var clients = this.clients;
-        var _int = 0;
-        if (!clients)
-            return "Anonymous" + _int;
-        while (true)
-        {
-            var test = "Anonymous" + _int;
-            var found = false;
-            _int++;
-            for (var i in clients)
-            {
-                if (clients[i].loginData.Username == test)
-                {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-            {
-                return test;
-            }
-            if (_int > 10000)
-            {
-                throw (new Error('error finding anonymous name'))
-            }
-        }
+        return "Anonymous_" + socket.id
     }
     this.resyncCounter = 0;
     this.totalerr = 0;
@@ -514,6 +529,7 @@ function runningInstance(id)
         var self = this;
         if(self.timerID) return; //already started
         self.accum = 0;
+       
         var timer = function()
         {
             var now = process.hrtime();
@@ -522,8 +538,24 @@ function runningInstance(id)
             if (!self.lasttime) self.lasttime = now;
             var timedelta = (now - self.lasttime) || 0;
             self.accum += timedelta;
+
             while (self.accum > .05)
             {
+              
+                self.accum -= .05;
+                self.time += .05;
+                self.ticknum ++;
+                var tickmessage = 
+                {
+                    "action": "tick",
+                    "parameters": [],
+                    "time": self.time,
+                    "origin": "reflector",
+                    
+                };
+
+                self.messageClients(tickmessage);
+
                 self.resyncCounter++;
                 if (self.resyncCounter == 10)
                 {
@@ -533,22 +565,14 @@ function runningInstance(id)
                     {
                         "action": "activeResync",
                         "parameters": [],
-                        "time": self.time,
-                        "respond": true
+                        "time": self.time, //mark so the client will process before any ticks
+                        "respond": true,
+                        "origin": "reflector",
                     }));
                     if (syncClient)
                         syncClient.emit('message', syncmessage)
                 }
-                self.accum -= .05;
-                self.time += .05;
-                var tickmessage = 
-                {
-                    "action": "tick",
-                    "parameters": [],
-                    "time": self.time,
-                    "origin": "reflector",
-                };
-                self.messageClients(tickmessage);
+
             }
             self.lasttime = now;
             
@@ -563,10 +587,32 @@ function runningInstanceList()
     this.instances = {};
     this.add = function(id)
     {
+        //send a signal to the parent process that we are hosting this instance
+        if(global.configuration.cluster)
+        {
+                var message = {};
+                message.type = 'state';
+                message.action = 'add';
+                message.args = [id];
+                
+                process.send(message); 
+        }
+
         this.instances[id] = new runningInstance(id);
     }
     this.remove = function(id)
     {
+        //send a signal to the parent process that we are hosting this instance
+        if(global.configuration.cluster)
+        {
+                var message = {};
+                message.type = 'state';
+                message.action = 'remove';
+                message.args = [id];
+                
+                process.send(message); 
+        }
+
         delete this.instances[id];
     }
     this.get = function(id)
@@ -584,6 +630,10 @@ global.instances = RunningInstances;
 function ClientConnected(socket, namespace, instancedata)
     {
         console.log('ClientConnected');
+
+        
+
+
         var allowAnonymous = false;
         if (instancedata.publishSettings && instancedata.publishSettings.allowAnonymous)
             allowAnonymous = true;
@@ -613,7 +663,7 @@ function ClientConnected(socket, namespace, instancedata)
         //count anonymous users, try to align with the value used for hte displayname of the avatar
         if (socket.loginData.UID == "Anonymous")
         {
-            var anonName = thisInstance.GetNextAnonName();
+            var anonName = thisInstance.GetNextAnonName(socket);
             socket.loginData.UID = anonName;
             socket.loginData.Username = anonName;
         }
@@ -745,7 +795,7 @@ function ClientConnected(socket, namespace, instancedata)
                     })));
                     socket.pending = false;
                     //this must come after the client is added. Here, there is only one client
-                    thisInstance.messageConnection(socket.id, socket.loginData.Username, socket.loginData.UID);
+                    thisInstance.messageConnection(socket.id, socket.loginData ? socket.loginData.Username : "", socket.loginData ? socket.loginData.UID : "");
                     thisInstance.startTimer();
                 });
             });
@@ -755,7 +805,7 @@ function ClientConnected(socket, namespace, instancedata)
         {
             logger.info('load from client', 2);
             var firstclient = loadClient;
-            socket.pending = true;
+          //  socket.pending = true;
             thisInstance.getStateTime = thisInstance.time;
             loadClient.emit('message', messageCompress.pack(JSON.stringify(
             {
@@ -770,8 +820,10 @@ function ClientConnected(socket, namespace, instancedata)
             {
                 "action": "getState",
                 "respond": true,
-                "time": thisInstance.time
+                "time": thisInstance.time,
+                "origin":"reflector"
             })));
+            //loadClient.pending = true;
             socket.emit('message', messageCompress.pack(JSON.stringify(
             {
                 "action": "status",
@@ -891,6 +943,7 @@ function ClientConnected(socket, namespace, instancedata)
                 try
                 {
                     var message = JSON.parse(messageCompress.unpack(msg));
+                    message.time = thisInstance.time;
                 }
                 catch (e)
                 {
@@ -1025,6 +1078,7 @@ function ClientConnected(socket, namespace, instancedata)
                         //we do need to keep some state data, and note that the node is gone
                         thisInstance.state.deleteNode(message.node)
                         thisInstance.Log("deleted " + node.id, 2);
+                        xapi.sendStatement(socket.loginData.UID, xapi.verbs.derezzed, message.node, node.properties ? node.properties.DisplayName : "",null,thisInstance.id);
                     }
                     else
                     {
@@ -1061,6 +1115,7 @@ function ClientConnected(socket, namespace, instancedata)
                             childComponent.properties = {};
                         fixIDs(node.children[childID]);
                         thisInstance.Log("created " + childID, 2);
+                        xapi.sendStatement(socket.loginData.UID, xapi.verbs.rezzed, childID,childComponent.properties.DisplayName,null,thisInstance.id);
                     }
                     else
                     {
@@ -1075,7 +1130,7 @@ function ClientConnected(socket, namespace, instancedata)
                 {
                     var client = thisInstance.clients[i];
                     //if the message was get state, then fire all the pending messages after firing the setState
-                    if (message.action == "getState")
+                    if (message.action == "getState" &&  client.pending == true)
                     {
                         thisInstance.Log('Got State', 2);
                         if (thisInstance.requestTimer)
@@ -1088,6 +1143,9 @@ function ClientConnected(socket, namespace, instancedata)
                             "parameters": ["State Received, Transmitting"],
                             "time": thisInstance.getStateTime
                         })));
+                        
+                        
+                        
                         client.emit('message', messageCompress.pack(JSON.stringify(
                         {
                             "action": "setState",
@@ -1105,7 +1163,7 @@ function ClientConnected(socket, namespace, instancedata)
                     {
                         //here we deal with continual resycn messages
                         var node = message.result.node;
-                        if (node)
+                        if (false && !global.configuration.disableResync && node)
                         {
                             if (message.time >= thisInstance.time)
                             {
@@ -1114,13 +1172,15 @@ function ClientConnected(socket, namespace, instancedata)
                                 {
                                     "action": "resyncNode",
                                     "parameters": [node.id, node],
-                                    "time": thisInstance.time
+                                    "time": thisInstance.time, //process before any ticks
+                                    "origin":"reflector"
                                 });
+                               
                             }
                             else
                             {
-                                //logger.info('rejecting resync data from the past');
-                                //logger.info(message.time,thisInstance.time);
+                                logger.info('rejecting resync data from the past');
+                                logger.info(message.time,thisInstance.time);
                             }
                         }
                     }
@@ -1164,16 +1224,28 @@ function ClientConnected(socket, namespace, instancedata)
         //When a client disconnects, go ahead and remove the instance data
         socket.on('disconnect', function()
         {
-            console.log(socket.id);
-            console.log(Object.keys(thisInstance.clients));
-            delete thisInstance.clients[socket.id];
-            console.log(thisInstance.clientCount());
+            logger.info(socket.id);
+            logger.info(Object.keys(thisInstance.clients));
+            thisInstance.removeClient(socket);
+            logger.info(thisInstance.clientCount());
+            DAL.getInstance(thisInstance.id,function(instancedata)
+            {
+                if(!instancedata)
+                {
+                    instancedata = {};
+                    instancedata.title = namespace;
+                    instancedata.description = '';
+                }
+                xapi.sendStatement(socket.loginData.UID, xapi.verbs.left, thisInstance.id,instancedata.title,instancedata.description,thisInstance.id);    
+            });
+            
+
             if (thisInstance.clientCount() == 0)
                 {
-                    clearInterval(thisInstance.timerID);
-                    console.log("timer is " + thisInstance.timerID)
+                    thisInstance.shutdown();
+                  
                     RunningInstances.remove(thisInstance.id);
-                    console.log('Shutting down ' + namespace, 2)
+                    
                 }
             else
             {    
@@ -1239,3 +1311,10 @@ function ClientConnected(socket, namespace, instancedata)
 exports.WebSocketConnection = WebSocketConnection;
 exports.setDAL = setDAL;
 exports.startup = startup;
+exports.closeInstance = function(id)
+{
+    var instance = RunningInstances.get(id);
+    if(instance)
+        instance.shutdown();
+    RunningInstances.remove(instance);
+}

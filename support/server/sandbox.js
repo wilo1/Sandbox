@@ -8,23 +8,9 @@ var libpath = require('path'),
     mime = require('mime'),
     YAML = require('js-yaml');
 var logger = require('./logger');
-// Read configuration settings early so we can use appPath
-var configSettings;
 
-try {
-    configSettings = JSON.parse(fs.readFileSync('./config.json').toString());
-} catch (e) {
-    configSettings = {};
-    logger.error("Error: Unable to load config file");
-    logger.info(e.message);
-}
 
-appPath = configSettings.appPath ? configSettings.appPath : '/adl/sandbox';
-global.appPath = appPath;
-logger.info('Set appPath to ' + global.appPath);
 
-//save configuration into global scope so other modules can use.
-global.configuration = configSettings;
 
 var SandboxAPI = require('./sandboxAPI'),
     Shell = require('./ShellInterface'),
@@ -123,9 +109,15 @@ function startVWF() {
     async.series([
 
             function readconfig(cb) {
+                var configSettings;
+                var p = process.argv.indexOf('-config');
+
+                //This is a bit ugly, but it does beat putting a ton of if/else statements everywhere
+                var config = p >= 0 ? (process.argv[p + 1]) : './config.json';
+                logger.warn('loading config from ' + config);
                 //start the DAL, load configuration file
                 try {
-                    configSettings = JSON.parse(fs.readFileSync('./config.json').toString());
+                    configSettings = JSON.parse(fs.readFileSync(config).toString());
                     SandboxAPI.setAnalytics(configSettings.analytics);
                     logger.info('Configuration read.')
                 } catch (e) {
@@ -141,58 +133,139 @@ function startVWF() {
 
 
                 //This is a bit ugly, but it does beat putting a ton of if/else statements everywhere
-                port = p >= 0 ? parseInt(process.argv[p + 1]) : (configSettings.port ? configSettings.port : 3000);
+                port = p >= 0 ? parseInt(process.argv[p + 1]) : (global.configuration.port ? global.configuration.port : 3000);
+                global.configuration.port = port;
+
+                var p = process.argv.indexOf('-DB');
+                var DB_driver = p >= 0 ? (process.argv[p + 1]) : (global.configuration.DB_driver ? global.configuration.DB_driver : './DB_nedb.js');
+                global.configuration.DB_driver = DB_driver;
+                
 
                 p = process.argv.indexOf('-sp');
-                sslPort = p >= 0 ? parseInt(process.argv[p + 1]) : (configSettings.sslPort ? configSettings.sslPort : 443);
+                sslPort = p >= 0 ? parseInt(process.argv[p + 1]) : (global.configuration.sslPort ? global.configuration.sslPort : 443);
+                global.configuration.sslPort = sslPort;
 
                 p = process.argv.indexOf('-d');
-                datapath = p >= 0 ? process.argv[p + 1] : (configSettings.datapath ? libpath.normalize(configSettings.datapath) : libpath.join(__dirname, "../../data"));
+                datapath = p >= 0 ? process.argv[p + 1] : (global.configuration.datapath ? libpath.normalize(global.configuration.datapath) : libpath.join(__dirname, "../../data"));
                 global.datapath = datapath;
+                global.configuration.datapath = datapath;
 
                 logger.initFileOutput(datapath);
 
                 p = process.argv.indexOf('-ls');
-                global.latencySim = p >= 0 ? parseInt(process.argv[p + 1]) : (configSettings.latencySim ? configSettings.latencySim : 0);
+                global.latencySim = p >= 0 ? parseInt(process.argv[p + 1]) : (global.configuration.latencySim ? global.configuration.latencySim : 0);
 
                 if (global.latencySim > 0)
                     logger.info('Latency Sim = ' + global.latencySim);
+                global.configuration.latencySim = global.latencySim;
 
                 p = process.argv.indexOf('-l');
-                logger.logLevel = p >= 0 ? process.argv[p + 1] : (configSettings.logLevel ? configSettings.logLevel : 1);
+                logger.logLevel = p >= 0 ? process.argv[p + 1] : (global.configuration.logLevel ? global.configuration.logLevel : 1);
                 logger.info('LogLevel = ' + logger.logLevel, 0);
+                global.configuration.logLevel = logger.logLevel;
 
                 adminUID = 'admin';
 
                 p = process.argv.indexOf('-a');
-                adminUID = p >= 0 ? process.argv[p + 1] : (configSettings.admin ? configSettings.admin : adminUID);
+                adminUID = p >= 0 ? process.argv[p + 1] : (global.configuration.admin ? global.configuration.admin : adminUID);
+                global.configuration.adminUID = adminUID;
 
-                FileCache.enabled = process.argv.indexOf('-nocache') >= 0 ? false : !configSettings.noCache;
+                p = process.argv.indexOf('-cluster');
+                var cluster = p >= 0 ? true : false;
+                global.configuration.cluster = cluster;
+
+                //use this flag to quit the process after the build step
+                p = process.argv.indexOf('-exit');
+                var exit = p >= 0 ? true : false;
+                global.configuration.exit = exit;
+
+                FileCache.enabled = process.argv.indexOf('-nocache') >= 0 ? false : !global.configuration.noCache;
                 if (!FileCache.enabled) {
                     logger.info('server cache disabled');
                 }
+                global.configuration.FileCache = FileCache.enabled;
 
-                FileCache.minify = process.argv.indexOf('-min') >= 0 ? true : !!configSettings.minify;
-                compile = process.argv.indexOf('-compile') >= 0 ? true : !!configSettings.compile;
+                FileCache.minify = process.argv.indexOf('-min') >= 0 ? true : !!global.configuration.minify;
+
+                //treat build and compile as the same.
+                compile = Math.max(process.argv.indexOf('-compile'),process.argv.indexOf('-build')) >= 0 ? true : !!global.configuration.compile;
                 if (compile) {
                     logger.info('Starting compilation process...');
                 }
+                global.configuration.minify = FileCache.minify;
+                global.configuration.compile = FileCache.compile;
 
-                var versioning = process.argv.indexOf('-cc') >= 0 ? true : !!configSettings.useVersioning;
+                var versioning = process.argv.indexOf('-cc') >= 0 ? true : !!global.configuration.useVersioning;
                 if (versioning) {
-                    global.version = configSettings.version ? configSettings.version : global.version;
+                    global.version = global.configuration.version ? global.configuration.version : global.version;
                     logger.info('Versioning is on. Version is ' + global.version);
                 } else {
                     logger.info('Versioning is off.');
                     delete global.version;
                 }
+                global.configuration.versioning = versioning;
+                global.configuration.version = global.version;
+
+                //set the default URL for the site
+                p = process.argv.indexOf('-ap');
+                appPath = global.appPath = p >= 0 ? (process.argv[p + 1]) : (global.configuration.appPath ? global.configuration.appPath : '/adl/sandbox');
+                if(appPath.length < 3)
+                {
+                    logger.error('appPath too short. Use at least 2 characters plus the slash');
+                    process.exit();
+                }
+
+                global.configuration.appPath = global.appPath;
+                logger.info('Set appPath to ' + global.appPath);
+
 
                 var clean = process.argv.indexOf('-clean') > 0 ? true : false;
+                global.configuration.clean = clean;
                 if (clean) {
                     var path = libpath.normalize('../../build/'); //trick the filecache
                     path = libpath.resolve(__dirname, path);
                     fs.remove(path, cb);
                 } else
+                    cb();
+            },
+
+			function registerAssetServer(cb)
+			{
+				if( global.configuration.hostAssets )
+				{
+					var datadir = libpath.resolve(__dirname, '..','..', global.configuration.assetDataDir);
+
+					fs.mkdirs(datadir, function()
+					{
+						global.configuration.assetAppPath = '/sas';
+
+						var assetServer = require('SandboxAssetServer');
+						app.use(global.configuration.assetAppPath, assetServer({
+							dataDir: libpath.resolve(__dirname, '..','..', global.configuration.assetDataDir),
+							sessionCookieName: 'session',
+							sessionHeader: global.configuration.assetSessionHeader,
+							sessionSecret: global.configuration.sessionSecret
+						}));
+						logger.info('Hosting assets locally at', global.configuration.assetAppPath);
+					});
+				}
+				else {
+					logger.info('Hosting assets remotely at', global.configuration.remoteAssetServerURL);
+				}
+				cb();
+			},
+
+            function initLandingRoutes(cb)
+            {
+                    if(!global.configuration.branding)
+                    {
+                        global.configuration.branding = {};
+                        global.configuration.branding.tagline = "An <a href='https://github.com/adlnet/sandbox/'> open source project</a> from <a href='http://www.adlnet.gov'>ADL</a>"
+                        global.configuration.branding.logo = '<a href="/adl/sandbox"><div style=" float:left;"><img src="/adl/sandbox/img/VWS_Logo.png"></div><div style=" margin-left:10px;margin-top:50px;float:left;"><img src="/adl/sandbox/img/VW_text.png"><img src="/adl/sandbox/img/Sandbox_text.png"></div></a>'
+                        global.configuration.branding.title = "Virtual World Sandbox - Virtual Worlds in your browser";
+                        global.configuration.branding.footer = '<br/><p>The views expressed on this website in the form of documentation, blog articles, or tutorials do not necessarily represent the views or policies of ADL or the U.S. Government.</p><p>Sponsored by the Office of the Under Secretary of Defense for Personnel and Readiness (OUSD P&amp;R).This is an official website of the U.S. Government (c)2014 Advanced Distributed Learning (ADL).</p><a href="{{root}}/test">Test Browser Support</a> '
+                    }
+                    Landing.init();
                     cb();
             },
             function registerErrorHandler(cb) {
@@ -317,6 +390,7 @@ function startVWF() {
                         baseUrl: './support/client/lib/',
                         name: './load',
                         out: './build/load.js',
+                        wrapShim:'true',
                         optimize: "uglify",
                         onBuildWrite: function(name, path, contents) {
                             logger.info('Writing: ' + name);
@@ -336,6 +410,16 @@ function startVWF() {
 
                 }
             },
+            function exitProcessIfDefined(cb)
+            {
+                if (!global.configuration.exit) {
+                    cb();
+                    return;
+                }else
+                {
+                    process.exit();
+                }
+            },
             function setupPassport(cb) {
                 // used to serialize the user for the session
                 passport.serializeUser(function(user, done) {
@@ -345,7 +429,7 @@ function startVWF() {
                         return;
                     }
 
-                    DAL.getUser(user.id, function(user) {
+                  //  DAL.getUser(user.id, function(user) {
                         if (!user) {
                             done(null, null)
                             return;;
@@ -359,14 +443,14 @@ function startVWF() {
                         userStorage.Password = user.Password;
 
                         done(null, userStorage);
-                    });
+                  //  });
                 });
 
                 // used to deserialize the user
                 passport.deserializeUser(function(userStorage, done) {
-                    DAL.getUser(userStorage.id, function(user) {
-                        done(null, user);
-                    });
+                  //  DAL.getUser(userStorage.id, function(user) {
+                        done(null, userStorage);
+                  //  });
                 });
 
                 passport.use(new LocalStrategy(
@@ -497,7 +581,7 @@ function startVWF() {
             function startupDAL(cb) {
                 DAL.setDataPath(datapath);
                 SandboxAPI.setDataPath(datapath);
-                Landing.setDocumentation(configSettings);
+                Landing.setDocumentation(global.configuration);
                 logger.info('DAL Startup');
                 DAL.startup(cb);
             },
@@ -526,7 +610,7 @@ function startVWF() {
                     return;
                 }
                 app.set('layout', 'layout');
-                app.set('views', __dirname + '/../../public' + global.appPath + '/views');
+                app.set('views', __dirname + '/../../public/adl/sandbox/views');
                 app.set('view engine', 'html');
                 app.engine('.html', require('hogan-express'));
 
@@ -544,6 +628,8 @@ function startVWF() {
                 // we append a version to the front if every request to keep the clients fresh
                 // otherwise, a user would have to know to refresh the cache every time we release
                 app.use(ServerFeatures.versioning);
+
+                app.use(ServerFeatures.customAppUrl);
 
                 //find pretty world URL's, and redirect to the non-pretty url for the world
                 app.use(ServerFeatures.prettyWorldURL);
@@ -568,12 +654,17 @@ function startVWF() {
                 app.use(require('cookie-parser')());
 
                 app.use(i18n.handle);
-                app.use(require('connect').cookieSession({
-                    key: global.configuration.sessionKey ? global.configuration.sessionKey : 'virtual',
+                app.use(require("client-sessions")({
+                    
                     secret: global.configuration.sessionSecret ? global.configuration.sessionSecret : 'unsecure cookie secret',
                     cookie: {
-                        maxAge: global.configuration.sessionTimeoutMs ? global.configuration.sessionTimeoutMs : 10000000
-                    }
+                        maxAge: global.configuration.sessionTimeoutMs ? global.configuration.sessionTimeoutMs : 10000000,
+                        httpOnly: !!global.configuration.hostAssets
+                    },
+                     cookieName: 'session', // cookie name dictates the key name added to the request object
+  
+                     duration: 24 * 60 * 60 * 1000, // how long the session will stay valid in ms
+                     activeDuration: 24*60*60*1000 //
                 }));
 
                 app.use(passport.initialize());
@@ -594,14 +685,14 @@ function startVWF() {
                     });
 
                 if (global.configuration.facebook_app_id) {
-                    app.get(global.appPath + '/auth/facebook',
+                    app.get("/adl/sandbox" + '/auth/facebook',
                         passport.authenticate('facebook', {
                             scope: 'email'
                         }));
 
-                    app.get(global.appPath + '/auth/facebook/callback',
+                    app.get("/adl/sandbox" + '/auth/facebook/callback',
                         passport.authenticate('facebook', {
-                            failureRedirect: global.appPath + '/login'
+                            failureRedirect: "/adl/sandbox" + '/login'
                         }),
                         function(req, res) {
                             handleRedirectAfterLogin(req, res);
@@ -610,11 +701,11 @@ function startVWF() {
 
                 if (global.configuration.twitter_consumer_key) {
                     // Twitter authentication routing
-                    app.get(global.appPath + '/auth/twitter', passport.authenticate('twitter'));
+                    app.get("/adl/sandbox" + '/auth/twitter', passport.authenticate('twitter'));
 
-                    app.get(global.appPath + '/auth/twitter/callback',
+                    app.get("/adl/sandbox" + '/auth/twitter/callback',
                         passport.authenticate('twitter', {
-                            failureRedirect: global.appPath + '/login'
+                            failureRedirect: "/adl/sandbox" + '/login'
                         }),
                         function(req, res) {
                             handleRedirectAfterLogin(req, res);
@@ -622,14 +713,14 @@ function startVWF() {
                 }
                 if (global.configuration.google_client_id) {
                     // Google authentication routing
-                    app.get(global.appPath + '/auth/google',
+                    app.get("/adl/sandbox" + '/auth/google',
                         passport.authenticate('google', {
                             scope: ['profile', 'email']
                         }));
 
-                    app.get(global.appPath + '/auth/google/callback',
+                    app.get("/adl/sandbox" + '/auth/google/callback',
                         passport.authenticate('google', {
-                            failureRedirect: global.appPath + '/login'
+                            failureRedirect: "/adl/sandbox" + '/login'
                         }),
                         function(req, res) {
                             handleRedirectAfterLogin(req, res);
@@ -642,35 +733,46 @@ function startVWF() {
                     res.redirect('/');
                 });
 
-                app.get(global.appPath + '/:page([a-zA-Z\\0-9\?/]*)', Landing.redirectPasswordEmail);
-                app.get(global.appPath, Landing.redirectPasswordEmail);
+                app.get("/adl/sandbox" + '/:page([a-zA-Z\\0-9\?/]*)', Landing.redirectPasswordEmail);
+                app.get("/adl/sandbox", Landing.redirectPasswordEmail);
 
-                app.get(global.appPath + '/help', Landing.help);
-                app.get(global.appPath + '/help/:page([a-zA-Z]+)', Landing.help);
-                app.get(global.appPath + '/world/:page([_a-zA-Z0-9]+)', Landing.world);
-                app.get(global.appPath + '/searchResults/:term([^/]+)/:page([0-9]+)', Landing.searchResults);
-                app.get(global.appPath + '/newWorlds', Landing.newWorlds);
-                app.get(global.appPath + '/allWorlds/:page([0-9]+)', Landing.allWorlds);
-                app.get(global.appPath + '/myWorlds/:page([0-9]+)', Landing.myWorlds);
-                app.get(global.appPath + '/featuredWorlds/:page([0-9]+)', Landing.featuredWorlds);
-                app.get(global.appPath + '/activeWorlds/:page([0-9]+)', Landing.activeWorlds);
-                app.get(global.appPath, Landing.generalHandler);
-                app.get(global.appPath + '/:page([a-zA-Z/]+)', Landing.generalHandler);
-                app.get(global.appPath + '/stats', Landing.statsHandler);
-                app.get(global.appPath + '/createNew/:page([0-9/]+)', Landing.createNew);
-                app.get(global.appPath + '/createNew2/:template([_a-zA-Z0-9/]+)', Landing.createNew2);
+                app.get("/adl/sandbox" + '/help', Landing.help);
+                app.get("/adl/sandbox" + '/help/:page([a-zA-Z]+)', Landing.help);
+                app.get("/adl/sandbox" + '/world/:page([_a-zA-Z0-9]+)', Landing.world);
+                app.get("/adl/sandbox" + '/searchResults/:term([^/]+)/:page([0-9]+)', Landing.searchResults);
+                app.get("/adl/sandbox" + '/newWorlds', Landing.newWorlds);
+                app.get("/adl/sandbox" + '/allWorlds/:page([0-9]+)', Landing.allWorlds);
+                app.get("/adl/sandbox" + '/myWorlds/:page([0-9]+)', Landing.myWorlds);
+                app.get("/adl/sandbox" + '/featuredWorlds/:page([0-9]+)', Landing.featuredWorlds);
+                app.get("/adl/sandbox" + '/activeWorlds/:page([0-9]+)', Landing.activeWorlds);
+                app.get("/adl/sandbox", Landing.generalHandler);
+                app.get("/adl/sandbox" + '/:page([a-zA-Z/]+)', Landing.generalHandler);
+                app.get("/adl/sandbox" + '/stats', Landing.statsHandler);
+                app.get("/adl/sandbox" + '/createNew/:page([0-9/]+)', Landing.createNew);
+                app.get("/adl/sandbox" + '/createNew2/:template([_a-zA-Z0-9/]+)', Landing.createNew2);
 
-                app.get(global.appPath + '/vwf.js', Landing.serveVWFcore);
+                app.get("/adl/sandbox" + '/vwf.js', Landing.serveVWFcore);
 
-                app.post(global.appPath + '/admin/:page([a-zA-Z]+)', Landing.handlePostRequest);
-                app.post(global.appPath + '/data/:action([a-zA-Z_]+)', Landing.handlePostRequest);
+                app.post("/adl/sandbox" + '/admin/:page([a-zA-Z]+)', Landing.handlePostRequest);
+                app.post("/adl/sandbox" + '/data/:action([a-zA-Z_]+)', Landing.handlePostRequest);
 
                 app.use(appserver.admin_instances);
                 app.use(appserver.routeToAPI);
                 //The file handleing logic for vwf engine files
                 app.use(appserver.handleRequest);
+                //manual 404
+                app.use(function(request,response)
+                    {
+                        response.writeHead(404,
+                        {
+                            
+                        });
+                        response.write('Cannot GET ' + request.url)
+                        response.end();
 
-                if (global.configuration.pfx) {
+                    });
+
+                if (global.configuration.pfx && !global.configuration.cluster) {
                     listen = spdy.createServer({
                         pfx: fs.readFileSync(global.configuration.pfx),
                         passphrase: global.configuration.pfxPassphrase,
@@ -708,6 +810,16 @@ function startVWF() {
             function startReflector(cb) {
                 Shell.StartShellInterface();
                 reflector.startup(listen);
+                cb();
+            },
+            function messageParentProcess(cb)
+            {
+                if(global.configuration.cluster)
+                {
+                    var message = {};
+                    message.type = 'ready';
+                    process.send(message);
+                }
                 cb();
             }
         ],

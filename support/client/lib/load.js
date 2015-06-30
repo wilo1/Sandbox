@@ -8,7 +8,7 @@ if (false) {
         "async.js", 
         "crypto.js", 
         "md5.js",  
-        
+        "URI.js",
         "./vwf/view/editorview/lib/jquery.transit.min.js", 
         "./vwf/view/editorview/lib/jquery-mousewheel.js", 
         "./vwf/view/editorview/lib/jquery-scrollpane.min.js", 
@@ -54,16 +54,17 @@ if (!window.jQuery) {
 
             require(["../vwf/view/editorview/lib/jquery-ui-1.10.3.custom.min.js", "md5.js", "closure/deps.js", "../vwf/view/editorview/lib/jquery.transit.min.js", "../vwf/view/editorview/lib/jquery-mousewheel.js", "../vwf/view/editorview/lib/jquery-scrollpane.min.js", "../vwf/model/threejs/three.js", "closure/vec/float32array.js", "closure/vec/float64array.js"],
                 function() {
-                    require(["../vwf/model/threejs/DDSLoader.js", "../vwf/model/threejs/ColladaLoader.js", "../vwf/model/threejs/UTF8JSONLoader.js", "../vwf/view/localization/i18next-1.7.2.min.js", "../vwf/view/localization/cookies.js", "compatibility.js", "closure/vec/vec.js", "../vwf.js","Class.create.js"],
+                    require(["../vwf/model/threejs/DDSLoader.js" ,"../URI.js", "../vwf/model/threejs/ColladaLoader.js", "../vwf/model/threejs/UTF8JSONLoader.js", "../vwf/view/localization/i18next-1.7.2.min.js", "../vwf/view/localization/cookies.js", "compatibility.js", "closure/vec/vec.js", "../vwf.js","Class.create.js"],
                         function() {
                             require(["closure/vec/vec3.js", "closure/vec/vec4.js"],
                                 function() {
-                                    require(["closure/vec/mat4.js", "closure/vec/quaternion.js", "alea.js", "mash.js", "jquery-encoder-0.1.0.js", "rAF.js", "centerinclient.js"],
+                                    require(["closure/vec/mat4.js", "closure/vec/quaternion.js", "alea.js", "mash.js", "jquery-encoder-0.1.0.js", "rAF.js", "centerinclient.js",'vwf/view/editorview/lib/alertify.js-0.3.9/src/alertify'],
                                         function() {
+                                            window.alertify = require('vwf/view/editorview/lib/alertify.js-0.3.9/src/alertify');
                                             require(["boot"], function(boot) {
                                                 //ok, the loading stage is complete - fire up some initial gui logic
 
-                                                startup(boot);
+                                                promptTest(boot);
                                             })
                                         })
                                 })
@@ -78,12 +79,34 @@ if (!window.jQuery) {
     })
 }
 
+function promptTest(boot)
+{
+
+       
+        var settings = localStorage['sandboxPreferences'] && JSON.parse(window.localStorage['sandboxPreferences'])
+        if(!settings || !settings.compatability.satisfied)
+        {
+            alertify.confirm("It looks like you haven't been here before. It's best if you take the compatability test first. Would you like to test your browser now?",
+                function(ok)
+                {   
+                    if(ok)
+                    window.location.pathname = '/adl/sandbox/test';
+                    else
+                        startup(boot);
+                })
+
+        }else
+        startup(boot);
+
+
+}
+
 //ok, at this point, we have all the libraries. Let's do a bit of gui logic and setup
 function startup(boot) {
-    //TODO: Try to read this and set from config.json in the build process
-    //window.appPath = "/adl/sandbox/";
-    window.appPath = "/adl/sandbox/";
-
+    
+    //read this from the server at runtime
+    window.appPath = $.trim($.ajax({url:"./vwfdatamanager.svc/appPath",async:false}).responseText) +"/";
+    
     $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
 
         var p = window.location.pathname;

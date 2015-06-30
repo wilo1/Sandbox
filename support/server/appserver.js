@@ -126,7 +126,7 @@ function RedirectToInstance(request, response, appname, newid) {
     newid = newid.replace(/\/\//g, '/');
     newid = newid.replace(/\/\/\//g, '/');
 
-
+    newid = newid.replace('/adl/sandbox',global.appPath);
     redirect(newid, response);
 }
 
@@ -314,6 +314,7 @@ function handleRequest(request, response, next) {
     var uri = URL.pathname.replace(safePathRE);
     
     if (URL.pathname == '/' || URL.pathname == '') {
+        console.log(global.appPath + '/');
         redirect(global.appPath + '/', response);
         return;
     }
@@ -549,7 +550,7 @@ function handleRequest(request, response, next) {
             }
         ],
         function appserver_waterfall_complete(err, results) {
-
+            
 
         });
 } // close onRequest

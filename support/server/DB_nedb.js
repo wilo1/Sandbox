@@ -8,7 +8,11 @@ var GUID = require('node-uuid').v4;
 var logger = require('./logger');
 exports.new = function(DBTablePath, cb) {
 
-    return (function() {
+   // if we're clustering, then load the cluster driver, otherwise load the local driver
+    if(global.configuration.cluster)
+        return require('./DB_nedb_cluster.js').new(DBTablePath,cb);
+    else 
+        return (function() {
         var DB = null;
         var proxy = {
             DBTablePath: DBTablePath,
@@ -66,11 +70,18 @@ exports.new = function(DBTablePath, cb) {
                     cb();
                 })
             },
-            find: function(key, data, cb) {
-                DB.find(key, data, cb);
+            find: function(key, cb) {
+                DB.find(key, cb);
             },
             find_raw: function(key, cb) {
                 return DB.find(key, cb);
+            },
+            find_advanced:function(query,start,sort,limit,cb)
+            {
+                DB.find(query).sort(sort).skip(start).limit(limit).exec(function(err,data)
+                    {
+                        cb(err,data);
+                    });
             },
             remove: function(key, cb) {
                 this.get(key, function(err, doc, key) {
