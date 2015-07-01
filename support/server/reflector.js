@@ -245,6 +245,12 @@ function ServeSinglePlayer(socket, namespace, instancedata)
                 "time": 0
             }));
             socket.emit('message', joinMessage);
+            socket.emit('message', messageCompress.pack(JSON.stringify(
+                    {
+                        "action": "startSimulating",
+                        "parameters": ["index-vwf"],
+                        "time": 0
+                    })));
             socket.emit('message',
             {
                 "action": "goOffline",
