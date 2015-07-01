@@ -12,6 +12,42 @@ var options = null;
 
 importScripts("/socket.io/socket.io.js")
 var socket;
+
+var socketBytesSentLast = 0;
+var socketBytesSent= 0;
+var socketBytesReceivedLast = 0;
+var socketBytesReceived= 0;
+
+function getUTF8Length(string) {
+    var utf8length = 0;
+    for (var n = 0; n < string.length; n++) {
+        var c = string.charCodeAt(n);
+        if (c < 128) {
+            utf8length++;
+        }
+        else if((c > 127) && (c < 2048)) {
+            utf8length = utf8length+2;
+        }
+        else {
+            utf8length = utf8length+3;
+        }
+    }
+    return utf8length;
+ }
+
+function log(s)
+{
+	this.postMessage({type:CONSOLE,message:s});
+}
+function socketMonitorInterval()
+{
+    socketBytesSentLast = socketBytesSent;
+    socketBytesSent = 0;
+    socketBytesReceivedLast = socketBytesReceived;
+    socketBytesReceived = 0;
+    log(socketBytesSentLast/10000 + 'KBps up' + socketBytesReceivedLast/10000 +'KBps down');   
+}
+
 function onEvent(event,param)
 {
 	this.postMessage({type:EVENT,event:{name:event,param:param}});
@@ -30,10 +66,12 @@ onmessage = function(e)
 		socket = io(host,options);
 		socket.on("message",function(e)
 		{
+			socketBytesReceived += 34 + getUTF8Length(message);
 			onEvent("message",e);
 		})
 		socket.on("connect",function(e)
 		{
+			setInterval(socketMonitorInterval,10000);
 			postMessage({type:ID,id:this.id})
 			onEvent("connect",e);
 		})
@@ -49,6 +87,7 @@ onmessage = function(e)
 	}
 	if(message.type == SEND)
 	{
+		socketBytesSent += 34 + getUTF8Length(message);
 		socket.send(message.message)
 	}
 

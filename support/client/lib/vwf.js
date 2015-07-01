@@ -26,22 +26,7 @@
 
     window.console && console.debug && console.debug( "loading vwf" );
 
-    function getUTF8Length(string) {
-    var utf8length = 0;
-    for (var n = 0; n < string.length; n++) {
-        var c = string.charCodeAt(n);
-        if (c < 128) {
-            utf8length++;
-        }
-        else if((c > 127) && (c < 2048)) {
-            utf8length = utf8length+2;
-        }
-        else {
-            utf8length = utf8length+3;
-        }
-    }
-    return utf8length;
- }
+    
 
     window.vwf = new function() {
 
@@ -836,7 +821,7 @@
 
         socket.on( "connect", function() {
 
-            window.setInterval(vwf.socketMonitorInterval.bind(vwf),10000);
+           
             vwf.logger.infox( "-socket", "connected" );
 
            
@@ -858,7 +843,7 @@
             // vwf.logger.debugx( "-socket", "message", message );
 
             try {   
-                vwf.socketBytesReceived += 34 + getUTF8Length(message);
+                
                 if ( isSocketIO07() ) {
 
                     if(message.constructor === String)
@@ -1011,7 +996,7 @@ this.send = function( nodeID, actionName, memberName, parameters, when, callback
         // Send the message.
         var message = JSON.stringify( fields );
         message = messageCompress.pack(message);
-        vwf.socketBytesSent += 34 + getUTF8Length(message);
+        
         socket.send( message );
 
     } else {
@@ -1065,7 +1050,7 @@ this.respond = function( nodeID, actionName, memberName, parameters, result ) {
 
         var message = JSON.stringify( fields );
         message = messageCompress.pack(message);
-        vwf.socketBytesSent += 34 + getUTF8Length(message);
+        
         socket.send( message );
 
     } else {
@@ -2227,19 +2212,7 @@ this.promptSaveState = function()
 {
     _DataManager.saveToServer();
 }
-this.socketBytesSentLast = 0;
-this.socketBytesSent= 0;
-this.socketBytesReceivedLast = 0;
-this.socketBytesReceived= 0;
-this.socketMonitorInterval = function()
-{
-    this.socketBytesSentLast = this.socketBytesSent;
-    this.socketBytesSent = 0;
-    this.socketBytesReceivedLast = this.socketBytesReceived;
-    this.socketBytesReceived = 0;
-    console.log(this.socketBytesSentLast/10000 + 'KBps up',this.socketBytesReceivedLast/10000 +'KBps down');
-    
-},
+
 this.saveState = function(data)
 {
     var fields = {
@@ -2254,7 +2227,7 @@ this.saveState = function(data)
         var message = JSON.stringify( fields );
         message = messageCompress.pack(message);
 
-        vwf.socketBytesSent += 34 + getUTF8Length(message);
+      
 
         socket.send( message );
     }
