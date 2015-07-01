@@ -522,14 +522,15 @@ function handleRequest(request, response, next) {
                     DAL.getInstance(instanceName, function(data) {
                         if (data) {
                             //ServeFile(request, filename, response, URL);
-							ServeTemplate(request,response, 'jade:index', data, URL);
+                            ServeTemplate(request,response, 'jade:index', data, URL);
                             callback(true, true);
                             return;
                         } else {
 
                             require('./examples.js').getExampleData(instanceName, function(data) {
                                 if (data) {
-                                    ServeFile(request, filename, response, URL);
+                                    //ServeFile(request, filename, response, URL);
+                                    ServeTemplate(request,response, 'jade:index', data, URL);
                                     callback(true, true);
                                     return;
                                 } else {
