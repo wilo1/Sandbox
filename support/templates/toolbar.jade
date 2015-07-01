@@ -2,16 +2,16 @@ mixin toolbar_head
 	block
 
 mixin toolbar_body
-	//#toolbar
+
 	#toolbar(ng-controller='ToolbarController', drag-scroll, style='display:none')
 
 		//#MenuLogInicon.icon.login.icondisabled(src='login', title='Log In')
 		.icon.logout(title='Leave World', ng-click='triggerMenu("MenuLogOut")')
-		.seperator
+		.separator
 
 		.icon.undo(title='Undo (ctrl-z)')
 		.icon.redo(title='Redo (ctrl-y)')
-		.seperator
+		.separator
 
 		.icon.move(toolbar-select='xfSelected = "move"', title='Move Tool', ng-click='triggerMenu("MenuMove")'
 			ng-class='{"icondisabled": !fields.selectedNode, "iconselected": xfSelected === "move"}')
@@ -19,29 +19,29 @@ mixin toolbar_body
 			ng-class='{"icondisabled": !fields.selectedNode, "iconselected": xfSelected === "rotate"}')
 		.icon.scale(toolbar-select='xfSelected = "scale"', title='Scale Tool', ng-click='triggerMenu("MenuScale")'
 			ng-class='{"icondisabled": !fields.selectedNode, "iconselected": xfSelected === "scale"}')
-		.seperator
+		.separator
 
 		.icon.worldspace(title='Use World Coordinates', ng-click='triggerMenu("MenuWorld")'
 			ng-class='{"icondisabled": !fields.selectedNode, "iconselected": fields.coordSpaceSelected === "world"}')
 		.icon.localspace(title='Use Local Coordinates', ng-click='triggerMenu("MenuLocal")'
 			ng-class='{"icondisabled": !fields.selectedNode, "iconselected": fields.coordSpaceSelected === "local"}')
-		.seperator
+		.separator
 
 		.icon.pick(title='Select by clicking', ng-click='triggerMenu("MenuSelectPick")')
 		.icon.selectnone(title='Select None', ng-click='triggerMenu("MenuSelectNone")')
 		.icon.up(title='Select Parent', ng-click='triggerMenu("MenuSelectParent")', ng-class='{"icondisabled": !fields.selectedNode}')
 		.icon.target(title='Focus to selected object', ng-click='triggerMenu("MenuFocusSelected")', ng-class='{"icondisabled": !fields.selectedNode}')
-		.seperator
+		.separator
 
 		.icon.copy(title='Copy', ng-click='triggerMenu("MenuCopy")', ng-class='{"icondisabled": !fields.selectedNode}')
 		.icon.paste(title='Paste', ng-click='triggerMenu("MenuPaste")')
 		.icon.duplicate(title='Duplicate', ng-click='triggerMenu("MenuDuplicate")', ng-class='{"icondisabled": !fields.selectedNode}')
 		.icon.delete(title='Delete', ng-click='triggerMenu("MenuDelete")', ng-class='{"icondisabled": !fields.selectedNode}')
-		.seperator
+		.separator
 
 		.icon.link(title='Link', ng-click='triggerMenu("MenuSetParent")', ng-class='{"icondisabled": !fields.selectedNode}')
 		.icon.unlink(title='Unlink', ng-click='triggerMenu("MenuRemoveParent")', ng-class='{"icondisabled": !fields.selectedNode}')
-		.seperator
+		.separator
 
 		.icon.camera(title='Orbit Camera', ng-click='triggerMenu("MenuCameraOrbit")', toolbar-select='cameraSelected = "orbit"'
 			ng-class='{"iconselected": cameraSelected === "orbit"}')
@@ -51,14 +51,14 @@ mixin toolbar_body
 			ng-class='{"iconselected": cameraSelected === "navigate"}')
 		.icon.free(title='Free Camera', ng-click='triggerMenu("MenuCameraFree")', toolbar-select='cameraSelected = "free"'
 			ng-class='{"iconselected": cameraSelected === "free"}')
-		.seperator
+		.separator
 
 		.icon.sphere(title='Create Sphere', ng-click='triggerMenu("MenuCreateSphere")')
 		.icon.cube(src='cube', title='Create Box', ng-click='triggerMenu("MenuCreateBox")')
 		.icon.cylinder(title='Create Cylinder', ng-click='triggerMenu("MenuCreateCylinder")')
 		.icon.cone(title='Create Cone', ng-click='triggerMenu("MenuCreateCone")')
 		.icon.plane(title='Create Plane', ng-click='triggerMenu("MenuCreatePlane")')
-		.seperator
+		.separator
 
 		.icon.script(src='script', title='Show Script Editor Window', ng-click='triggerMenu("MenuScriptEditor")'
 			ng-class='{"icondisabled": !fields.selectedNode}')

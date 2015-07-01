@@ -1,3 +1,7 @@
+@import 'assets';
+@import 'toolbar';
+
+
 @-webkit-keyframes pulsing {
 	0% {
 		background-color: #20559b;
@@ -483,57 +487,6 @@ canvas:focus {
 	zoom: 1.2;
 	padding-right: 5px;
 }
-
-.icon {
-	width: 25px;
-	height: 25px;
-	vertical-align: middle;
-	margin-top: 3px;
-	/* border: 4px inset #444; */
-	margin-left: 3px;
-	/* border-radius: 2px; */
-	/* background-color:white; */
-	padding: 1px;
-	cursor: pointer;
-	display: inline-block;
-	zoom: 1.15;
-}
-
-.icon:hover {
-	margin-top: 1px;
-	margin-left: 1px;
-	margin-right: 2px;
-	margin-bottom: 2px;
-	background-color: lightblue;
-}
-
-.icon:active {
-	background-color: #7B7B7B;
-}
-
-.iconselected {
-	background-color: #3a8fff;
-	padding: 2px;
-}
-
-.icondisabled {
-	opacity: .1;
-	pointer-events: none;
-}
-
-.seperator {
-	width: 25px;
-	height: 25px;
-	vertical-align: middle;
-	margin-top: 3px;
-	border-left: 3px outset #adadad;
-	margin-left: 19px;
-	margin-right: -26px;
-	padding: 19px;
-	display: inline;
-	border-left-style: groove;
-}
-
 .usertable tr td {
 	font: 8pt "Open Sans";
 }
@@ -604,17 +557,6 @@ canvas:focus {
 	/* Adding this here because .icon:hover will change it to 2px */
 }
 
-#toolbar {
-	/* z-index: 100; */
-	position: fixed;
-	width: 100%;
-	background-color: #424242;
-	/* background: #4c4c4c; */
-	/* Old browsers */
-	overflow: hidden;
-	white-space: nowrap;
-	border-bottom: 3px solid #454545;
-}
 
 .GLGEStat {
 	z-index: 999999;
@@ -681,16 +623,6 @@ canvas:focus {
 	}
 }
 @media only screen and (max-width: 1280px) {
-	.seperator {
-		margin-left: 5px;
-		margin-right: 0px;
-		padding: 0px;
-	}
-
-	.icon {
-		margin-left: 0px;
-	}
-
 	#sidepanel {
 		width: 220px;
 	}
@@ -705,16 +637,6 @@ canvas:focus {
 	#sidepanel {
 		width: 250px;
 	}
-
-	.seperator {
-		margin-left: 5px;
-		margin-right: 0px;
-		padding: 0px;
-	}
-
-	.icon {
-		zoom: 80%;
-	}
 }
 @media only screen and (max-width: 800px) {
 	#ScriptEditor {
@@ -724,11 +646,6 @@ canvas:focus {
 
 	#sidepanel {
 		width: 200px;
-	}
-
-	.seperator {
-		margin-left: 0px;
-		margin-right: 0px;
 	}
 
 	.primeditorinputbox {
