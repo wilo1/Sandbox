@@ -1098,19 +1098,38 @@ this.simulationStateUpdate = function(nodeID,member,state)
 this.postSimulationStateUpdates = function()
 {
 
-    var updates = {};
+     var updates = {};
     for(var i = 0; i < this.nodesSimulating.length; i++)
     {
         var nodeID = this.nodesSimulating[i];
         var props = this.propertyDataUpdates[nodeID];
         if(props)
+        {
+        var keys = Object.keys(this.propertyDataUpdates[nodeID]);
+        for(var j = 0; j < keys.length; j++)
+        {
+            if(this.lastPropertyDataUpdates && this.lastPropertyDataUpdates[nodeID]&&this.lastPropertyDataUpdates[nodeID][keys[j]] && JSON.stringify(props[keys[j]]) == this.lastPropertyDataUpdates[nodeID][keys[j]])
+                delete props[keys[j]];
+        }
+        }
+        if(props && Object.keys(props).length)
             updates[nodeID] = props;
         var action = "simulationStateUpdate";
         
     }
-    var payload = JSON.stringify(updates);
-    
-    this.send(vwf.application(),action,"null",payload);
+   if(Object.keys(updates).length)
+    {
+        var payload = JSON.stringify(updates);
+        this.send(vwf.application(),action,"null",payload);
+    }
+    this.lastPropertyDataUpdates = this.propertyDataUpdates;
+    var keys = Object.keys(this.lastPropertyDataUpdates)
+    for(var i = 0; i <keys.length ; i++)
+    {
+        var keys2 = Object.keys(this.lastPropertyDataUpdates[keys[i]]);
+        for(var j = 0; j < keys2.length; j++)
+            this.lastPropertyDataUpdates[keys[i]][keys2[j]] = JSON.stringify(this.lastPropertyDataUpdates[keys[i]][keys2[j]]);
+    }
     this.propertyDataUpdates = {};
 }
 this.propertyUpdated = function(id,name,val)

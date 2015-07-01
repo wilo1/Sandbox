@@ -164,6 +164,9 @@ var messageCompress = {
         this.addMapping('"children"');
         this.addMapping('"extends"');
         this.addMapping('"source"');
+        this.addMapping('"simulationStateUpdate"');
+        
+
 
 
 
