@@ -66,6 +66,10 @@ function socketThreadProxy(host,options)
 		{
 			this.pong();
 		}
+		if(message.type == CONSOLE)
+		{
+			console.log(message.message);
+		}
 
 
 	}
