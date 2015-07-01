@@ -189,6 +189,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 		$scope.assets = assets;
 		dataRoot = assets;
 
+		$scope.selectedAsset = null;
 		$scope.hideThumbs = true;
 
 		$scope.knownTypes = [
@@ -200,8 +201,10 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 
 		setSelection = function(id){
 			$scope.selectedAsset = id;
-			$scope.new._added = true;
+			if( id === 'new' )
+				$scope.new._added = true;
 		}
+		$scope.setSelection = setSelection;
 
 		// build resonable defaults for new uploads
 		$scope.resetNew = function(){
@@ -470,7 +473,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 							if($scope.selected._uploadCallback)
 								$scope.selected._uploadCallback(xhr.responseText);
 
-							$scope.refreshData(xhr.responseText);
+							$scope.assets.refresh(xhr.responseText);
 							$scope.selectedAsset = xhr.responseText;
 							$scope.resetNew();
 							$scope.clearFileInput();
@@ -501,7 +504,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 				function checkRemaining(){
 					toComplete -= 1;
 					if( toComplete === 0 ){
-						$scope.refreshData($scope.selected.id);
+						$scope.assets.refresh($scope.selected.id);
 					}
 				}
 
@@ -578,12 +581,12 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 			{
 				$http.delete($scope.assets.appPath+'/assets/'+id)
 				.success(function(){
-					$scope.refreshData(id);
+					$scope.assets.refresh(id);
 					$scope.selectedAsset = null;
 				})
 				.error(function(data){
 					alertify.alert('Delete failed: '+data);
-					$scope.refreshData(id);
+					$scope.assets.refresh(id);
 					$scope.selectedAsset = null;
 				});
 			});
