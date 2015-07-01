@@ -81,7 +81,7 @@ define([],function(){
 
 	return function(url,options)
 	{
-		debugger;
+		
 		return new socketThreadProxy(url,options)
 	}
 })
