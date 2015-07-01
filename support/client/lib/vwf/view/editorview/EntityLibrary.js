@@ -1,5 +1,5 @@
 
-define(['vwf/view/editorview/angular-app'], function(app)
+define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], function(app)
 {
 	app.directive('vwsAccordion', function()
 	{

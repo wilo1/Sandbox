@@ -3,9 +3,9 @@ mixin manageAssets_head
 
 mixin manageAssets_body
 
-	#manageAssetsDialog(style='display: none;')
+	#manageAssetsDialog(ng-controller='AssetManagerController', style='display: none;')
 
-		#assetBrowser.verticalLayout(ng-controller='AssetListController')
+		#assetBrowser.verticalLayout
 
 			#controls.horizontalLayout
 				label#hideThumbs.horizontalLayout
@@ -23,7 +23,7 @@ mixin manageAssets_body
 						p.meta {{prettifyType(asset.type)}}, {{asset.size | humanSize}} ({{asset.id}})
 
 					.nonbs-thumbnail(ng-if='!asset._basicDirty && asset.thumbnail'
-						ng-style='{"background-image": "url("+appPath+"/assets/"+asset.id+"/meta/thumbnail)"}')
+						ng-style='{"background-image": "url("+assets.appPath+"/assets/"+asset.id+"/meta/thumbnail)"}')
 
 				.newAsset.horizontalLayout(ng-show='new._added', ng-class='{"selected-asset": fields.selectedAsset === "new"}'
 					ng-click='fields.selectedAsset = "new"', adl-scroll-to='fields.selectedAsset == "new"')
@@ -33,7 +33,7 @@ mixin manageAssets_body
 
 			input#newAssetButton(type='button', value='+', ng-click='new._added = true; fields.selectedAsset = "new"')
 
-		#propertyBrowser.verticalLayout(ng-controller='AssetPropertiesController')
+		#propertyBrowser.verticalLayout
 
 			#dragarea.verticalLayout
 				span.fixed-height {{!fields.selectedAsset ? '' : fields.selectedAsset==='new' ? 'Create Asset' : 'Replace Asset'}}

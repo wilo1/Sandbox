@@ -1,14 +1,67 @@
-define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes'], function(app, strToBytes)
+define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf/view/editorview/UserManager'], function(app, strToBytes)
 {
 	var dataRoot = null;
 	var appHeaderName = '';
 	var uploadVWFObject, setSelection;
 
-	app.run(['$http','$rootScope', function($http, $rootScope)
+	app.service('AssetDataManager', ['$http', function($http)
 	{
-		$http.get('vwfDataManager.svc/saspath').success(function(data)
+		var data = {};
+
+		Object.defineProperty(data, 'refresh',
 		{
-			$rootScope.appPath = data;
+			enumerable: false,
+			writable: false,
+			value: function(id)
+			{
+				var self = this;
+
+				var toComplete = 1;
+				function refCountCallback(cb){
+					toComplete--;
+					if(toComplete === 0 && cb) cb();
+				}
+
+				function updateAsset(id,cb){
+					$http.get(data.appPath+'/assets/'+id+'/meta?permFormat=json').success(function(data){
+						self[id] = data;
+						self[id].id = id;
+						refCountCallback(cb);
+					})
+					.error(function(data,status){
+						if(status === 404){
+							delete self[id];
+						}
+						refCountCallback(cb);
+					});
+				}
+
+				if(id && typeof(id) === 'string'){
+					updateAsset(id);
+				}
+				else {
+					var cb = typeof(id) === 'function' ? id : null;
+					$http.get(self.appPath+'/assets/by-user/'+_UserManager.GetCurrentUserName()).success(
+						function(list)
+						{
+							var ids = Object.keys(list.assets);
+							toComplete = ids.length;
+							for(var i=0; i<ids.length; i++){
+								updateAsset(ids[i], cb);
+							}
+						}
+					);
+				}
+			}.bind(data)
+		});
+
+		$http.get('vwfDataManager.svc/saspath').success(function(appPath)
+		{
+			Object.defineProperty(data, 'appPath', {
+				enumerable: false,
+				writable: false,
+				value: appPath
+			});
 
 			// check if same origin
 			var loc = window.location;
@@ -27,100 +80,8 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes'], fun
 				});
 			}
 		});
-	}]);
 
-	app.factory('AssetDataManager', ['$rootScope','$http', function($rootScope, $http)
-	{
-		dataRoot = $rootScope;
-		$rootScope.fields.selectedAsset = null;
-		$rootScope.assets = {};
-
-		setSelection = function(id){
-			$rootScope.fields.selectedAsset = id;
-			$rootScope.new._added = true;
-		}
-
-		$rootScope.refreshData = function(id)
-		{
-			var toComplete = 1;
-			function refCountCallback(cb){
-				toComplete--;
-				if(toComplete === 0 && cb) cb();
-			}
-
-			function updateAsset(id,cb){
-				$http.get($rootScope.appPath+'/assets/'+id+'/meta?permFormat=json').success(function(data){
-					$rootScope.assets[id] = data;
-					$rootScope.assets[id].id = id;
-					refCountCallback(cb);
-				})
-				.error(function(data,status){
-					if(status === 404){
-						delete $rootScope.assets[id];
-					}
-					refCountCallback(cb);
-				});
-			}
-
-			if(id && typeof(id) === 'string'){
-				updateAsset(id);
-			}
-			else {
-				var cb = typeof(id) === 'function' ? id : null;
-				$http.get($rootScope.appPath+'/assets/by-user/'+_UserManager.GetCurrentUserName()).success(
-					function(list)
-					{
-						$rootScope.assets = {};
-						var ids = Object.keys(list.assets);
-						toComplete = ids.length;
-						for(var i=0; i<ids.length; i++){
-							updateAsset(ids[i], cb);
-						}
-					}
-				);
-			}
-		}
-
-		// build resonable defaults for new uploads
-		$rootScope.resetNew = function(){
-			$rootScope.new = {
-				name: '<new asset>',
-				type: '???',
-				license: 'CC-BY',
-				permissions: {
-					user: {
-						read: true,
-						write: true,
-						delete: true
-					},
-					group: {
-						read: true
-					},
-					other: {
-						read: true
-					}
-				}
-			};
-
-			if($rootScope.fields.selectedAsset === 'new')
-				$rootScope.fields.selectedAsset = null;
-		}
-		$rootScope.resetNew();
-
-		$rootScope.prettifyType = function(type){
-			switch(type){
-				case 'application/vnd.vws-entity+json':
-					return 'VWS Entity';
-				case 'application/vnd.vws-material+json':
-					return 'VWS Material';
-				case 'application/vnd.vws-behavior+json':
-					return 'VWS Behavior';
-				default:
-					return type;
-			}
-		};
-
-		return null;
+		return data;
 	}]);
 
 	app.filter('sortKeys', function(){
@@ -191,31 +152,6 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes'], fun
 				return input + 'B';
 		}
 	});
-	/*app.directive('adlSticky', function()
-	{
-		return {
-			'restrict': 'A',
-			'link': function(scope,element,attr)
-			{
-				var parent = element.parent()[0];
-				parent.onscroll = updateState;
-				$('#manageAssetsDialog').on('dialogresize', updateState);
-				scope.$watch(function(){ return parent.scrollHeight; }, updateState);
-
-				function updateState(e)
-				{
-					//console.log( parent.scrollTop, parent.clientHeight, parent.scrollHeight );
-					if( parent.scrollTop+parent.clientHeight < parent.scrollHeight ){
-						element.toggleClass('sticky', true);
-						element.css('bottom', parent.scrollHeight-parent.clientHeight-parent.scrollTop);
-					}
-					else {
-						element.toggleClass('sticky', false);
-					}
-				}
-			}
-		};
-	});*/
 
 	app.directive('adlScrollTo', ['$timeout', function($timeout)
 	{
@@ -248,14 +184,13 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes'], fun
 		};
 	}]);
 
-	app.controller('AssetListController', ['$scope','$rootScope','AssetDataManager', function($scope,$rootScope)
+	app.controller('AssetManagerController', ['$scope','$http','AssetDataManager', function($scope, $http, assets)
 	{
+		$scope.assets = assets;
+		dataRoot = assets;
+
 		$scope.hideThumbs = true;
 
-	}]);
-
-	app.controller('AssetPropertiesController', ['$scope','$rootScope','$http','AssetDataManager', function($scope,$rootScope,$http)
-	{
 		$scope.knownTypes = [
 			'image/png', 'image/jpeg', 'image/dds',
 			'model/vnd.collada+xml', 'model/vnd.three.js+json', 'model/vnd.gltf+json',
@@ -263,8 +198,52 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes'], fun
 			'application/octet-stream', 'application/json'
 		].sort();
 
+		setSelection = function(id){
+			$scope.selectedAsset = id;
+			$scope.new._added = true;
+		}
+
+		// build resonable defaults for new uploads
+		$scope.resetNew = function(){
+			$scope.new = {
+				name: '<new asset>',
+				type: '???',
+				license: 'CC-BY',
+				permissions: {
+					user: {
+						read: true,
+						write: true,
+						delete: true
+					},
+					group: {
+						read: true
+					},
+					other: {
+						read: true
+					}
+				}
+			};
+
+			if($scope.selectedAsset === 'new')
+				$scope.selectedAsset = null;
+		}
+		$scope.resetNew();
+
+		$scope.prettifyType = function(type){
+			switch(type){
+				case 'application/vnd.vws-entity+json':
+					return 'VWS Entity';
+				case 'application/vnd.vws-material+json':
+					return 'VWS Material';
+				case 'application/vnd.vws-behavior+json':
+					return 'VWS Behavior';
+				default:
+					return type;
+			}
+		};
+
 		// keep 'selected' in sync with currently selected asset
-		$scope.$watchGroup(['fields.selectedAsset', 'assets[fields.selectedAsset]', 'new'], function(newvals)
+		$scope.$watchGroup(['selectedAsset', 'assets[selectedAsset]', 'new'], function(newvals)
 		{
 			$scope.clearFileInput();
 
@@ -378,7 +357,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes'], fun
 			if(!existingId)
 			{
 				$scope.resetNew();
-				$scope.fields.selectedAsset = 'new';
+				$scope.selectedAsset = 'new';
 				$scope.new.filedata = strToBytes( JSON.stringify(cleanObj) );
 				$scope.new.filename = name;
 				$scope.new.type = type;
@@ -388,7 +367,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes'], fun
 			}
 			else
 			{
-				$scope.fields.selectedAsset = existingId;
+				$scope.selectedAsset = existingId;
 				$scope.assets[existingId].filedata = strToBytes( JSON.stringify(cleanObj) );
 				$scope.assets[existingId].filename = name;
 				$scope.assets[existingId].type = type;
@@ -403,14 +382,14 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes'], fun
 		// since file inputs are read-only...
 		$scope.clearFileInput = function(){
 			var input = $('#manageAssetsDialog #fileInput');
-			input.replaceWith( input.val('').prop('disabled', !$scope.fields.selectedAsset).clone(true) );
+			input.replaceWith( input.val('').prop('disabled', !$scope.selectedAsset).clone(true) );
 		}
 
 
 		$scope.getAssetUrl = function(id){
 			if(!id) return '';
 			else if(id === 'new') return 'Unsaved Asset';
-			else return $scope.appPath+'/assets/'+id;
+			else return $scope.assets.appPath+'/assets/'+id;
 		};
 
 		// generate octal perms from checkbox array
@@ -448,7 +427,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes'], fun
 				{
 					var perms = $scope.getPackedPermissions();
 
-					var url = $scope.appPath+'/assets/new';
+					var url = $scope.assets.appPath+'/assets/new';
 					var queryChar = '?';
 					if( $scope.selected.name ){
 						url += queryChar+'name='+ encodeURIComponent( $scope.selected.name );
@@ -492,7 +471,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes'], fun
 								$scope.selected._uploadCallback(xhr.responseText);
 
 							$scope.refreshData(xhr.responseText);
-							$scope.fields.selectedAsset = xhr.responseText;
+							$scope.selectedAsset = xhr.responseText;
 							$scope.resetNew();
 							$scope.clearFileInput();
 						}
@@ -541,7 +520,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes'], fun
 						}
 						checkRemaining();
 					});
-					xhr.open('POST', $scope.appPath+'/assets/'+$scope.selected.id);
+					xhr.open('POST', $scope.assets.appPath+'/assets/'+$scope.selected.id);
 					xhr.setRequestHeader('Content-Type', $scope.selected.type);
 
 					if( $http.defaults.headers.post[appHeaderName] ){
@@ -563,7 +542,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes'], fun
 						height: $scope.selected.height || null,
 						isTexture: $scope.selected.isTexture
 					};
-					$http.post($scope.appPath+'/assets/'+$scope.selected.id+'/meta', meta).success(checkRemaining)
+					$http.post($scope.assets.appPath+'/assets/'+$scope.selected.id+'/meta', meta).success(checkRemaining)
 					.error(function(data,status){
 						alertify.alert('Failed to post metadata: '+data);
 						checkRemaining();
@@ -573,7 +552,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes'], fun
 				if($scope.selected._groupDirty)
 				{
 					toComplete += 1;
-					$http.post($scope.appPath+'/assets/'+$scope.selected.id+'/meta/group_name', $scope.selected.group_name).success(checkRemaining)
+					$http.post($scope.assets.appPath+'/assets/'+$scope.selected.id+'/meta/group_name', $scope.selected.group_name).success(checkRemaining)
 					.error(function(data,status){
 						alertify.alert('Failed to change group: '+data);
 						checkRemaining();
@@ -584,7 +563,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes'], fun
 				{
 					var perms = $scope.getPackedPermissions();
 					toComplete += 1;
-					$http.post($scope.appPath+'/assets/'+$scope.selected.id+'/meta/permissions', perms.toString(8)).success(checkRemaining)
+					$http.post($scope.assets.appPath+'/assets/'+$scope.selected.id+'/meta/permissions', perms.toString(8)).success(checkRemaining)
 					.error(function(data,status){
 						alertify.alert('Failed to change permissions: '+data);
 						checkRemaining();
@@ -597,15 +576,15 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes'], fun
 		{
 			alertify.confirm('Are you POSITIVE you want to delete this asset?', function()
 			{
-				$http.delete($scope.appPath+'/assets/'+id)
+				$http.delete($scope.assets.appPath+'/assets/'+id)
 				.success(function(){
 					$scope.refreshData(id);
-					$scope.fields.selectedAsset = null;
+					$scope.selectedAsset = null;
 				})
 				.error(function(data){
 					alertify.alert('Delete failed: '+data);
 					$scope.refreshData(id);
-					$scope.fields.selectedAsset = null;
+					$scope.selectedAsset = null;
 				});
 			});
 		}
@@ -636,7 +615,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes'], fun
 		},
 
 		refreshData: function(cb){
-			dataRoot.refreshData(cb);
+			dataRoot.refresh(cb);
 		},
 
 		uploadSelectedEntity: function(overwrite)
