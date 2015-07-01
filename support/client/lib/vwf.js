@@ -315,6 +315,7 @@
 
             var requireArray = [
                 { library: "domReady", active: true },
+                { library: "vwf/socket", active: true },
                 { library: "vwf/configuration", active: true },
                 { library: "vwf/kernel/model", active: true },
                 { library: "vwf/model/javascript", active: true },
@@ -800,60 +801,14 @@
                 window.location.pathname.lastIndexOf("/") );
             var protocol = window.location.protocol;
             var host = {{host}};
-
-
-
-        if ( isSocketIO07()) {
+        
+            var socketProxy = require('vwf/socket')
             if ( window.location.protocol === "https:" )
             {
-
-                socket = io(host, {secure:true, reconnection : false,transports:['websocket'],query:'pathname='+window.location.pathname});
+                socket = socketProxy(host, {secure:true, reconnection : false,transports:['websocket'],query:'pathname='+window.location.pathname});
             } else {
-                socket = io(host,{reconnection : false,transports:['websocket'],query:'pathname='+window.location.pathname});
+                socket = socketProxy(host,{reconnection : false,transports:['websocket'],query:'pathname='+window.location.pathname});
             }
-
-        } else {  // Ruby Server
-
-            socket = new io.Socket( undefined, {
-
-                // The socket is relative to the application path.
-
-                resource: window.location.pathname.slice( 1,
-                    window.location.pathname.lastIndexOf("/") ),
-
-                // Use a secure connection when the application comes from https.
-
-                secure: window.location.protocol === "https:",
-                reconnect:false,
-                port: window.location.port ||
-                    ( window.location.protocol === "https:" ? 443 : 80 ),
-
-                // The ruby socket.io server only supports WebSockets. Don't try the others.
-
-                transports: [
-                    'websocket',
-                    // 'flashsocket',
-                    // 'htmlfile',
-                    // 'xhr-multipart',
-                    // 'xhr-polling',
-                    // 'jsonp-polling',
-                ],
-
-                // Increase the timeout due to starvation while loading the scene. The server
-                // timeout must also be increased.
-                // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
-
-                transportOptions: {
-                    "websocket": { timeout: 90000 }
-                    // "flashsocket": { timeout: 90000 },
-                    // "htmlfile": { timeout: 90000 },
-                    // "xhr-multipart": { timeout: 90000 },
-                    // "xhr-polling": { timeout: 90000 },
-                    // "jsonp-polling": { timeout: 90000 },
-                }
-
-            } );
-        }
 
     } catch ( e ) {
 
@@ -884,11 +839,9 @@
             window.setInterval(vwf.socketMonitorInterval.bind(vwf),10000);
             vwf.logger.infox( "-socket", "connected" );
 
-            if ( isSocketIO07() ) {
+           
                 vwf.moniker_ = this.id;
-            } else {  //Ruby Server
-                vwf.moniker_ = this.transport.sessionid;
-            }
+           
 
         } );
 
@@ -960,11 +913,11 @@
 
         } );
 
-        if ( !isSocketIO07() ) {
+        
             // Start communication with the reflector. 
 
             socket.connect();  // TODO: errors can occur here too, particularly if a local client contains the socket.io files but there is no server; do the loopback here instead of earlier in response to new io.Socket.
-        }
+        
 
     } else if ( component_uri_or_json_or_object ) {
 
