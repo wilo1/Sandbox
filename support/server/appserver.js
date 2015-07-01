@@ -217,7 +217,7 @@ function ServeTemplate(req,res, filename, instanceData, url)
 			needsTools = instanceData && instanceData.publishSettings ? instanceData.publishSettings.allowTools : true;
 
 		var templateFile = libpath.join(__dirname,'..','templates', filename.slice(5)+'.jade');
-
+		console.log(instanceData);
 		try {
 			var html = jade.renderFile(templateFile, {
 				filename: templateFile,
@@ -527,7 +527,7 @@ function handleRequest(request, response, next) {
                             return;
                         } else {
 
-                            require('./examples.js').getExampleData(instanceName, function(data) {
+                            require('./examples.js').getExampleMetadata(instanceName, function(data) {
                                 if (data) {
                                     //ServeFile(request, filename, response, URL);
                                     ServeTemplate(request,response, 'jade:index', data, URL);

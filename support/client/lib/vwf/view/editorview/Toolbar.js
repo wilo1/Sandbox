@@ -1,5 +1,5 @@
 
-define(['vwf/view/editorview/angular-app'], function(app)
+define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/Menubar'], function(app)
 {
 	app.directive('dragScroll', function()
 	{
@@ -60,15 +60,15 @@ define(['vwf/view/editorview/angular-app'], function(app)
 		};
 	});
 
-	app.controller('ToolbarController', ['$scope', function($scope)
+	app.controller('ToolbarController', ['$scope', 'MenuHandlers', function($scope, handlers)
 	{
 		$scope.xfSelected = 'move';
 		$scope.fields.coordSpaceSelected = 'world';
 		$scope.cameraSelected = 'orbit';
 
-		$scope.triggerMenu = function(menuId)
+		$scope.triggerMenu = function(menuId, evt)
 		{
-			$('#' + menuId).click();
+			handlers[menuId](evt);
 			$(".ddsmoothmenu").find('li').trigger('mouseleave');
 		}
 	}]);

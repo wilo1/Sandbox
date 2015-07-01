@@ -1,7 +1,7 @@
 
 define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], function(app, manageAssets)
 {
-	app.controller('MenuController', ['$scope', function($scope)
+	app.controller('MenuController', ['$scope', 'MenuHandlers', function($scope, handlers)
 	{
 		function nodeInherits(node, ancestor)
 		{
@@ -39,10 +39,12 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 
 		$scope.lookUpHandler = function(e){
 			$('#ddsmoothmenu li').trigger('mouseleave');
-			$scope.handlers[e.currentTarget.id](e);
+			handlers[e.currentTarget.id](e);
 		}
+	}]);
 
-		$scope.handlers = 
+	app.service('MenuHandlers', function(){
+		var handlers = 
 		{
 			// hook up assets menu
 			MenuManageAssets: function(e){
@@ -869,7 +871,9 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 				$('#MenuViewFullscreen').click();
 			}
 		};
-	}]);
+
+		return handlers;
+	});
 
 	return {
 		initialize: function()
