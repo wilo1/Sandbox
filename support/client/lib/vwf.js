@@ -844,16 +844,8 @@
 
             try {   
                 
-                if ( isSocketIO07() ) {
-
-                    if(message.constructor === String)
-                        var fields = JSON.parse(messageCompress.unpack(message));
-                    else
-                        var fields = message;
-
-                } else { // Ruby Server - Unpack the arguements
-                    var fields = JSON.parse( message );
-                }
+              
+                var fields = message;
 
                 if(fields.action == 'goOffline')
                 {
@@ -993,11 +985,9 @@ this.send = function( nodeID, actionName, memberName, parameters, when, callback
 
     if ( socket ) {
 
-        // Send the message.
-        var message = JSON.stringify( fields );
-        message = messageCompress.pack(message);
+       
         
-        socket.send( message );
+        socket.send( fields );
 
     } else {
 
@@ -1048,10 +1038,9 @@ this.respond = function( nodeID, actionName, memberName, parameters, result ) {
 
         // Send the message.
 
-        var message = JSON.stringify( fields );
-        message = messageCompress.pack(message);
         
-        socket.send( message );
+        
+        socket.send( fields );
 
     } else {
 
@@ -2224,12 +2213,11 @@ this.saveState = function(data)
     if ( socket ) {
 
         // Send the message.
-        var message = JSON.stringify( fields );
-        message = messageCompress.pack(message);
+      
 
       
 
-        socket.send( message );
+        socket.send( fields );
     }
 
 }
