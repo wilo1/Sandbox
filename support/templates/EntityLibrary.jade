@@ -16,10 +16,10 @@ mixin EntityLibrary_body
 				a#entitylibraryclose.ui-dialog-titlebar-close.ui-corner-all(href='#', ng-click='hide()', role='button', style="display: inline-block;float: right;")
 					span.ui-icon.ui-icon-closethick close
 
-			#EntityLibraryAccordion
-				h3.modifiersection(ng-repeat-start='(libName, lib) in staticLibs')
-					a(href="#"): strong {{libName}}
+			#EntityLibraryAccordion(vws-accordion='staticLibs')
+				h3.modifiersection(ng-repeat-start='lib in staticLibs')
+					a(href="#"): div(style='font-weight: bold; display: inline;') {{lib.name}}
 				.modifiersection(ng-repeat-end)
-					.libraryasset(ng-repeat='asset in lib')
+					.libraryAsset(ng-repeat='asset in lib.content')
 						img(ng-src='{{asset.preview}}', draggable=true)
 						div {{asset.name}}

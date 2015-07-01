@@ -1,22 +1,47 @@
 
 define(['vwf/view/editorview/angular-app'], function(app)
 {
+	app.directive('vwsAccordion', function()
+	{
+		return {
+			restrict: 'A',
+			scope: {
+				data: '=vwsAccordion'
+			},
+			link: function(scope, elem, attrs)
+			{
+				elem.accordion({header: 'h3', heightStyle: 'content'});
+
+				scope.$watch('data', function(newval)
+				{
+					elem.accordion('refresh');
+				}, true);
+
+				elem.bind('$destroy', function(){
+					elem.accordion('destroy');
+				});
+			}
+		};
+	});
+
 	app.service('LibraryDataManager', ['$http', function($http)
 	{
-		var libraries = {};
+		var libraries = [];
 
 		$http.get('./contentlibraries/libraries.json').success(function(libs)
 		{
-			for(var i in libs)
+			for(var i=0; i<libs.length; i++)
 			{
-				(function(name, url)
+				libraries.push( {'name': libs[i].name} );
+
+				(function(url, obj)
 				{
 					$http.get(url).success(function(lib)
 					{
-						libraries[name] = lib;
+						obj.content = lib;
 					});
 
-				})(i, libs[i].url);
+				})(libs[i].url, libraries[libraries.length-1]);
 			}
 		});
 
@@ -80,9 +105,6 @@ define(['vwf/view/editorview/angular-app'], function(app)
 
 	return {
 		initialize: function(){
-			$("#EntityLibraryAccordion").accordion({		   
-				activate: function() {}
-			});		
 			$('#EntityLibrary').show();
 		}
 	};
