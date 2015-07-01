@@ -42,8 +42,6 @@ if (false) {
     ]);
 }
 
-
-
 //if window.jQuery is defined, than the Require Optimizer has run, and appended it to the top of this file. Thus, we don't need to worry about loading all the dependancy libraries
 if (!window.jQuery) {
 

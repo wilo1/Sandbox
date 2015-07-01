@@ -34,13 +34,10 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			{
 				libraries.push( {'name': libs[i].name} );
 
-				(function(url, obj)
-				{
-					$http.get(url).success(function(lib)
-					{
+				(function(url, obj){
+					$http.get(url).success(function(lib){
 						obj.content = lib;
 					});
-
 				})(libs[i].url, libraries[libraries.length-1]);
 			}
 		});
