@@ -16,7 +16,8 @@ var logger = require('./logger');
 var xapi = require('./xapi');
 
 var sandboxWorld = require('./sandboxWorld').sandboxWorld;
-var stateToScene = require('./sandboxWorld').stateToScene;
+var sandboxClient = require('./sandboxClient').sandboxClient;
+var DBstateToVWFDef = require('./sandboxState').DBstateToVWFDef;
 
 function startup(listen)
 {
@@ -34,36 +35,36 @@ function startup(listen)
     //assoicate the session information from the handshake with the socket.
     //this is a touch tricky, because we need to manually do the session decrypt from the cookie     
     sio.use(function(socket, next)
+    {
+        var handshake = socket.request;
+        socket.handshake = handshake;
+        if (handshake.headers.cookie)
         {
-            var handshake = socket.request;
-            socket.handshake = handshake;
-            if (handshake.headers.cookie)
+            // save parsedSessionId to handshakeData
+            try
             {
-                // save parsedSessionId to handshakeData
-                try
-                {
-                    handshake.cookieData = parseSignedCookie(cookie.parse(handshake.headers.cookie)['session'],
-                        global.configuration.sessionSecret ? global.configuration.sessionSecret : 'unsecure cookie secret');
-                }
-                catch (e)
-                {
-                    //this is important! We're seeing a few crashes from here.
-                    console.error(e);
-                    next();
-                    return;
-                }
+                handshake.cookieData = parseSignedCookie(cookie.parse(handshake.headers.cookie)['session'],
+                    global.configuration.sessionSecret ? global.configuration.sessionSecret : 'unsecure cookie secret');
             }
-            next();
-        })
-        //When there is a new connection, goto WebSocketConnection.
+            catch (e)
+            {
+                //this is important! We're seeing a few crashes from here.
+                console.error(e);
+                next();
+                return;
+            }
+        }
+        next();
+    })
+    //When there is a new connection, goto WebSocketConnection.
     sio.on('connect', WebSocketConnection);
 }
 
 function setDAL(dal)
-    {
-        DAL = dal;
-    }
-    //find in the handshake of the socket the information about what instance to connect to
+{
+    DAL = dal;
+}
+//find in the handshake of the socket the information about what instance to connect to
 function getNamespace(socket)
 {
     try
@@ -104,7 +105,7 @@ function ServeSinglePlayer(socket, namespace, instancedata)
                 owner: undefined
             }];
         }
-        stateToScene(state, instancedata, function(scene)
+        DBstateToVWFDef(state, instancedata, function(scene)
         {
             socket.emit('message',
             {
@@ -214,7 +215,7 @@ function WebSocketConnection(socket, _namespace)
 function runningInstanceList()
 {
     this.instances = {};
-    this.add = function(id, metadata)
+    this.add = function(world)
     {
         //send a signal to the parent process that we are hosting this instance
         if (global.configuration.cluster)
@@ -222,10 +223,10 @@ function runningInstanceList()
             var message = {};
             message.type = 'state';
             message.action = 'add';
-            message.args = [id];
+            message.args = [world.id];
             process.send(message);
         }
-        this.instances[id] = new sandboxWorld(id, metadata);
+        this.instances[world.id] = world;
     }
     this.remove = function(id)
     {
@@ -253,51 +254,24 @@ var RunningInstances = new runningInstanceList();
 global.instances = RunningInstances;
 
 function ClientConnected(socket, namespace, instancedata)
+{
+    console.log('ClientConnected');
+    //if it's a new instance, setup record 
+    if (!RunningInstances.has(namespace))
     {
-        console.log('ClientConnected');
-        //if it's a new instance, setup record 
-        if (!RunningInstances.has(namespace))
+        logger.warn('adding new instance' + namespace)
+        var world = new sandboxWorld(namespace, instancedata);
+        RunningInstances.add(world);
+        world.on('shutdown', function()
         {
-            logger.warn('adding new instance' + namespace)
-            RunningInstances.add(namespace, instancedata);
-        }
-        var thisInstance = RunningInstances.get(namespace);
-        thisInstance.clientConnected(socket);
-        socket.on('authenticate', function(msg)
-        {
-            console.log(msg.cookie);
-            try
-            {
-                var cookieData = parseSignedCookie(cookie.parse(msg.cookie.join(';'))[global.configuration.sessionKey ? global.configuration.sessionKey : 'virtual'],
-                    global.configuration.sessionSecret ? global.configuration.sessionSecret : 'unsecure cookie secret');
-                logger.warn(cookieData);
-                sessions.GetSessionData(
-                {
-                    cookieData: cookieData
-                }, function(loginData)
-                {
-                    logger.warn('client changed credentials');
-                    console.log(loginData);
-                    socket.loginData = loginData;
-                });
-            }
-            catch (e)
-            {
-                logger.error(e);
-            }
-        });
-        socket.on('message', function(msg)
-        {
-            thisInstance.message(msg, socket)
-        });
-        //When a client disconnects, go ahead and remove the instance data
-        socket.on('disconnect', function()
-        {
-            thisInstance.disconnect(socket);
-            if (thisInstance.clientCount() == 0)
-                RunningInstances.remove(this.id);
-        });
-    } // end WebSocketConnection
+            RunningInstances.remove(this.id);
+        })
+    }
+    var thisInstance = RunningInstances.get(namespace);
+    var client = new sandboxClient(socket);
+    thisInstance.clientConnected(client);
+} // end WebSocketConnection
+
 exports.WebSocketConnection = WebSocketConnection;
 exports.setDAL = setDAL;
 exports.startup = startup;
@@ -306,5 +280,4 @@ exports.closeInstance = function(id)
     var instance = RunningInstances.get(id);
     if (instance)
         instance.shutdown();
-    RunningInstances.remove(instance);
 }

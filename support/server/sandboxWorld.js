@@ -4,37 +4,13 @@ var sio = require('socket.io');
 var fs = require('fs');
 var url = require("url");
 var mime = require('mime');
-var sessions = require('./sessions.js');
 var messageCompress = require('../client/lib/messageCompress')
     .messageCompress;
-var connect = require('connect'),
-    parseSignedCookie = connect.utils.parseSignedCookie,
-    cookie = require('express/node_modules/cookie');
 YAML = require('js-yaml');
 var logger = require('./logger');
 var xapi = require('./xapi');
-//Check that a user has permission on a node
-function checkOwner(node, name)
-    {
-        var level = 0;
-        if (!node.properties) node.properties = {};
-        if (!node.properties.permission) node.properties.permission = {}
-        var permission = node.properties['permission'];
-        var owner = node.properties['owner'];
-        if (owner == name)
-        {
-            level = Infinity;
-            return level;
-        }
-        if (permission)
-        {
-            level = Math.max(level ? level : 0, permission[name] ? permission[name] : 0, permission['Everyone'] ? permission['Everyone'] : 0);
-        }
-        var parent = node.parent;
-        if (parent)
-            level = Math.max(level ? level : 0, checkOwner(parent, name));
-        return level ? level : 0;
-    }
+var sandboxState = require('./sandboxState').sandboxState;
+
     //***node, uses REGEX, escape properly!
 function strEndsWith(str, suffix)
     {
@@ -56,28 +32,7 @@ function isPointerEvent(message)
             message.member == 'pointerWheel'
         )
     }
-    //change up the ID of the loaded scene so that they match what the client will have
-var fixIDs = function(node)
-{
-    if (node.children)
-        var childnames = {};
-    for (var i in node.children)
-    {
-        childnames[i] = null;
-    }
-    for (var i in childnames)
-    {
-        var childComponent = node.children[i];
-        var childName = childComponent.name || i;
-        var childID = childComponent.id || childComponent.uri || (childComponent["extends"]) + "." + childName.replace(/ /g, '-');
-        childID = childID.replace(/[^0-9A-Za-z_]+/g, "-");
-        childComponent.id = childID;
-        node.children[childID] = childComponent;
-        node.children[childID].parent = node;
-        delete node.children[i];
-        fixIDs(childComponent);
-    }
-}
+
 
 function SaveInstanceState(namespace, data, socket)
 {
@@ -130,68 +85,6 @@ function SaveInstanceState(namespace, data, socket)
     });
 }
 
-function stateToScene(state, instanceData, cb)
-{
-    var state2 = JSON.parse(JSON.stringify(state));
-    fs.readFile("./public" + "/adl/sandbox" + "/index.vwf.yaml", 'utf8', function(err, blankscene)
-    {
-        var err = null;
-        try
-        {
-            blankscene = YAML.load(blankscene);
-            blankscene.id = 'index-vwf';
-            blankscene.patches = "index.vwf";
-            if (!blankscene.children)
-                blankscene.children = {};
-            //only really doing this to keep track of the ownership
-            for (var i = 0; i < state.length - 1; i++)
-            {
-                var childComponent = state[i];
-                var childName = (state[i].name || state[i].properties.DisplayName) || i;
-                var childID = childComponent.id || childComponent.uri || (childComponent["extends"]) + "." + childName.replace(/ /g, '-');
-                childID = childID.replace(/[^0-9A-Za-z_]+/g, "-");
-                //state[i].id = childID;
-                //state2[i].id = childID;
-                blankscene.children[childName] = state2[i];
-                state[i].id = childID;
-                fixIDs(state[i]);
-            }
-            var props = state[state.length - 1];
-            if (props)
-            {
-                if (!blankscene.properties)
-                    blankscene.properties = {};
-                for (var i in props)
-                {
-                    blankscene.properties[i] = props[i];
-                }
-                for (var i in blankscene.properties)
-                {
-                    if (blankscene.properties[i] && blankscene.properties[i].value)
-                        blankscene.properties[i] = blankscene.properties[i].value;
-                    else if (blankscene.properties[i] && (blankscene.properties[i].get || blankscene.properties[i].set))
-                        delete blankscene.properties[i];
-                }
-                //don't allow the clients to persist between a save/load cycle
-                blankscene.properties['clients'] = null;
-                if (instanceData && instanceData.publishSettings && instanceData.publishSettings.allowTools == false)
-                {
-                    blankscene.properties['playMode'] = 'play';
-                }
-                else
-                    blankscene.properties['playMode'] = 'stop';
-            }
-        }
-        catch (e)
-        {
-            err = e;
-        }
-        if (err)
-            cb(null);
-        else
-            cb(blankscene);
-    });
-}
 var timeout = function(world)
 {
     this.world = world;
@@ -227,7 +120,7 @@ var timeout = function(world)
                 else
                 {
                     logger.warn('sending default state', 2);
-                    var state = this.world.cachedState;
+                    var state = this.world.state.getVWFDef();
                     //send cached state to all pending clients, drain their pending list, mark active
                     for (var i in this.world.clients)
                     {
@@ -292,6 +185,26 @@ function sandboxWorld(id, metadata)
     {
         logger.error(e.message + ' when opening ' + SandboxAPI.getDataPath() + '//Logs/' + id.replace(/[\\\/]/g, '_'));
     }
+    this.events = {};
+    this.on = function(name, callback)
+    {
+        if (!this.events[name])
+            this.events[name] = [];
+        this.events[name].push(callback)
+    }
+    this.removeListener = function(name, callback)
+    {
+        if (!this.events[name]) return;
+        var index = this.events[name].indexOf(callback)
+        if (index != -1)
+            this.events[name].splice(index, 1);
+    }
+    this.trigger = function(name, e)
+    {
+        if (!this.events[name]) return;
+        for (var i = 0; i < this.events[name].length; i++)
+            this.events[name][i].apply(this, [e]);
+    }
     this.addClient = function(socket)
     {
         this.clients[socket.id] = socket;
@@ -306,6 +219,7 @@ function sandboxWorld(id, metadata)
             this.clients[i].disconnect();
         clearInterval(this.timerID);
         logger.warn('Shutting down ' + this.id)
+        this.trigger('shutdown');
     }
     this.Log = function(message, level)
     {
@@ -464,89 +378,6 @@ function sandboxWorld(id, metadata)
         self.timerID = setInterval(timer, 5);
         console.warn("timer is " + self.timerID)
     }
-    this.setupState = function(state)
-    {
-        if (!state)
-        {
-            logger.warn('creating new blank world!');
-            state = [
-            {
-                owner: instancedata.owner
-            }];
-        }
-        var newState = {
-            nodes:
-            {}
-        };
-        newState.nodes['index-vwf'] = {
-            id: "index-vwf",
-            properties: state[state.length - 1],
-            children:
-            {}
-        };
-        newState.findNode = function(id, parent)
-        {
-            var ret = null;
-            if (!parent) parent = this.nodes['index-vwf'];
-            if (parent.id == id)
-                ret = parent;
-            else if (parent.children)
-            {
-                for (var i in parent.children)
-                {
-                    ret = this.findNode(id, parent.children[i]);
-                    if (ret) return ret;
-                }
-            }
-            return ret;
-        }
-        newState.deleteNode = function(id, parent)
-        {
-            if (!parent) parent = this.nodes['index-vwf'];
-            if (parent.children)
-            {
-                for (var i in parent.children)
-                {
-                    if (i == id)
-                    {
-                        delete parent.children[i];
-                        return
-                    }
-                }
-            }
-        }
-        newState.reattachParents = function(node)
-            {
-                if (node && node.children)
-                {
-                    for (var i in node.children)
-                    {
-                        node.children[i].parent = node;
-                        this.reattachParents(node.children[i]);
-                    }
-                }
-            }
-            // so, the player has hit pause after hitting play. They are going to reset the entire state with the state backup. 
-            //The statebackup travels over the wire (though technically I guess we should have a copy of that data in our state already)
-            //when it does, we can receive it here. Because the server is doing some tracking of state, we need to restore the server
-            //side state.
-        newState.callMethod = function(id, name, args)
-        {
-            if (id == 'index-vwf' && name == 'restoreState')
-            {
-                logger.info('Restore State from Play Backup', 2);
-                //args[0][0] should be a vwf root node definition
-                if (args[0][0])
-                {
-                    //note we have to JSON parse and stringify here to avoid creating a circular structure that cannot be reserialized 
-                    this.nodes['index-vwf'] = JSON.parse(JSON.stringify(args[0][0]));
-                    //here, we need to hook back up the .parent property, so we can walk the graph for other operations.
-                    this.reattachParents(this.nodes['index-vwf']);
-                }
-            }
-        }
-        return newState;
-    }
     this.firstConnection = function(socket, cb)
     {
         logger.info('load from db', 2);
@@ -560,12 +391,10 @@ function sandboxWorld(id, metadata)
         //Get the state and load it.
         //Now the server has a rough idea of what the simulation is
         var self = this;
-        SandboxAPI.getState(this.id, function(state)
+        this.state = new sandboxState(this.id,this.metadata);
+        this.state.on('loaded', function()
         {
-            //turn DB state into VWF root node def
-            stateToScene(state, self.metadata, function(scene)
-            {
-                self.state = self.setupState(state);
+            var scene = self.state.getVWFDef();
                 socket.emit('message', messageCompress.pack(JSON.stringify(
                 {
                     "action": "status",
@@ -573,15 +402,8 @@ function sandboxWorld(id, metadata)
                     "time": self.time
                 })));
                 console.log('got  blank scene');
-                //only really doing this to keep track of the ownership
-                for (var i = 0; i < state.length - 1; i++)
-                {
-                    var childID = state[i].id;
-                    self.state.nodes['index-vwf'].children[childID] = state[i];
-                    self.state.nodes['index-vwf'].children[childID].parent = self.state.nodes['index-vwf'];
-                }
+
                 //note: don't have to worry about pending status here, client is first
-                self.cachedState = scene;
                 socket.emit('message', messageCompress.pack(JSON.stringify(
                 {
                     "action": "createNode",
@@ -604,8 +426,8 @@ function sandboxWorld(id, metadata)
                 socket.pending = false;
                 self.startTimer();
                 cb();
-            });
-        });
+
+        })
     }
     this.messagePeerConnected = function()
     {
@@ -619,28 +441,29 @@ function sandboxWorld(id, metadata)
             })));
         }
     }
-    this.clientConnected = function(socket)
+    this.clientConnected = function(client)
     {
+        client.setWorld(this);
         this.messagePeerConnected();
         //add the new client to the instance data
-        this.addClient(socket);
+        this.addClient(client);
         //count anonymous users, try to align with the value used for hte displayname of the avatar
-        if (socket.loginData.UID == "Anonymous")
+        if (client.loginData.UID == "Anonymous")
         {
-            var anonName = this.GetNextAnonName(socket);
-            socket.loginData.UID = anonName;
-            socket.loginData.Username = anonName;
+            var anonName = this.GetNextAnonName(client);
+            client.loginData.UID = anonName;
+            client.loginData.Username = anonName;
         }
-        socket.pending = true;
-        socket.pendingList = [];
+        client.pending = true;
+        client.pendingList = [];
         //The client is the first, is can just load the index.vwf, and mark it not pending
         if (this.clientCount() == 1)
         {
             var self = this;
-            this.firstConnection(socket, function()
+            this.firstConnection(client, function()
             {
                 //this must come after the client is added. Here, there is only one client
-                self.messageConnection(socket.id, socket.loginData ? socket.loginData.Username : "", socket.loginData ? socket.loginData.UID : "");
+                self.messageConnection(client.id, client.loginData ? client.loginData.Username : "", client.loginData ? client.loginData.UID : "");
             });
         }
         //this client is not the first, we need to get the state and mark it pending
@@ -648,14 +471,14 @@ function sandboxWorld(id, metadata)
         {
             this.requestState();
             //loadClient.pending = true;
-            socket.emit('message', messageCompress.pack(JSON.stringify(
+            client.emit('message', messageCompress.pack(JSON.stringify(
             {
                 "action": "status",
                 "parameters": ["Requesting state from clients"],
                 "time": this.getStateTime
             })));
             //the below message should now queue for the pending socket, fire off for others
-            this.messageConnection(socket.id, socket.loginData ? socket.loginData.Username : "", socket.loginData ? socket.loginData.UID : "");
+            this.messageConnection(client.id, client.loginData ? client.loginData.Username : "", client.loginData ? client.loginData.UID : "");
         }
     }
     this.requestState = function()
@@ -704,28 +527,18 @@ function sandboxWorld(id, metadata)
                 SaveInstanceState(this.id, message.data, sendingclient);
                 return;
             }
-            //Log all message if level is high enough
-            if (isPointerEvent(message))
-            {
-                this.Log(JSON.stringify(message), 4);
-            }
-            else
-            {
-                this.Log(JSON.stringify(message), 3);
-            }
+
             //do not accept messages from clients that have not been claimed by a user
             //currently, allow getstate from anonymous clients
             if (!this.allowAnonymous && !sendingclient.loginData && message.action != "getState" && message.member != "latencyTest")
             {
-                if (isPointerEvent(message))
-                    this.Error('DENIED ' + JSON.stringify(message), 4);
-                else
-                    this.Error('DENIED ' + JSON.stringify(message), 2);
                 return;
             }
+
             //route callmessage to the state to it can respond to manip the server side copy
             if (message.action == 'callMethod')
                 this.state.callMethod(message.node, message.member, message.parameters);
+
             if (message.action == 'callMethod' && message.node == 'index-vwf' && message.member == 'PM')
             {
                 var textmessage = JSON.parse(message.parameters[0]);
@@ -766,108 +579,37 @@ function sandboxWorld(id, metadata)
                 return;
             }
             //We'll only accept a setProperty if the user has ownership of the object
+            if (message.action == "deleteNode" || message.action == "createMethod" || message.action == "createProperty" || message.action == "createEvent" ||
+                message.action == "deleteMethod" || message.action == "deleteProperty" || message.action == "deleteEvent" || message.action == "setProperty")
+            {
+                if (!this.state.validate(message.action, message.node, sendingclient))
+                {
+                    return;
+                }
+
+                }
             if (message.action == "setProperty")
-            {
-                var node = this.state.findNode(message.node);
-                if (!node)
-                {
-                    this.Log('server has no record of ' + message.node, 1);
-                    return;
-                }
-                if (this.allowAnonymous || checkOwner(node, sendingclient.loginData.UID))
-                {
-                    //We need to keep track internally of the properties
-                    //mostly just to check that the user has not messed with the ownership manually
-                    if (!node.properties)
-                        node.properties = {};
-                    node.properties[message.member] = message.parameters[0];
-                    this.Log("Set " + message.member + " of " + node.id + " to " + message.parameters[0], 2);
-                }
-                else
-                {
-                    this.Error('permission denied for modifying ' + node.id, 1);
-                    return;
-                }
-            }
-            //We'll only accept a any of these if the user has ownership of the object
-            if (message.action == "createMethod" || message.action == "createProperty" || message.action == "createEvent" ||
-                message.action == "deleteMethod" || message.action == "deleteProperty" || message.action == "deleteEvent")
-            {
-                var node = this.state.findNode(message.node);
-                if (!node)
-                {
-                    this.Error('server has no record of ' + message.node, 1);
-                    return;
-                }
-                if (this.allowAnonymous || checkOwner(node, sendingclient.loginData.UID))
-                {
-                    this.Log("Do " + message.action + " of " + node.id, 2);
-                }
-                else
-                {
-                    this.Error('permission denied for ' + message.action + ' on ' + node.id, 1);
-                    return;
-                }
-            }
+                this.state.setProperty(message.node, message.member, message.parameters[0]);
             //We'll only accept a deleteNode if the user has ownership of the object
             if (message.action == "deleteNode")
             {
-                var node = this.state.findNode(message.node);
-                if (!node)
-                {
-                    this.Error('server has no record of ' + message.node, 1);
-                    return;
-                }
-                if (this.allowAnonymous || checkOwner(node, sendingclient.loginData.UID))
-                {
-                    //we do need to keep some state data, and note that the node is gone
                     this.state.deleteNode(message.node)
-                    this.Log("deleted " + node.id, 2);
                     xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.derezzed, message.node, node.properties ? node.properties.DisplayName : "", null, this.id);
                 }
-                else
-                {
-                    this.Error('permission denied for deleting ' + node.id, 1);
-                    return;
-                }
-            }
             //We'll only accept a createChild if the user has ownership of the object
             //Note that you now must share a scene with a user!!!!
             if (message.action == "createChild")
             {
-                this.Log(message, 2);
-                var node = this.state.findNode(message.node);
-                if (!node)
-                {
-                    this.Error('server has no record of ' + message.node, 1);
-                    return;
-                }
-                //Keep a record of the new node
-                //remove allow for user to create new node on index-vwf. Must have permission!
                 var childComponent = JSON.parse(JSON.stringify(message.parameters[0]));
-                if (this.allowAnonymous || checkOwner(node, sendingclient.loginData.UID) || childComponent.extends == 'character.vwf')
+                if (!this.state.validateCreate(message.node, childComponent, sendingclient))
                 {
-                    if (!childComponent) return;
-                    var childName = message.member;
-                    if (!childName) return;
-                    var childID = childComponent.id || childComponent.uri || (childComponent["extends"]) + "." + childName.replace(/ /g, '-');
-                    childID = childID.replace(/[^0-9A-Za-z_]+/g, "-");
-                    childComponent.id = childID;
-                    if (!node.children) node.children = {};
-                    node.children[childID] = childComponent;
-                    node.children[childID].parent = node;
-                    if (!childComponent.properties)
-                        childComponent.properties = {};
-                    fixIDs(node.children[childID]);
-                    this.Log("created " + childID, 2);
-                    xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.rezzed, childID, childComponent.properties.DisplayName, null, this.id);
-                }
-                else
-                {
-                    this.Error('permission denied for creating child ' + node.id, 1);
                     return;
                 }
-            }
+                var childID = this.state.createChild(message.node, childComponent, sendingclient)
+                    xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.rezzed, childID, childComponent.properties.DisplayName, null, this.id);
+
+
+                }
             message.instance = this.id;
             var compressedMessage = messageCompress.pack(JSON.stringify(message))
                 //distribute message to all clients on given instance
@@ -881,7 +623,7 @@ function sandboxWorld(id, metadata)
                     if (this.requestTimer)
                         this.requestTimer.deleteMe();
                     var state = message.result;
-                    this.cachedState = JSON.parse(JSON.stringify(state));
+                    this.state.setVWFDef(JSON.parse(JSON.stringify(state)));
                     client.emit('message', messageCompress.pack(JSON.stringify(
                     {
                         "action": "status",
@@ -972,23 +714,15 @@ function sandboxWorld(id, metadata)
             logger.error(e.stack);
         }
     }
-    this.disconnect = function(socket)
+    this.disconnect = function(client)
     {
-        logger.info(socket.id);
+        logger.info(client.id);
         logger.info(Object.keys(this.clients));
-        this.removeClient(socket);
+        this.removeClient(client);
         logger.info(this.clientCount());
-        var self = this
-        DAL.getInstance(this.id, function(instancedata)
-        {
-            if (!instancedata)
-            {
-                instancedata = {};
-                instancedata.title = namespace;
-                instancedata.description = '';
-            }
-            xapi.sendStatement(socket.loginData.UID, xapi.verbs.left, self.id, instancedata.title, instancedata.description, self.id);
-        });
+
+        xapi.sendStatement(client.loginData.UID, xapi.verbs.left, this.id, this.metadata.title, this.metadata.description, this.id);
+
         if (this.clientCount() == 0)
         {
             this.shutdown();
@@ -997,12 +731,12 @@ function sandboxWorld(id, metadata)
         {
             try
             {
-                var loginData = socket.loginData;
-                logger.debug(socket.id, loginData, 2)
+                var loginData = client.loginData;
+                logger.debug(client.id, loginData, 2)
                     //thisInstance.clients[socket.id] = null;
                     //if it's the last client, delete the data and the timer
                     //message to each user the join of the new client. Queue it up for the new guy, since he should not send it until after getstate
-                this.messageDisconnection(socket.id, socket.loginData ? socket.loginData.Username : null);
+                this.messageDisconnection(client.id, client.loginData ? client.loginData.Username : null);
                 if (loginData && loginData.clients)
                 {
                     console.log("Disconnect. Deleting node for user avatar " + loginData.UID);
@@ -1052,4 +786,3 @@ function sandboxWorld(id, metadata)
     }
 }
 exports.sandboxWorld = sandboxWorld;
-exports.stateToScene = stateToScene;
