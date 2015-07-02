@@ -81,6 +81,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 			}
 		});
 
+		window._AssetLibrary = data;
 		return data;
 	}]);
 

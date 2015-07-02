@@ -105,7 +105,7 @@ mixin manageAssets_body
 			#buttons.horizontalLayout
 				input(type='button', ng-click='saveData(selected.id)', ng-value='selectedAsset === "new" ? "Upload" : "Save"'
 					ng-disabled='!selectedAsset || !selected._dirty')
-				input(type='button', ng-click='selectedAsset === "new" ? resetNew() : refreshData(selected.id)', value='Discard Changes'
+				input(type='button', ng-click='selectedAsset === "new" ? resetNew() : assets.refresh(selected.id)', value='Discard Changes'
 					ng-disabled='(!selectedAsset || !selected._dirty) && !selected._added')
 				input(type='button', ng-click='deleteData(selected.id)' value='Delete'
 					ng-disabled='!selectedAsset || selectedAsset === "new"')

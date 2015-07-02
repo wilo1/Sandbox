@@ -15,7 +15,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 				scope.$watch('data', function(newval)
 				{
 					elem.accordion('refresh');
-				}, true);
+				});
 
 				elem.bind('$destroy', function(){
 					elem.accordion('destroy');
@@ -45,11 +45,114 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 		return libraries;
 	}]);
 
-	app.controller('EntityLibraryController', ['$scope','LibraryDataManager', function($scope, staticLibs)
+	app.controller('EntityLibraryController', ['$scope','LibraryDataManager','AssetDataManager', function($scope, staticLibs, assets)
 	{
 		window._EntityLibrary = $scope;
-
+		
+		$scope.assets = assets;
 		$scope.staticLibs = staticLibs;
+
+		function convertAndCombine(dynamicLib, staticLib)
+		{
+			var combinedLibs = [];
+
+			var defs = [
+				{
+					name: "My Entities",
+					filter: function(asset){
+						return /^application\/vnd\.vws-entity\+json$/.test(asset.type);
+					},
+					entityType: 'asset'
+				},
+				{
+					name: "My Models",
+					filter: function(asset){
+						return /^model\//.test(asset.type);
+					},
+					transform: function(asset, libitem){
+						var modelType = /^model\/(.+)$/.exec(asset.type);
+						if( modelType ){
+							libitem.modelType = 'subDriver/threejs/asset/'+modelType[1];
+							libitem.dropPreview = {
+								'url': libitem.url,
+								'type': libitem.modelType,
+								'transform': [
+									1,0,0,0,
+									0,1,0,0,
+									0,0,1,0,
+									0,0,0,1
+								]
+							};
+						}
+					},
+					entityType: 'model'
+				},
+				{
+					name: "My Materials",
+					filter: function(asset){
+						return /^application\/vnd\.vws-material\+json$/.test(asset.type);
+					},
+					entityType: 'material'
+				},
+				{
+					name: "My Textures",
+					filter: function(asset){
+						return /^image\//.test(asset.type) && asset.isTexture;
+					},
+					entityType: 'texture'
+				},
+				{
+					name: "My Behaviors",
+					filter: function(asset){
+						return /^application\/vnd\.vws-behavior\+json$/.test(asset.type);
+					},
+					entityType: 'child'
+				}
+			];
+
+			// generate dynamic libs and append
+			for(var i=0; i<defs.length; i++){
+				combinedLibs.push( {name: defs[i].name, content: []} );
+			}
+
+			// populate combined libs
+			for(var i in dynamicLib)
+			{
+				for(var j=0; j<defs.length; j++){
+					if( defs[j].filter( dynamicLib[i] ) )
+					{
+						var libitem = {};
+						libitem.name = dynamicLib[i].name || i;
+						libitem.url = dynamicLib.appPath+'/assets/'+i;
+						libitem.preview = dynamicLib[i].thumbnail ?
+							dynamicLib.appPath+'/assets/'+i+'/meta/thumbnail'
+							: "./img/VWS_Logo.png";
+						libitem.type = defs[j].entityType;
+						libitem.sourceAssetId = i;
+
+						if( defs[j].transform )
+							defs[j].transform(dynamicLib[i], libitem);
+							
+						combinedLibs[j].content.push(libitem);
+						break;
+					}
+				}
+			}
+
+			// append static libs to set
+			Array.prototype.push.apply(combinedLibs, staticLib);
+
+			return combinedLibs;
+		}
+
+		$scope.combinedLibs = convertAndCombine(assets, staticLibs);
+
+		$scope.$watch('assets', function(newval){
+			$scope.combinedLibs = convertAndCombine(newval, staticLibs);
+		},true);
+		$scope.$watch('staticLibs', function(newval){
+			$scope.combinedLibs = convertAndCombine(assets, newval);
+		},true);
 
 		$scope.isOpen = false;
 
@@ -67,20 +170,21 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			}
 		}
 
-		$scope.show = function() {
-
+		$scope.show = function()
+		{
+			$scope.assets.refresh();
 			$('#EntityLibrary').animate({
-				'left': 0
+				left: 0
 			});
 			var w = $(window).width() - 250 - ($(window).width() - getLeft('sidepanel',$(window).width()));
 			$('#ScriptEditor').animate({
-				'left': $('#EntityLibrary').width(),
+				left: $('#EntityLibrary').width(),
 				width: w
 			}, {
 				step: _ScriptEditor.resize
 			});
 			$('#index-vwf').animate({
-				'left': $('#EntityLibrary').width(),
+				left: $('#EntityLibrary').width(),
 				width: w
 			}, {
 				step: sizeWindowTimer
@@ -92,20 +196,20 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			$scope.isOpen = true;
 		}
 
-		$scope.hide = function() {
-
+		$scope.hide = function()
+		{
 			$('#EntityLibrary').animate({
-				'left': -$('#EntityLibrary').width()
+				left: -$('#EntityLibrary').width()
 			});
 			var w = $(window).width() - ($(window).width() - getLeft('sidepanel',$(window).width()));
 			$('#ScriptEditor').animate({
-				'left': 0,
+				left: 0,
 				width: w
 			}, {
 				step: _ScriptEditor.resize
 			});
 			$('#index-vwf').animate({
-				'left': 0,
+				left: 0,
 				width: w
 			}, {
 				step: sizeWindowTimer
