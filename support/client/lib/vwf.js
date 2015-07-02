@@ -1086,7 +1086,7 @@ this.isSimulating = function(nodeID)
 }
 this.simulationStateUpdate = function(nodeID,member,state)
 {
-    state = JSON.parse(state);
+    //state = JSON.parse(state);
     for(var nodeID in state)
     {
         if(!nodes.existing[nodeID]) return;
@@ -1119,7 +1119,7 @@ this.postSimulationStateUpdates = function()
     }
    if(Object.keys(updates).length)
     {
-        var payload = JSON.stringify(updates);
+        var payload = updates;//JSON.stringify(updates);
         this.send(vwf.application(),action,"null",payload);
     }
     this.lastPropertyDataUpdates = this.propertyDataUpdates;

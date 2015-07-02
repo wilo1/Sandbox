@@ -594,7 +594,7 @@ function sandboxWorld(id, metadata)
 
 
                 }
-            message.instance = this.id;
+            
             var compressedMessage = messageCompress.pack(JSON.stringify(message))
                 //distribute message to all clients on given instance
             for (var i in this.clients)
