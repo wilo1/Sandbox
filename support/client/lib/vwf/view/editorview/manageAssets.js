@@ -1,10 +1,9 @@
 define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf/view/editorview/UserManager'], function(app, strToBytes)
 {
-	var dataRoot = null;
 	var appHeaderName = '';
 	var uploadVWFObject, setSelection;
 
-	app.service('AssetDataManager', ['$http', function($http)
+	app.service('AssetDataManager', ['$http','$rootScope', function($http, $rootScope)
 	{
 		var data = {};
 
@@ -23,9 +22,11 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 				}
 
 				function updateAsset(id,cb){
-					$http.get(data.appPath+'/assets/'+id+'/meta?permFormat=json').success(function(data){
-						self[id] = data;
-						self[id].id = id;
+					$http.get(data.appPath+'/assets/'+id+'/meta?permFormat=json').success(function(data,status){
+						if( status !== 304 ){
+							self[id] = data;
+							self[id].id = id;
+						}
 						refCountCallback(cb);
 					})
 					.error(function(data,status){
@@ -42,12 +43,14 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 				else {
 					var cb = typeof(id) === 'function' ? id : null;
 					$http.get(self.appPath+'/assets/by-user/'+_UserManager.GetCurrentUserName()).success(
-						function(list)
+						function(list,status)
 						{
-							var ids = Object.keys(list.assets);
-							toComplete = ids.length;
-							for(var i=0; i<ids.length; i++){
-								updateAsset(ids[i], cb);
+							if( status !== 304 ){
+								var ids = Object.keys(list.assets);
+								toComplete = ids.length;
+								for(var i=0; i<ids.length; i++){
+									updateAsset(ids[i], cb);
+								}
 							}
 						}
 					);
@@ -79,6 +82,10 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 					}
 				});
 			}
+		});
+
+		$rootScope.$watch('fields.worldIsReady', function(){
+			data.refresh();
 		});
 
 		window._AssetLibrary = data;
@@ -188,7 +195,6 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 	app.controller('AssetManagerController', ['$scope','$http','AssetDataManager', function($scope, $http, assets)
 	{
 		$scope.assets = assets;
-		dataRoot = assets;
 
 		$scope.selectedAsset = null;
 		$scope.hideThumbs = true;
@@ -616,10 +622,6 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 				autoOpen: false
 			});
 
-		},
-
-		refreshData: function(cb){
-			dataRoot.refresh(cb);
 		},
 
 		uploadSelectedEntity: function(overwrite)

@@ -48,52 +48,41 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 		{
 			// hook up assets menu
 			MenuManageAssets: function(e){
-				manageAssets.refreshData();
 				$('#manageAssetsDialog').dialog('open');
 			},
 
 			MenuAssetsSaveAsEntity: function(e){
-				manageAssets.refreshData();
 				manageAssets.uploadSelectedEntity();
 				$('#manageAssetsDialog').dialog('open');
 			},
 
 			MenuAssetsSaveAsMaterial: function(e){
-				manageAssets.refreshData();
 				manageAssets.uploadSelectedMaterial();
 				$('#manageAssetsDialog').dialog('open');
 			},
 
 			MenuAssetsSaveAsBehavior: function(e){
-				manageAssets.refreshData();
 				manageAssets.uploadSelectedBehavior();
 				$('#manageAssetsDialog').dialog('open');
 			},
 
 			MenuAssetsSaveAsFile: function(e){
-				manageAssets.refreshData();
 				manageAssets.uploadFile();
 				$('#manageAssetsDialog').dialog('open');
 			},
 
 			MenuAssetsSaveEntity: function(e){
-				manageAssets.refreshData(function(){
-					manageAssets.uploadSelectedEntity(true);
-				});
+				manageAssets.uploadSelectedEntity(true);
 				$('#manageAssetsDialog').dialog('open');
 			},
 
 			MenuAssetsSaveMaterial: function(e){
-				manageAssets.refreshData(function(){
-					manageAssets.uploadSelectedMaterial(true);
-				});
+				manageAssets.uploadSelectedMaterial(true);
 				$('#manageAssetsDialog').dialog('open');
 			},
 
 			MenuAssetsSaveBehavior: function(e){
-				manageAssets.refreshData(function(){
-					manageAssets.uploadSelectedBehavior(true);
-				});
+				manageAssets.uploadSelectedBehavior(true);
 				$('#manageAssetsDialog').dialog('open');
 			},
 

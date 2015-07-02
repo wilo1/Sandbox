@@ -21,5 +21,5 @@ mixin EntityLibrary_body
 					a(href="#"): strong {{lib.name}}
 				.modifiersection(ng-repeat-end)
 					.libraryAsset(ng-repeat='asset in lib.content', ng-click='create(asset, $event)', draggable-asset='asset')
-						img(ng-src='{{asset.preview}}')
+						lazy-img(src='asset.preview', load-when='isOpen')
 						div {{asset.name}}

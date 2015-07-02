@@ -24,6 +24,43 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 		};
 	});
 
+	app.directive('lazyImg', function()
+	{
+		return {
+			restrict: 'E',
+			template: '<img></img>',
+			scope: {
+				src: '=',
+				loadWhen: '='
+			},
+			link: function($scope, elem, attrs)
+			{
+				var deregister = null;
+				$scope.$watch('src', function(srcval)
+				{
+					if(deregister){
+						deregister();
+						deregister = null;
+					}
+
+					if( $scope.loadWhen ){
+						elem[0].children[0].src = srcval;
+					}
+					else
+					{
+						deregister = $scope.$watch('loadWhen', function(loadval){
+							if(loadval){
+								elem[0].children[0].src = srcval;
+								deregister();
+								deregister = null;
+							}
+						});
+					}
+				});
+			}
+		};
+	});
+
 	app.service('LibraryDataManager', ['$http', function($http)
 	{
 		var libraries = [];
@@ -172,7 +209,6 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 
 		$scope.show = function()
 		{
-			$scope.assets.refresh();
 			$('#EntityLibrary').animate({
 				left: 0
 			});
