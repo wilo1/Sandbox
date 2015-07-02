@@ -327,7 +327,6 @@ function sandboxWorld(id, metadata)
     {
         return "Anonymous_" + socket.id
     }
-    this.resyncCounter = 0;
     this.totalerr = 0;
     //instead of starting the timer when the object is initialzied, let's start the timer after the state has been served to the first client
     this.startTimer = function()
@@ -356,22 +355,6 @@ function sandboxWorld(id, metadata)
                     "origin": "reflector",
                 };
                 self.messageClients(tickmessage);
-                self.resyncCounter++;
-                if (self.resyncCounter == 10)
-                {
-                    self.resyncCounter = 0;
-                    var syncClient = self.getLoadClient();
-                    var syncmessage = messageCompress.pack(JSON.stringify(
-                    {
-                        "action": "activeResync",
-                        "parameters": [],
-                        "time": self.time, //mark so the client will process before any ticks
-                        "respond": true,
-                        "origin": "reflector",
-                    }));
-                    if (syncClient)
-                        syncClient.emit('message', syncmessage)
-                }
             }
             self.lasttime = now;
         }.bind(self);
@@ -605,7 +588,8 @@ function sandboxWorld(id, metadata)
                 {
                     return;
                 }
-                var childID = this.state.createChild(message.node, childComponent, sendingclient)
+                var childID = this.state.createChild(message.node, message.member, childComponent)
+                console.log("created: " + childID)
                     xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.rezzed, childID, childComponent.properties.DisplayName, null, this.id);
 
 
@@ -643,42 +627,8 @@ function sandboxWorld(id, metadata)
                     }
                     client.pendingList = [];
                 }
-                else if (message.action == "activeResync")
-                {
-                    //here we deal with continual resycn messages
-                    var node = message.result.node;
-                    if (false && !global.configuration.disableResync && node)
-                    {
-                        if (message.time >= this.time)
-                        {
-                            delete node.children; //remove children or we could end up getting large trees
-                            this.messageClients(
-                            {
-                                "action": "resyncNode",
-                                "parameters": [node.id, node],
-                                "time": this.time, //process before any ticks
-                                "origin": "reflector"
-                            });
-                        }
-                        else
-                        {
-                            logger.info('rejecting resync data from the past');
-                            logger.info(message.time, this.time);
-                        }
-                    }
-                }
                 else
                 {
-                    if (message.action == "createChild")
-                    {
-                        console.log('client simulate own node:' + childID)
-                        this.messageClient(sendingclient, messageCompress.pack(JSON.stringify(
-                        {
-                            "action": "startSimulating",
-                            "parameters": [childID],
-                            "time": this.time
-                        })));
-                    }
                     //just a regular message, so push if the client is pending a load, otherwise just send it.
                     if (client.pending == true)
                     {
@@ -705,6 +655,17 @@ function sandboxWorld(id, metadata)
                     }
                 }
             }
+            if (message.action == "createChild")
+            {
+                console.log('client simulate own node:' + childID)
+                this.messageClient(sendingclient, messageCompress.pack(JSON.stringify(
+                {
+                    "action": "startSimulating",
+                    "parameters": [childID],
+                    "time": this.time
+                })));
+            }
+
         }
         catch (e)
         {
