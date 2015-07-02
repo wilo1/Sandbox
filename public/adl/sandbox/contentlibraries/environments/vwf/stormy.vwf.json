@@ -52,7 +52,8 @@
                 }
             ],
             "type": "phong",
-            "side": 2
+            "side": 2,
+			"wireframe": false
         },
         "shadowDarkness": 0.3,
         "simTime": 0,
@@ -67,5 +68,4 @@
         "sunIntensity": 0.2,
         "vAtmosphereDensity": 0.0005
     }
-    
 }
