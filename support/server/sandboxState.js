@@ -141,14 +141,7 @@ var sandboxState = function(id, metadata)
     this.nodes = {};
     this.setup = function(state)
     {
-        if (!state)
-        {
-            
-            state = [
-            {
-                owner: instancedata.owner
-            }];
-        }
+        
 
         this.nodes['index-vwf'] = {
             id: "index-vwf",
@@ -312,6 +305,15 @@ var sandboxState = function(id, metadata)
     var self = this;
     SandboxAPI.getState(this.id, function(state)
     {
+        //create the basic structure if the DAL layer returns null
+        if (!state)
+        {
+            state = [
+            {
+                owner: self.metadata.owner
+            }];
+        }
+
         //turn DB state into VWF root node def
         DBstateToVWFDef(state, self.metadata, function(scene)
         {
