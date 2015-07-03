@@ -10,28 +10,28 @@ YAML = require('js-yaml');
 var logger = require('./logger');
 var xapi = require('./xapi');
 var sandboxState = require('./sandboxState').sandboxState;
-
-    //***node, uses REGEX, escape properly!
+var _simulationManager = require('./simulationManager').simulationManager;
+//***node, uses REGEX, escape properly!
 function strEndsWith(str, suffix)
-    {
-        return str.match(suffix + "$") == suffix;
-    }
-    //Is an event in the websocket stream a mouse event?
+{
+    return str.match(suffix + "$") == suffix;
+}
+//Is an event in the websocket stream a mouse event?
 function isPointerEvent(message)
-    {
-        if (!message) return false;
-        if (!message.member) return false;
-        return (message.member == 'pointerMove' ||
-            message.member == 'pointerHover' ||
-            message.member == 'pointerEnter' ||
-            message.member == 'pointerLeave' ||
-            message.member == 'pointerOver' ||
-            message.member == 'pointerOut' ||
-            message.member == 'pointerUp' ||
-            message.member == 'pointerDown' ||
-            message.member == 'pointerWheel'
-        )
-    }
+{
+    if (!message) return false;
+    if (!message.member) return false;
+    return (message.member == 'pointerMove' ||
+        message.member == 'pointerHover' ||
+        message.member == 'pointerEnter' ||
+        message.member == 'pointerLeave' ||
+        message.member == 'pointerOver' ||
+        message.member == 'pointerOut' ||
+        message.member == 'pointerUp' ||
+        message.member == 'pointerDown' ||
+        message.member == 'pointerWheel'
+    )
+}
 
 
 function SaveInstanceState(namespace, data, socket)
@@ -174,6 +174,7 @@ function sandboxWorld(id, metadata)
     this.state = {};
     this.metadata = metadata;
     this.allowAnonymous = false;
+    this.simulationManager = new _simulationManager(this);
     if (this.metadata.publishSettings && this.metadata.publishSettings.allowAnonymous)
         this.allowAnonymous = true;
     var log = null;
@@ -374,41 +375,40 @@ function sandboxWorld(id, metadata)
         //Get the state and load it.
         //Now the server has a rough idea of what the simulation is
         var self = this;
-        this.state = new sandboxState(this.id,this.metadata);
+        this.state = new sandboxState(this.id, this.metadata);
+        this.simulationManager.addClient(socket);
         this.state.on('loaded', function()
         {
             var scene = self.state.getVWFDef();
-                socket.emit('message', messageCompress.pack(JSON.stringify(
-                {
-                    "action": "status",
-                    "parameters": ["State loaded, sending..."],
-                    "time": self.time
-                })));
-                console.log('got  blank scene');
+            socket.emit('message', messageCompress.pack(JSON.stringify(
+            {
+                "action": "status",
+                "parameters": ["State loaded, sending..."],
+                "time": self.time
+            })));
+            console.log('got  blank scene');
 
-                //note: don't have to worry about pending status here, client is first
-                socket.emit('message', messageCompress.pack(JSON.stringify(
-                {
-                    "action": "createNode",
-                    "parameters": [scene],
-                    "time": self.time
-                })));
-                socket.emit('message', messageCompress.pack(JSON.stringify(
-                {
-                    "action": "startSimulating",
-                    "parameters": ["index-vwf"],
-                    "time": 0
-                })));
-                socket.emit('message', messageCompress.pack(JSON.stringify(
-                {
-                    "action": "fireEvent",
-                    "parameters": ["loaded", []],
-                    node: "index-vwf",
-                    "time": self.time
-                })));
-                socket.pending = false;
-                self.startTimer();
-                cb();
+            //note: don't have to worry about pending status here, client is first
+            socket.emit('message', messageCompress.pack(JSON.stringify(
+            {
+                "action": "createNode",
+                "parameters": [scene],
+                "time": self.time
+            })));
+
+
+            self.simulationManager.startScene();
+
+            socket.emit('message', messageCompress.pack(JSON.stringify(
+            {
+                "action": "fireEvent",
+                "parameters": ["loaded", []],
+                node: "index-vwf",
+                "time": self.time
+            })));
+            socket.pending = false;
+            self.startTimer();
+            cb();
 
         })
     }
@@ -570,15 +570,17 @@ function sandboxWorld(id, metadata)
                     return;
                 }
 
-                }
+            }
             if (message.action == "setProperty")
                 this.state.setProperty(message.node, message.member, message.parameters[0]);
             //We'll only accept a deleteNode if the user has ownership of the object
             if (message.action == "deleteNode")
             {
-                    this.state.deleteNode(message.node)
-                    xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.derezzed, message.node, node.properties ? node.properties.DisplayName : "", null, this.id);
-                }
+                this.state.deleteNode(message.node)
+                var node = this.state.findNode(message.node) || {};
+                this.simulationManager.nodeDeleted(message.node);
+                xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.derezzed, message.node, node.properties ? node.properties.DisplayName : "", null, this.id);
+            }
             //We'll only accept a createChild if the user has ownership of the object
             //Note that you now must share a scene with a user!!!!
             if (message.action == "createChild")
@@ -590,11 +592,11 @@ function sandboxWorld(id, metadata)
                 }
                 var childID = this.state.createChild(message.node, message.member, childComponent)
                 console.log("created: " + childID)
-                    xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.rezzed, childID, childComponent.properties.DisplayName, null, this.id);
+                xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.rezzed, childID, childComponent.properties.DisplayName, null, this.id);
 
 
-                }
-            
+            }
+
             var compressedMessage = messageCompress.pack(JSON.stringify(message))
                 //distribute message to all clients on given instance
             for (var i in this.clients)
@@ -658,12 +660,7 @@ function sandboxWorld(id, metadata)
             if (message.action == "createChild")
             {
                 console.log('client simulate own node:' + childID)
-                this.messageClient(sendingclient, messageCompress.pack(JSON.stringify(
-                {
-                    "action": "startSimulating",
-                    "parameters": [childID],
-                    "time": this.time
-                })));
+                this.simulationManager.nodeCreated(childID,sendingclient);
             }
 
         }
@@ -694,9 +691,9 @@ function sandboxWorld(id, metadata)
             {
                 var loginData = client.loginData;
                 logger.debug(client.id, loginData, 2)
-                    //thisInstance.clients[socket.id] = null;
-                    //if it's the last client, delete the data and the timer
-                    //message to each user the join of the new client. Queue it up for the new guy, since he should not send it until after getstate
+                //thisInstance.clients[socket.id] = null;
+                //if it's the last client, delete the data and the timer
+                //message to each user the join of the new client. Queue it up for the new guy, since he should not send it until after getstate
                 this.messageDisconnection(client.id, client.loginData ? client.loginData.Username : null);
                 if (loginData && loginData.clients)
                 {
