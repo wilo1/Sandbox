@@ -7,8 +7,8 @@ var simClient = function(sandboxClient, simulationManager)
     this.nodesSimulating = [];
     this.startSimulatingScene = function()
     {
-        var nodes = this.manager.world.state.decendants('index-vwf')
-        for (var i in nodes)
+        var nodes = this.manager.world.state.children('index-vwf')
+        for (var i =0; i < nodes.length; i++)
         {
             if (this.nodesSimulating.indexOf(nodes[i]) == -1)
                 this.nodesSimulating.push(nodes[i])
@@ -60,12 +60,17 @@ var simulationManager = function(world)
     this.clients = {};
     this.addClient = function(sandboxClient)
     {
-        var average = this.clientAverageLoad();
+        
         var newClient = new simClient(sandboxClient,this);
+        //must add to list to get proper average load, then remove so we don't keep distributing
+        //nodes from new client to new client
+        this.clients[sandboxClient.id] = newClient;
+        var average = this.clientAverageLoad();
+        delete this.clients[sandboxClient.id];
 
         var counter = 0;
         //divide up work distribute until new client shares load
-        while (newClient.nodesSimulating.length < average - 1)
+        while (newClient.nodesSimulating.length < average )
         {
             var nextClient = this.clients[Object.keys(this.clients)[counter]];
             var node = nextClient.nodesSimulating[0];
@@ -96,7 +101,7 @@ var simulationManager = function(world)
         {
             for (var i in this.clients)
             {
-                var node = nodes.unshift();
+                var node = nodes.shift();
                 if (node)
                     this.clients[i].startSimulatingNode(node);
             }

@@ -173,6 +173,17 @@ var sandboxState = function(id, metadata)
     {
         this.VWFDef = newDef;
     }
+    this.children = function(nodeid)
+    {
+        var root = this.findNode(nodeid);
+        var list = [];
+        if(!root ||!root.children) return list;
+        for(var i in root.children)
+        {
+            list.push(root.children[i].id);
+        }
+        return list;
+    }
     this.decendants = function(nodeid)
     {
         var root = this.findNode(nodeid);

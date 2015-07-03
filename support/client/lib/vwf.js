@@ -1070,7 +1070,7 @@ this.startSimulating = function(nodeID)
         this.nodesSimulating.push(nodes[i]);
     }
 }
-this.endSimulating = function(nodeID)
+this.stopSimulating = function(nodeID)
 {
     var nodes = this.decendants(nodeID);
     nodes.push(nodeID);

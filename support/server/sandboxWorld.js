@@ -453,6 +453,14 @@ function sandboxWorld(id, metadata)
         else
         {
             this.requestState();
+
+            var self = this;
+            var distributeSim = function()
+            {
+                self.simulationManager.addClient(client);
+                this.removeListener('stateSent',distributeSim);
+            }
+            this.on('stateSent',distributeSim)
             //loadClient.pending = true;
             client.emit('message', messageCompress.pack(JSON.stringify(
             {
@@ -576,10 +584,11 @@ function sandboxWorld(id, metadata)
             //We'll only accept a deleteNode if the user has ownership of the object
             if (message.action == "deleteNode")
             {
-                this.state.deleteNode(message.node)
+               
                 var node = this.state.findNode(message.node) || {};
                 this.simulationManager.nodeDeleted(message.node);
                 xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.derezzed, message.node, node.properties ? node.properties.DisplayName : "", null, this.id);
+                 this.state.deleteNode(message.node)
             }
             //We'll only accept a createChild if the user has ownership of the object
             //Note that you now must share a scene with a user!!!!
@@ -623,6 +632,7 @@ function sandboxWorld(id, metadata)
                         "time": this.getStateTime
                     })));
                     client.pending = false;
+                    this.trigger('stateSent');
                     for (var j = 0; j < client.pendingList.length; j++)
                     {
                         client.emit('message', client.pendingList[j]);
@@ -695,6 +705,7 @@ function sandboxWorld(id, metadata)
                 //if it's the last client, delete the data and the timer
                 //message to each user the join of the new client. Queue it up for the new guy, since he should not send it until after getstate
                 this.messageDisconnection(client.id, client.loginData ? client.loginData.Username : null);
+                this.simulationManager.removeClient(client)
                 if (loginData && loginData.clients)
                 {
                     console.log("Disconnect. Deleting node for user avatar " + loginData.UID);
