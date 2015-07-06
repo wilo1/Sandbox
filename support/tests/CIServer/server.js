@@ -610,10 +610,10 @@ server.on('request', function(request, response) {
 		});
 	}
 });
-var port = 80;
+var port = 8181;
 
 var p = process.argv.indexOf('-p');
-port = p >= 0 ? parseInt(process.argv[p + 1]) : 80;
+port = p >= 0 ? parseInt(process.argv[p + 1]) : 8181;
 
 server.listen(port);
 if (process.argv.indexOf('start') > -1)
