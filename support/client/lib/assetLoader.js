@@ -584,6 +584,48 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                         _SceneManager.getTexture(url);
                         cb2();
                     }
+                    this.s3dToVWF = function(s3d_url,cb2)
+                    {
+                        var s3d = null;
+                        var vwfDef = {};
+                        $.getJSON(s3d_url, function(data) {
+                            s3d = data;
+                            vwfDef.source = s3d_url;
+                            vwfDef.type = 'subDriver/threejs/asset/vnd.SAVE+json';
+
+
+
+                            cb2();
+                        }    
+                    }
+                    //load the SAVE JSON, get the asset file, modify the scenegraph as required, return to engine
+                    this.loadSAVE = function(url, cb2)
+                    {
+                        var JSON = null;
+                        var COLLADA = null;
+                        async.series([
+                            function getSAVEJSON(cb)
+                            {
+                                $.getJSON(url, function(data) {
+                                    JSON = data;
+                                });
+                            },
+                            function getCOLLADAFile(cb){
+                                assetLoader.loadCollada(JSON.semantic_mapping.asset.uri,function(asset)
+                                {
+                                    COLLADA = asset.scene;
+                                    cb();
+                                })
+                            },
+                            function applyMapping(cb){
+
+
+                            }
+                        ], function complete(e)
+                        {
+                            cb2(COLLADA) //here we need to return to Sandbox the
+                        });
+                    }
                     this.loadTerrain = function(url, cb2)
                     {
                         var type = url.substr(url.lastIndexOf('.') + 1).toLowerCase();
@@ -609,6 +651,7 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                     this.addType('subDriver/threejs/asset/vnd.raw-animation', this.loadglTFAnimation);
                     this.addType('subDriver/threejs/asset/vnd.osgjs+json+compressed+optimized', this.loadUTf8JsonOptimized);
                     this.addType('subDriver/threejs/asset/vnd.raw-morphttarget', this.loadMorph);
+                    this.addType('subDriver/threejs/asset/vnd.SAVE+json', this.loadSAVE);
                     this.addType('terrain', this.loadTerrain);
                     this.addType('texture', this.loadTexture);
                     this.addType('subDriver/threejs', this.loadSubDriver);
