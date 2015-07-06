@@ -76,7 +76,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/Menubar'], funct
 	return {
 		initialize: function()
 		{
-			$('#toolbar').show();
+			//$('#toolbar').show();
 		}
 	};
 });

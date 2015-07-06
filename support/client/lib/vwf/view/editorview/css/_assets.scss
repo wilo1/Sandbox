@@ -242,11 +242,3 @@
 
 }
 
-.verticalLayout {
-	@include display-flex();
-	@include flex-direction(column);
-}
-.horizontalLayout {
-	@include display-flex();
-	@include flex-direction(row);
-}

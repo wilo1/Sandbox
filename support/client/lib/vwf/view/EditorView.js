@@ -52,7 +52,7 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/lib/alertify.js-0.
                         dataType: 'html'
                     }).responseText;
                     $(document.body).append(data);*/
-					$('#smoothmenu1').show();
+					//$('#smoothmenu1').show();
                     $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/lib/ddsmoothmenu.js"></script>');
 
 
@@ -270,6 +270,8 @@ function InitializeEditor() {
         //_EditorView.addManager(require("vwf/view/editorview/Menubar"));
         require("vwf/view/editorview/SideTabs").initialize();
         
+		$('#toolbarLevel').show();
+
         $(document.head).append('<script type="text/javascript" src="vwf/view/localization/translate.js"></script>');
         translateMenu();
         //default to select mode

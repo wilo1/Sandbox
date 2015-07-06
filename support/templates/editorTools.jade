@@ -14,9 +14,20 @@ mixin editorTools_head
 	+EntityLibrary_head
 
 mixin editorTools_body
-	+menus_body
-	+toolbar_body
-	+manageAssets_body
-	+statusbar_body
+
+	#toolbarLevel.verticalLayout(style='display: none;')
+		+menus_body
+		+toolbar_body
+
+		#panelLevel.horizontalLayout
+			+EntityLibrary_body
+
+			#editorLevel.verticalLayout
+				#vwf-root
+					#glyphOverlay(style='display: none;')
+					iframe#resizer(href='about:blank', frameborder='0')
+
+		+statusbar_body
+		
 	+3DRIntegration_body
-	+EntityLibrary_body
+	+manageAssets_body

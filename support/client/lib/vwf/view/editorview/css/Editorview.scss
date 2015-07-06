@@ -1,6 +1,9 @@
+@import 'polyfill';
+
 @import 'assets';
 @import 'toolbar';
-
+@import 'statusbar';
+@import 'EntityLibrary';
 
 @-webkit-keyframes pulsing {
 	0% {
@@ -45,6 +48,21 @@
 	-webkit-animation-direction: alternate;
 	-webkit-animation-timing-function: linear;
 	-webkit-animation-play-state: running;*/
+}
+
+.verticalLayout {
+	@include display-flex();
+	@include flex-direction(column);
+	width: 100%;
+}
+.horizontalLayout {
+	@include display-flex();
+	@include flex-direction(row);
+	height: 100%;
+}
+
+#toolbarLevel.verticalLayout {
+	height: 100%;
 }
 
 #InventoryControls {
@@ -101,71 +119,6 @@
 	background-blend-mode: multiply;
 	background-origin: inherit;
 	max-width: 190px;
-}
-
-.timeControlActive {
-	background-color: blue;
-}
-
-#TimeControl {
-	height: 59px;
-	display: inline-block;
-	margin-top: -45px;
-	background: #444;
-	border-radius: 5px;
-	border: 1px solid #555555;
-	padding: 4px 4px 4px 4px;
-}
-
-#playButton {
-	background-image: url(../images/icons/sprites.svg) !important;
-	background-origin: content-box !important;
-	background-position: -212px -56px;
-	background-size: 646px;
-}
-
-#pauseButton {
-	background-image: url(../images/icons/sprites.svg) !important;
-	background-origin: content-box !important;
-	background-position: -262px -56px;
-	background-size: 645px;
-}
-
-#stopButton {
-	background-image: url(../images/icons/sprites.svg) !important;
-	background-origin: content-box !important;
-	background-position: -349px -65px;
-	background-size: 718px;
-}
-
-.timeControl {
-	text-indent: 0px;
-	display: inline-block;
-	color: #777777;
-	font-family: 'Open Sans',Arial;
-	font-size: 27px;
-	font-weight: bold;
-	font-style: normal;
-	height: 45px;
-	line-height: 45px;
-	width: 50px;
-	text-decoration: none;
-	text-align: center;
-	text-shadow: 1px 1px 0px white;
-	vertical-align: bottom;
-	margin-bottom: -3px;
-	cursor: pointer;
-	margin-right: 2px;
-	margin-bottom: -4px;
-	/* border-radius: 6px; */
-}
-
-.timeControl:hover {
-	background-color: #dfdfdf;
-}
-
-.timeControl:active {
-	background-color: #dfdfff;
 }
 
 /* This button was generated using CSSButtonGenerator.com */
@@ -420,9 +373,9 @@ canvas:focus {
 
 .nametag {
 	/* pointer-events: none; */
-	position: fixed;
-	left: 612.7792636991876px;
-	top: 350.056008871367px;
+	position: absolute;
+	/*left: 612.7792636991876px;
+	top: 350.056008871367px;*/
 	color: white;
 	text-shadow: 1px 1px 2px black;
 	padding: 0px 18px 0px 18px;
@@ -457,22 +410,6 @@ canvas:focus {
 	width: 4em;
 }
 
-.statusbar {
-	position: fixed;
-	width: 100%;
-	height: 25px;
-	z-index: 201;
-	background: #444;
-	white-space: nowrap;
-}
-
-#statusbarinner {
-	display: inline-block;
-	width: 100%;
-	background: #414141;
-	/* Old browsers */
-}
-
 .usertable {
 	width: 100%;
 	margin-bottom: 5px;
@@ -496,22 +433,6 @@ canvas:focus {
 	border-radius: 5px;
 	width: 100%;
 	padding-bottom: 1px;
-}
-
-.statusbarElement {
-	display: inline;
-	height: 100%;
-	padding-left: 5px;
-	padding-right: 5px;
-	line-height: 25px;
-	border-radius: 0px;
-	color: gray;
-	margin-left: 3px;
-	margin-right: 3px;
-	font-family: 'Open Sans',sans-serif;
-	font-size: 1.3em;
-	/* text-shadow: 1px 1px 3px black; */
-	border-left: 1px solid;
 }
 
 #sidepanel {
@@ -1325,89 +1246,6 @@ canvas:focus {
 .guiselected:hover {
 	outline: 3px solid blue !important;
 }
-
-#EntityLibrary {
-	width: 250px;
-	position: absolute;
-	background: #444;
-	height: 100%;
-	left: -250px;
-	top: 62px;
-}
-
-#EntityLibrarySideTab:hover {
-	color: #82b8ff;
-}
-
-#EntityLibrarySideTab {
-	position: relative;
-	left: 209px;
-	width: 73px;
-	top: 24px;
-	height: 45px;
-	-webkit-transform: rotate(90deg);
-	-moz-transform: rotate(90deg);
-	transform: rotate(90deg);
-	font-size: 12px;
-	font-family: 'Open Sans',sans-serif;
-	text-align: center;
-	/* border-radius: 7px; */
-	border: 2px solid #82b8ff;
-	color: white;
-	text-shadow: 1px 1px 3px black;
-	cursor: pointer;
-	background: #4c4c4c;
-	padding-left: 0px;
-	z-index: 20;
-}
-
-#EntityLibraryMain {
-	width: 247px;
-	height: auto;
-	position: absolute;
-	top: 0px;
-	z-index: 30;
-	overflow: auto;
-	background: #515151 url(../../../../images/ui-bg_diagonals-thick_8_333333_40x40.png) 0% 0% repeat;
-	background-size: 5%;
-	margin-top: 3px;
-	padding-right: 3px;
-}
-
-.libraryAsset {
-	text-align: center;
-	display: inline-block;
-	margin-right: 1.5em;
-	width: 73px;
-	height: 75px;
-	margin-bottom: 9px;
-}
-
-.libraryAsset div {
-	color: whitesmoke;
-	text-shadow: 1px 1px 5px black;
-	overflow: hidden;
-	background: rgba(0, 0, 0, 0.5);
-	z-index: 100;
-	position: relative;
-	/* border-radius: 10px; */
-	pointer-events: none;
-}
-
-.libraryAsset img {
-	width: 75px;
-	height: 75px;
-	box-sizing: border-box;
-	margin-bottom: -19px;
-	border-radius: 3px;
-	/* box-shadow: 2px 2px 5px gray; */
-	-webkit-transition: opactiy 2s;
-	/* For Safari 3.1 to 6.0 */
-	-blink-transition: opactiy 2s;
-	/* For Safari 3.1 to 6.0 */
-	transition: opactiy 2s;
-}
-
 /* Let's get this party started */
 ::-webkit-scrollbar {
 	width: 8px;

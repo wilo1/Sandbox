@@ -69,10 +69,9 @@ html
 
 			The main content renders to "#vwf-root", the item with the id "vwf-root".
 
-		div#vwf-root
+		//div#vwf-root
 
 		//- Overlay div to display loading information
-		div#glyphOverlay(style='display: none;')
 
 		//- asset preload loading screen
 		div#preloadGUIBack(style='display:none')
@@ -87,3 +86,5 @@ html
 
 		if needsTools
 			+editorTools_body
+		else
+			#vwf-root.verticalLayout

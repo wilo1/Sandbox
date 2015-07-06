@@ -210,7 +210,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 		$scope.show = function()
 		{
 			$('#EntityLibrary').animate({
-				left: 0
+				width: 300
 			});
 			var w = $(window).width() - 250 - ($(window).width() - getLeft('sidepanel',$(window).width()));
 			$('#ScriptEditor').animate({
@@ -219,12 +219,12 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			}, {
 				step: _ScriptEditor.resize
 			});
-			$('#index-vwf').animate({
+			/*$('#index-vwf').animate({
 				left: $('#EntityLibrary').width(),
 				width: w
 			}, {
 				step: sizeWindowTimer
-			});
+			});*/
 
 			$('#EntityLibraryAccordion').css('height', $('#index-vwf').css('height') - $('#entitylibrarytitle').height());
 			$('#EntityLibrary').css('height', $('#index-vwf').css('height'));
@@ -235,7 +235,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 		$scope.hide = function()
 		{
 			$('#EntityLibrary').animate({
-				left: -$('#EntityLibrary').width()
+				width: 0
 			});
 			var w = $(window).width() - ($(window).width() - getLeft('sidepanel',$(window).width()));
 			$('#ScriptEditor').animate({
@@ -244,12 +244,12 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			}, {
 				step: _ScriptEditor.resize
 			});
-			$('#index-vwf').animate({
+			/*$('#index-vwf').animate({
 				left: 0,
 				width: w
 			}, {
 				step: sizeWindowTimer
-			});
+			});*/
 			$scope.isOpen = false;
 		}
 

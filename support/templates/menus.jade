@@ -3,7 +3,7 @@ mixin menus_head
 
 mixin menus_body
 
-	#smoothmenu1.ddsmoothmenu(ng-controller='MenuController', style="display: none; z-index: 100; position: fixed; width: 100%; border-bottom: 1px solid #666666;"): ul
+	#smoothmenu1.ddsmoothmenu(ng-controller='MenuController', style="z-index: 100; border-bottom: 1px solid #666666;"): ul
 		li
 			a#MenuFile File
 			ul
@@ -417,5 +417,3 @@ mixin menus_body
 						li: a#MenuRu(ng-click='lookUpHandler($event)') Русский
 						li: a#MenuEs_ES(ng-click='lookUpHandler($event)') Español (España)
 
-	br(style="clear: left")
-		

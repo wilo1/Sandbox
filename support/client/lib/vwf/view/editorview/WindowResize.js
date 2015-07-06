@@ -109,6 +109,25 @@ define({
         var toolsHidden = false;
         var toolsLoaded = true;
         toolsLoaded = _EditorView.needTools();
+
+		$('#vwf-root > #resizer')[0].contentDocument.defaultView.addEventListener('resize', function()
+		{
+			console.log('Resizing canvas');
+			var canvas = $('#vwf-root > canvas');
+			var resolutionScale = _SettingsManager.getKey('resolutionScale');
+			var w = parseInt(canvas.parent().css('width')), h = parseInt(canvas.parent().css('height'));
+
+			canvas.attr('width', w / resolutionScale);
+			canvas.attr('height', h / resolutionScale);
+			if(window._dRenderer){
+				_dRenderer.setViewport(0, 0, w, h);
+                _dRenderer.setSize(w / resolutionScale, h / resolutionScale);
+			}
+            _dView.getCamera().aspect = w/h;
+            _dView.getCamera().updateProjectionMatrix()
+            _dView.windowResized();
+		});
+
         $(window).resize(function(event) {
 
             //prevent resize events from dialogs from bubbling up here and causing a full gui refresh
@@ -116,19 +135,19 @@ define({
                 return;
             }
 
-            var canvasheight;
+            /*var canvasheight;
             var canvaswidth;
             if (!toolsHidden && toolsLoaded) {
-                $('#smoothmenu1').css('top', '0px');
-                $('#smoothmenu1').css('left', '0px');
-                $('#toolbar').css('top', getHeight('smoothmenu1'));
+                //$('#smoothmenu1').css('top', '0px');
+                //$('#smoothmenu1').css('left', '0px');
+                //$('#toolbar').css('top', getHeight('smoothmenu1'));
                 //$('#toolbar').css('height','35px');
-                $('#toolbar').css('left', '0px');
-                $('#statusbar').css('left', '0px');
+                //$('#toolbar').css('left', '0px');
+                //$('#statusbar').css('left', '0px');
 
-                $('#index-vwf').css('top', getHeight('smoothmenu1') + getHeight('toolbar'));
+                //$('#index-vwf').css('top', getHeight('smoothmenu1') + getHeight('toolbar'));
 
-                $('#index-vwf').css('width', window.innerWidth  - (getLeft('EntityLibrary') + getWidth('EntityLibrary')));
+                //$('#index-vwf').css('width', window.innerWidth  - (getLeft('EntityLibrary') + getWidth('EntityLibrary')));
 
                 $('#ScriptEditor').css('top', $(window).height() - $('#ScriptEditor').height() - getHeight('statusbar'));
 
@@ -149,10 +168,10 @@ define({
                 //$('#index-vwf').css('height', window.innerHeight - $('#ScriptEditor').offset().top - $('#statusbar').height());
 
                 
-                $('#index-vwf').css('position', 'absolute');
-                $('#vwf-root').css('overflow', 'visible');
-                $('#vwf-root').css('left', '0px');
-                $('#vwf-root').css('top', '0px');
+                //$('#index-vwf').css('position', 'absolute');
+                //$('#vwf-root').css('overflow', 'visible');
+                //$('#vwf-root').css('left', '0px');
+                //$('#vwf-root').css('top', '0px');
                 var scripteditorheight = $('#ScriptEditor').offset().top;
                 if (scripteditorheight != 0) {
                     $('#index-vwf').css('height', scripteditorheight - $('#index-vwf').offset().top);
@@ -163,7 +182,7 @@ define({
                     canvasheight = window.innerHeight - (getTop('toolbar') + getHeight('toolbar') + getHeight('statusbar'));
                 }
 
-                $('#index-vwf').css('left',getWidth('EntityLibrary') + getLeft('EntityLibrary'));
+                //$('#index-vwf').css('left',getWidth('EntityLibrary') + getLeft('EntityLibrary'));
 
 
                 if ($('#index-vwf').length)
@@ -171,17 +190,17 @@ define({
                 //$('#sidepanel').css('width',320);
                 $('#sidepanel').css('top', getTop('toolbar') + getHeight('toolbar'));
 
-                $('#EntityLibrary').css('top', getHeight('smoothmenu1') + getHeight('toolbar'));
-                $('#EntityLibrary').css('height', $(window).height());
+                //$('#EntityLibrary').css('top', getHeight('smoothmenu1') + getHeight('toolbar'));
+                //$('#EntityLibrary').css('height', $(window).height());
 
                 $('#sidepanel').css('height', $(window).height());
-                $('#statusbar').css('top', ($(window).height() - 25) + 'px');
+                //$('#statusbar').css('top', ($(window).height() - 25) + 'px');
 
 
                 $('#sidepanel').css('height', $(window).height() - (getHeight('toolbar') + getHeight('statusbar') + getHeight('smoothmenu1')));
                 $('#ScriptEditor').css('width', $(window).width() - ($(window).width() - getLeft('sidepanel',$(window).width())) - (getLeft('EntityLibrary') + getWidth('EntityLibrary')));
-                $('#EntityLibrary').css('height', $('#index-vwf').css('height'));
-                $('#EntityLibraryAccordion').css('height', $(window).height() - $('#EntityLibraryAccordion').offset().top -$('#statusbar').height());
+                //$('#EntityLibrary').css('height', $('#index-vwf').css('height'));
+                //$('#EntityLibraryAccordion').css('height', $(window).height() - $('#EntityLibraryAccordion').offset().top -$('#statusbar').height());
                // $('#EntityLibraryMain').css('height', $('#statusbar').height() + parseInt($('#index-vwf').css('height')) + parseInt($('#ScriptEditor').css('height')) - $('#entitylibrarytitle').height());
                 _ScriptEditor.resize();
                 //hideSidePanel();
@@ -227,7 +246,7 @@ define({
                 $('#index-vwf').css('width', oldwidth);
                 _dView.getCamera().updateProjectionMatrix()
                 _dView.windowResized();
-            }
+            }*/
         });
         
         window.hideTools = function() {
@@ -239,13 +258,13 @@ define({
             $('#sidepanel').hide();
             $('#EntityLibrary').hide();
             $('#ScriptEditor').hide();
-            $('#index-vwf').css('height', $(window).height());
+            /*$('#index-vwf').css('height', $(window).height());
             $('#index-vwf').css('width', $(window).width());
             $('#index-vwf').attr('height', $(window).height());
             $('#index-vwf').attr('width', $(window).width());
             $('#index-vwf').css('top', 0 + 'px');
             $('#index-vwf').css('left', 0 + 'px');
-             $('#index-vwf').css('border','none');
+             $('#index-vwf').css('border','none');*/
             _Editor.findcamera().aspect = (parseInt($('#index-vwf').css('width')) / parseInt($('#index-vwf').css('height')));
             $('#index-vwf').focus()
             _Editor.findcamera().updateProjectionMatrix();
@@ -268,15 +287,15 @@ define({
             $('#index-vwf').focus();
             if(libraryEnabled)
                 $('#EntityLibrary').show();
-            $('#index-vwf').css('height', $(window).height() + 'px');
+            /*$('#index-vwf').css('height', $(window).height() + 'px');
             $('#index-vwf').css('width', $(window).width() + 'px');
             $('#index-vwf').css('top', $('#smoothmenu1').height() + $('#toolbar').height() + 'px');
             $('#index-vwf').css('height', $(window).height() - ($('#smoothmenu1').height() + $('#toolbar').height() + $('#statusbar').height()) + 'px');
-            $('#index-vwf').css('left', parseInt($('#EntityLibrary').css('left')) + $('#EntityLibrary').width());
+            $('#index-vwf').css('left', parseInt($('#EntityLibrary').css('left')) + $('#EntityLibrary').width());*/
             _Editor.findcamera().aspect = (parseInt($('#index-vwf').css('width')) / parseInt($('#index-vwf').css('height')));
             _Editor.findcamera().updateProjectionMatrix();
             _Editor.SetSelectMode('Pick');
-            $('#index-vwf').css('border','');
+            //$('#index-vwf').css('border','');
             $(window).resize();
 
 
