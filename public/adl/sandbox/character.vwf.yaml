@@ -41,6 +41,7 @@ methods:
   keyDown:
   ready: 
   lookat: 
+  simulation: 
 events:
   pointerOver:
   pointerOut:
@@ -418,6 +419,25 @@ scripts:
           var offset = Mat4.multMat(iWorld, this.transform.internal_val, []);
           this.standingOnOffset = offset;
         }
+      }
+      // used for user simulation testing
+      this.simulation = function(motion) {
+
+        if (motion == "walk")
+          this.walk();
+
+        if (motion == "walkback")
+          this.walkback();
+
+        if (motion == "jump")
+          this.jump();
+
+        if (motion == "run")
+          this.run();
+
+        if (motion == "idle")
+          this.stand();
+
       }
       this.update = function(moniker) {
 
