@@ -438,6 +438,12 @@ scripts:
         if (motion == "idle")
           this.stand();
 
+        if(motion == 'turn')
+        {
+           
+            this.lookat([Math.random(),Math.random(),0]);
+        }  
+
       }
       this.update = function(moniker) {
 
