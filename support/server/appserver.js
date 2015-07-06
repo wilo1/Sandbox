@@ -217,7 +217,7 @@ function ServeTemplate(req,res, filename, instanceData, url)
 			needsTools = instanceData && instanceData.publishSettings ? instanceData.publishSettings.allowTools : true;
 
 		var templateFile = libpath.join(__dirname,'..','templates', filename.slice(5)+'.jade');
-		console.log(instanceData);
+
 		try {
 			var html = jade.renderFile(templateFile, {
 				filename: templateFile,
