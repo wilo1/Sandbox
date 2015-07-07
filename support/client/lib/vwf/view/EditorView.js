@@ -70,7 +70,7 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/lib/alertify.js-0.
                     
                     window._MaterialEditor.hide();
                     window._Notifier = require("vwf/view/editorview/Notifier").getSingleton();
-                    window._ScriptEditor = require("vwf/view/editorview/ScriptEditor").getSingleton();;
+					require('vwf/view/editorview/ScriptEditor').initialize();
                     window._ModelLibrary = require("vwf/view/editorview/_3DRIntegration").getSingleton();
                     window._Publisher = require("vwf/view/editorview/Publisher").getSingleton();
                    
@@ -81,7 +81,7 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/lib/alertify.js-0.
                     require("vwf/view/editorview/EntityLibrary").initialize();
                     require("vwf/view/editorview/JSONPrompt").initialize();
 
-                    this.addManager(_ScriptEditor);
+                    //this.addManager(_ScriptEditor);
                     this.addManager(_UndoManager);
                     this.addManager(_ModelLibrary);
                     this.addManager(_Notifier);
@@ -127,6 +127,7 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/lib/alertify.js-0.
                 this.addManager(_Editor);
 
 				angular_app.initialize();
+				this.addManager(angular_app);
             }
         },
         managers: [], //list of objects that need notification of events

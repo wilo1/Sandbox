@@ -92,7 +92,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 		return data;
 	}]);
 
-	app.filter('sortKeys', function(){
+	app.filter('sortByProp', function(){
 		return function(input, field, reverse)
 		{
 			input = input || {};

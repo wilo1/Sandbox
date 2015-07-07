@@ -17,7 +17,7 @@ mixin manageAssets_body
 			#assetList
 
 				.asset.horizontalLayout(ng-class='{"selected-asset": selectedAsset === asset.id}', ng-click='setSelection(asset.id)'
-					ng-repeat='asset in assets | sortKeys:"name":true | filterAssetThumbs:hideThumbs | searchForAsset:search', adl-scroll-to='selectedAsset == asset.id')
+					ng-repeat='asset in assets | sortByProp:"name":true | filterAssetThumbs:hideThumbs | searchForAsset:search', adl-scroll-to='selectedAsset == asset.id')
 
 					.info.verticalLayout
 						p.name(ng-style='{"font-weight": asset._dirty ? "bold" : "normal"}') {{(asset._dirty ? '*' : '')+asset.name}}

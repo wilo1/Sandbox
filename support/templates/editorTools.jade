@@ -4,6 +4,7 @@ include ./statusbar
 include ./3DRIntegration
 include ./toolbar
 include ./EntityLibrary
+include ./scripteditor
 
 mixin editorTools_head
 	+menus_head
@@ -12,6 +13,7 @@ mixin editorTools_head
 	+statusbar_head
 	+3DRIntegration_head
 	+EntityLibrary_head
+	+scripteditor_head
 
 mixin editorTools_body
 
@@ -27,6 +29,8 @@ mixin editorTools_body
 					canvas#index-vwf.vwf-scene(width='100', height='100')
 					#glyphOverlay(style='display: none;')
 					iframe#resizer(href='about:blank', frameborder='0')
+
+				+scripteditor_body
 
 		+statusbar_body
 		

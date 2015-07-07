@@ -410,6 +410,21 @@
       /* For Safari 3.1 to 6.0 */
       transition: opactiy 2s; }
 
+#ScriptEditor {
+  height: 300px;
+  overflow: hidden;
+  padding: 0px 0px 0px 0px; }
+  #ScriptEditor #hidescripteditor {
+    text-align: center;
+    line-height: 20px;
+    margin-left: 3px;
+    /* Adding this here because .icon:hover will change it to 2px */ }
+  #ScriptEditor #maximizescripteditor {
+    text-align: center;
+    line-height: 19px;
+    margin-left: 3px;
+    /* Adding this here because .icon:hover will change it to 2px */ }
+
 @-webkit-keyframes pulsing {
   0% {
     background-color: #20559b; }
@@ -476,24 +491,6 @@
 
 #toolbarLevel.verticalLayout {
   height: 100%; }
-
-#InventoryControls {
-  margin-left: 3px;
-  vertical-align: middle; }
-
-#InventoryTypeChoice {
-  display: inline;
-  width: 50%; }
-
-#InventoryFilter, #AddPermissionName, #HeirarchyFilter {
-  display: inline;
-  width: 50%;
-  padding: 0px;
-  margin-bottom: 0px;
-  margin-top: 4px;
-  /* border-radius: 6px; */
-  border-color: lightgray;
-  border-width: 1px; }
 
 #GlobalProgressBar {
   vertical-align: middle;
@@ -620,31 +617,6 @@ canvas:focus {
 .SidePanelWindowBottomBorder {
   border-bottom: 5px solid #444444;
   border-left: 2px solid #444444; }
-
-.InventoryRename {
-  display: inline-block;
-  top: 22.0px;
-  position: absolute;
-  padding: 0px;
-  font: 1em sans-serif;
-  border: 1px solid black;
-  margin: 0px;
-  width: 80%; }
-
-.InventoryPanel {
-  font: 1.5em sans-serif;
-  padding-bottom: 5px;
-  /* background:#FFFFF8; */
-  border: 1px black solid;
-  margin: 3px 3px 3px 3px;
-  height: auto;
-  color: #444; }
-
-.inventoryItem {
-  text-overflow: ellipsis;
-  /* background:#FFFFF8; */
-  padding-left: 10px;
-  color: #DFDFDF; }
 
 .loadchoice:hover {
   background-color: #DDF;
@@ -821,26 +793,9 @@ canvas:focus {
 .EditorDataSectionTitle:first-child {
   margin: 1em 0px 0px 0px; }
 
-#ScriptEditor {
-  overflow: hidden;
-  padding: 0px 0px 0px 0px;
-  display: block;
-  position: fixed;
-  width: 100%;
-  left: 0px; }
-
-#hidescripteditor {
-  text-align: center;
-  line-height: 20px;
-  margin-left: 3px;
-  /* Adding this here because .icon:hover will change it to 2px */ }
-
-#maximizescripteditor {
-  text-align: center;
-  line-height: 19px;
-  margin-left: 3px;
-  /* Adding this here because .icon:hover will change it to 2px */ }
-
+@media only screen and (max-width: 1024px) {
+  #sidepanel {
+    width: 250px; } }
 .GLGEStat {
   z-index: 999999;
   background-color: black;
@@ -888,29 +843,7 @@ canvas:focus {
   color: white;
   height: 16px; }
 
-@media only screen and (max-height: 1200px) {
-  #ScriptEditor {
-    top: 683px;
-    height: 405px; } }
-@media only screen and (max-height: 1024px) {
-  #ScriptEditor {
-    top: 683px;
-    height: 405px; } }
-@media only screen and (max-width: 1280px) {
-  #sidepanel {
-    width: 220px; } }
-@media only screen and (max-height: 768px) {
-  #ScriptEditor {
-    top: 531px;
-    height: 405px; } }
-@media only screen and (max-width: 1024px) {
-  #sidepanel {
-    width: 250px; } }
 @media only screen and (max-width: 800px) {
-  #ScriptEditor {
-    top: 531px;
-    height: 380px; }
-
   #sidepanel {
     width: 200px; }
 

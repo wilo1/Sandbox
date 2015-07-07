@@ -22,5 +22,10 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		angular.bootstrap( document.body, ['SandboxEditor'] );
 	};
 
+	app.calledMethod = function(id, evt, data)
+	{
+		
+	};
+
 	return app;
 });

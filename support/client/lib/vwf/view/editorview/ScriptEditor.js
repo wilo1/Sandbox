@@ -1,4 +1,4 @@
-jQuery.fn.extend({
+/*jQuery.fn.extend({
 	insertAtCaret: function(textToInsert) {
 		return this.each(function(i) {
 			if (document.selection) {
@@ -77,9 +77,200 @@ jQuery.fn.sortElements = (function() {
 
 	};
 
-})();
+})();*/
 
-define(function() {
+define(['vwf/view/editorview/angular-app'], function(app)
+{
+	$(document.head).append('<script src="../vwf/view/editorview/lib/ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>');
+
+	app.filter('sortByKeys', function()
+	{
+		return function(input){
+			return Object.keys(input).sort();
+		};
+	});
+
+	app.controller('ScriptEditorController', ['$scope', function($scope)
+	{
+		$scope.showHiddenProperties = false;
+		$scope.inheritPrototype = false;
+
+		$scope.$watch('fields.selectedNode', function(node)
+		{
+			$scope.methodList = {};
+
+			// populate methods
+			while (node)
+			{
+				for (var i in node.methods) {
+					if ($scope.methodList[i] === undefined && (i.indexOf('__') !== 0 || $scope.showHiddenProperties) )
+						$scope.methodList[i] = node.methods[i];
+				}
+
+				node = _Editor.getNode(vwf.prototype(node.id), true);
+				if (!$scope.inheritPrototype) break;
+			}
+
+		});
+
+	}]);
+
+	return {
+		initialize: function()
+		{
+			$('#ScriptEditorTabs').tabs({});
+			$('#ScriptEditorAbandonChanges').dialog({
+				title: 'Abandon Changes?',
+				autoOpen: false,
+				height: 'auto',
+				width: '200px',
+				position: 'center',
+				modal: true,
+				buttons: {
+					'Yes': function() {
+						_ScriptEditor.AbandonChangesCallback();
+						$('#ScriptEditorAbandonChanges').dialog('close');
+					},
+					'No': function() {
+						$('#ScriptEditorAbandonChanges').dialog('close');
+					},
+				}
+			});
+
+			$('#ScriptEditorCreateMethod').dialog({
+				title: 'Enter Method Name',
+				autoOpen: false,
+				height: 'auto',
+				width: '300px',
+				position: 'center',
+				modal: true,
+				buttons: {
+					'Ok': function() {
+						var name = $('#newMethodName').val();
+						_ScriptEditor.setSelectedMethod(name, 'function ' + name + '(){\n\n console.log("got here"); \n\n}');
+						$('#ScriptEditorCreateMethod').dialog('close');
+					},
+					'Cancel': function() {
+						$('#ScriptEditorCreateMethod').dialog('close');
+					}
+				}
+			});
+
+			$('#ScriptEditorCreateEvent').dialog({
+				title: 'Enter Event Signiture',
+				autoOpen: false,
+				height: 'auto',
+				width: '300px',
+				position: 'center',
+				modal: true,
+				buttons: {
+					'Ok': function() {
+						var name = $('#newEventName').val();
+						name = name.substring(0, name.indexOf('('));
+						name = $.trim(name);
+						_ScriptEditor.setSelectedEvent(name, 'function ' + $('#newEventName').val() + '{\n\n console.log("got here"); \n\n}');
+						$('#ScriptEditorCreateEvent').dialog('close');
+					},
+					'Cancel': function() {
+						$('#ScriptEditorCreateEvent').dialog('close');
+					}
+				}
+			});
+
+			$('#ScriptEditorCreateProperty').dialog({
+				title: 'Enter Method Name',
+				autoOpen: false,
+				height: 'auto',
+				width: '300px',
+				position: 'center',
+				modal: true,
+				buttons: {
+					'Ok': function() {
+						var name = $('#newPropertyName').val();
+						_ScriptEditor.setSelectedProperty(name, '"null"');
+						_ScriptEditor.SavePropertyClicked(true);
+						$('#ScriptEditorCreateProperty').dialog('close');
+					},
+					'Cancel': function() {
+						$('#ScriptEditorCreateProperty').dialog('close');
+					}
+				}
+			});
+
+			$('#ScriptEditorDeleteMethod').dialog({
+				title: 'Delete Method?',
+				autoOpen: false,
+				height: 'auto',
+				width: '200px',
+				position: 'center',
+				modal: true,
+				buttons: {
+					'Yes': function() {
+						_ScriptEditor.DeleteActiveMethod_imp();
+						$('#ScriptEditorDeleteMethod').dialog('close');
+					},
+					'No': function() {
+						$('#ScriptEditorDeleteMethod').dialog('close');
+					},
+				}
+			});
+
+			$('#ScriptEditorDeleteProperty').dialog({
+				title: 'Delete Property?',
+				autoOpen: false,
+				height: 'auto',
+				width: '200px',
+				position: 'center',
+				modal: true,
+				buttons: {
+					'Yes': function() {
+						_ScriptEditor.DeleteActiveProperty_imp();
+						$('#ScriptEditorDeleteProperty').dialog('close');
+					},
+					'No': function() {
+						$('#ScriptEditorDeleteProperty').dialog('close');
+					},
+				}
+			});
+
+			$('#ScriptEditorDeleteEvent').dialog({
+				title: 'Delete Event?',
+				autoOpen: false,
+				height: 'auto',
+				width: '200px',
+				position: 'center',
+				modal: true,
+				buttons: {
+					'Yes': function() {
+						_ScriptEditor.DeleteActiveEvent_imp();
+						$('#ScriptEditorDeleteEvent').dialog('close');
+					},
+					'No': function() {
+						$('#ScriptEditorDeleteEvent').dialog('close');
+					},
+				}
+			});
+
+			$('#ScriptEditorMessage').dialog({
+				title: 'Syntax Error',
+				autoOpen: false,
+				height: 'auto',
+				width: '200px',
+				position: 'center',
+				modal: true,
+				buttons: {
+					'Ok': function() {
+						$('#ScriptEditorMessage').dialog('close');
+					},
+				}
+			});
+
+		}
+	};
+});
+
+
+var oldDefine = function() {
 	var ScriptEditor = {};
 	var isInitialized = false;
 	return {
@@ -139,61 +330,8 @@ define(function() {
 			$('.ace_gutter-layer').css('width', 40);
 		}
 		
-		$(document.body).append('<script src="../vwf/view/editorview/lib/ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>');
-		$(document.body).append("<div id='ScriptEditorAbandonChanges'>You have are about to load a different script,but you have unsaved changes to this script. Do you want to continue and abandon the changes? This action cannot be undone.</div>");
-		$(document.body).append("<div id='ScriptEditorCreateMethod'><input id='newMethodName' type='text' /></div>");
-		$(document.body).append("<div id='ScriptEditorCreateEvent'><input id='newEventName' type='text' /></div>");
-		$(document.body).append("<div id='ScriptEditorCreateProperty'><input id='newPropertyName' type='text' /></div>");
-		$(document.body).append("<div id='ScriptEditorDeleteMethod'>Are you sure you want to delete this script? This cannot be undone.</div>");
-		$(document.body).append("<div id='ScriptEditorDeleteProperty'>Are you sure you want to delete this property? This cannot be undone.</div>");
-		$(document.body).append("<div id='ScriptEditorDeleteEvent'>Are you sure you want to delete this script? This cannot be undone.</div>");
-		$(document.body).append("<div id='ScriptEditorMessage'>This script contains syntax errors, and cannot be saved;</div>");
-		$(document.body).append("<div id='ScriptEditor'  style='z-index:99'>" +
-			"<div id='scripteditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' >" +
-			"<span id='scripteditortitletext' class='ui-dialog-title' id='ui-dialog-title-Players'>ScriptEditor</span></div>" +
-			'<div id="ScriptEditorTabs" style="width:100%;height:100%;overflow:hidden;padding: 0px 10px 0px 0px;">' +
-			'	<ul>' +
-			'		<li><a href="#methods">Methods</a></li>' +
-			'		<li><a href="#events">Events</a></li>' +
-			'		<li><a href="#properties">Properties</a></li>' +
-			'		<li><a href="#options">Options</a></li>' +
-			'	</ul>' +
-			'	<div id="methods" style="height: 100%;padding:4px">' +
-			'		<div style="width: 180px;display: inline-block;vertical-align: top;">' +
-			'      <div id="methodlist"/></div>' +
-			'      <div id="textinnerm" style="display: inline-block;position:absolute">' +
-			'          <div style="position: absolute;top: 0px;width: 100%;height: 100%;border: 1px black solid;"  id="methodtext" />' +
-			'         <div id="saveMethod"/><div id="callMethod"/><div id="deleteMethod"/><div id="newMethod"/><div id="checkSyntaxMethod"/>' +
-			'      </div>' +
-			'	</div>' +
-			'	<div id="events" style="height: 100%;padding:4px">' +
-			'		<div style="width: 180px;display: inline-block;vertical-align: top;">' +
-			'       <div id="eventlist"/></div>' +
-			'		<div id="textinnere" style="display: inline-block;position:absolute">' +
-			'          <div style="position: absolute;top: 0px;width: 100%;height: 100%;border: 1px black solid;"  id="eventtext" />' +
-			'		   <div id="saveEvent"/><div id="callEvent"/><div id="deleteEvent"/><div id="newEvent"/><div id="checkSyntaxEvent"/>' +
-			'		</div>' +
-			'	</div>' +
-			'	<div id="properties" style="height: 100%;padding:4px">' +
-			'		<div style="width: 180px;display: inline-block;vertical-align: top;">' +
-			'       <div id="propertylist"/></div>' +
-			'		<div id="textinnerp" style="display: inline-block;position:absolute">' +
-			'          <div style="position: absolute;top: 0px;width: 100%;height: 100%;border: 1px black solid;"  id="propertytext" />' +
-			'		   <div id="saveProperty"/><div id="deleteProperty"/><div id="newProperty"/>' +
-			'		</div>' +
-			'	</div>' +
-			'	<div id="options" style="height: 100%;padding:4px">' +
-			'  <input type="checkbox" id="inheritPrototype"><label for="inheritPrototype">Show Inherited Properties</label>' +
-			'  <input type="checkbox" id="showHiddenProperties"><label for="showHiddenProperties">Show Hidden Properties</label>' +
-			'	</div>' +
-			'</div>' +
-			"</div>");
 		this.MethodChanged = false;
 		this.EventChanged = false;
-		//$('#ScriptEditor').resize(function(){_ScriptEditor.resize()});
-		$('#scripteditortitle').prepend('<div class="headericon script"  />');
-		$('#scripteditortitle').append('<div id="maximizescripteditor" style="float:right;margin-right: 20px;" class="icon glyphicon glyphicon-chevron-up" />');
-		$('#scripteditortitle').append('<div id="hidescripteditor" class="icon glyphicon glyphicon-chevron-down" style="float:right;"  />');
 		$('#hidescripteditor').click(function() {
 			_ScriptEditor.hide();
 		});
@@ -2005,4 +2143,4 @@ define(function() {
 		self.eventEditor.setBehavioursEnabled(false);
 		self.propertyEditor.setBehavioursEnabled(false);
 	}
-});
+};

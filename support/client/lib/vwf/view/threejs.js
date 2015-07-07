@@ -161,10 +161,12 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
             $('#glyphOverlay').append(newdiv);
             $(newdiv).disableSelection();
             $(newdiv).mousedown(function(e) {
+				console.log('glyph mousedown');
                 $('#index-vwf').focus();
                 if (_Editor.GetSelectMode() == "None" || e.which != 1) $('#index-vwf').trigger(e)
             });
             $(newdiv).mouseup(function(e) {
+				console.log('glyph mouseup');
                 $('#index-vwf').focus();
                 $('#index-vwf').trigger(e)
             });
@@ -172,6 +174,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                 $('#index-vwf').trigger(e)
             });
             $(newdiv).click(function(e) {
+				console.log('glyph click');
                 $('#index-vwf').focus();
                 if (_Editor.GetSelectMode() != "None") _Editor.SelectObjectPublic(id)
             });
