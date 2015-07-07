@@ -456,8 +456,9 @@
   -moz-flex-direction: column;
   -ms-flex-direction: column;
   -webkit-flex-direction: column;
-  flex-direction: column;
-  width: 100%; }
+  flex-direction: column; }
+  #toolbarLevel .verticalLayout {
+    width: 100%; }
 
 .horizontalLayout {
   display: -webkit-box;
@@ -469,8 +470,9 @@
   -moz-flex-direction: row;
   -ms-flex-direction: row;
   -webkit-flex-direction: row;
-  flex-direction: row;
-  height: 100%; }
+  flex-direction: row; }
+  #toolbarLevel .horizontalLayout {
+    height: 100%; }
 
 #toolbarLevel.verticalLayout {
   height: 100%; }

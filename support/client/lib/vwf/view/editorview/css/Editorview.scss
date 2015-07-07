@@ -53,12 +53,18 @@
 .verticalLayout {
 	@include display-flex();
 	@include flex-direction(column);
-	width: 100%;
+
+	#toolbarLevel & {
+		width: 100%;
+	}
 }
 .horizontalLayout {
 	@include display-flex();
 	@include flex-direction(row);
-	height: 100%;
+
+	#toolbarLevel & {
+		height: 100%;
+	}
 }
 
 #toolbarLevel.verticalLayout {

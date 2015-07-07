@@ -193,7 +193,7 @@ buildmenu: function($, setting){
 			subulw	: $subul.outerWidth(),
 			subulh	: $subul.outerHeight()
 		};
-		$subul.css({top: orient === 'down'? dimensions.h : 0});
+		//$subul.css({top: orient === 'down'? dimensions.h : 0});
 		function restore(){$link.removeClass('selected');}
 		method === 'toggle' && $subul.click(smoothmenu.subulpreventemptyclose);
 		$curobj[method](
