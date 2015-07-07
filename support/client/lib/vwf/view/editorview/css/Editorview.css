@@ -356,7 +356,7 @@
   #EntityLibrary #EntityLibrarySideTab {
     z-index: 30;
     position: absolute;
-    left: 219px;
+    right: -50px;
     width: 73px;
     top: 10%;
     height: 21px;
