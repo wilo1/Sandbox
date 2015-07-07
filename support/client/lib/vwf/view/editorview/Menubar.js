@@ -913,18 +913,21 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 					return;
 				}
 				var resolutionScale = _SettingsManager.getKey('resolutionScale')  ;
-				var h = parseInt($('#index-vwf').css('height'));
-				var w = parseInt($('#index-vwf').css('width'));
 				_dRenderer.setSize(600, 300);
 				var camera = _dView.getCamera();
-				var a = camera.aspect;
 				camera.aspect = 2;
 				camera.updateProjectionMatrix();
 	
 				window.takeimage = function() {
 	
 					var img = $('#index-vwf')[0].toDataURL();
-					_dRenderer.setSize(w, h);
+
+					$('#index-vwf').css('width', '');
+					$('#index-vwf').css('height', '');
+
+					window._resizeCanvas();
+
+					/*_dRenderer.setViewport(0,0, w, h);
 					camera.aspect = a;
 					camera.updateProjectionMatrix();
 					$('#index-vwf')[0].height = h / resolutionScale;
@@ -939,7 +942,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 	
 					$('#index-vwf').css('height', h);
 					$('#index-vwf').css('width', w);
-	
+					*/
 	
 					jQuery.ajax({
 						type: 'POST',

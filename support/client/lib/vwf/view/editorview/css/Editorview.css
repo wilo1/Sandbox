@@ -345,46 +345,43 @@
   background-color: #dfdfff; }
 
 #EntityLibrary {
-  width: 300px;
-  /*position: absolute;
-  background: #444;
-  height: 100%;
-  left: -250px;
-  top: 62px;*/ }
+  position: relative;
+  width: 0;
+  -moz-flex-shrink: 0;
+  -ms-flex-shrink: 0;
+  -webkit-flex-shrink: 0;
+  flex-shrink: 0;
+  background: #515151 url(../../../../images/ui-bg_diagonals-thick_8_333333_40x40.png) 0% 0% repeat;
+  background-size: 5%; }
   #EntityLibrary #EntityLibrarySideTab {
-    display: none;
-    position: relative;
-    left: 209px;
+    z-index: 30;
+    position: absolute;
+    left: 219px;
     width: 73px;
-    top: 24px;
-    height: 45px;
+    top: 10%;
+    height: 21px;
     -webkit-transform: rotate(90deg);
     -moz-transform: rotate(90deg);
     transform: rotate(90deg);
     font-size: 12px;
     font-family: 'Open Sans',sans-serif;
     text-align: center;
-    /* border-radius: 7px; */
     border: 2px solid #82b8ff;
+    border-bottom: none;
     color: white;
     text-shadow: 1px 1px 3px black;
     cursor: pointer;
     background: #4c4c4c;
-    padding-left: 0px;
-    z-index: 20; }
+    padding-left: 0px; }
     #EntityLibrary #EntityLibrarySideTab:hover {
       color: #82b8ff; }
   #EntityLibrary #EntityLibraryMain {
-    /*width: 247px;
-    height: auto;
-    position: absolute;
-    top: 0px;*/
-    z-index: 30;
+    width: 245px;
     overflow: auto;
-    background: #515151 url(../../../../images/ui-bg_diagonals-thick_8_333333_40x40.png) 0% 0% repeat;
-    background-size: 5%;
     margin-top: 3px;
     padding-right: 3px; }
+  #EntityLibrary #EntityLibraryAccordion {
+    overflow-y: auto; }
   #EntityLibrary .libraryAsset {
     text-align: center;
     display: inline-block;
@@ -397,7 +394,6 @@
       text-shadow: 1px 1px 5px black;
       overflow: hidden;
       background: rgba(0, 0, 0, 0.5);
-      z-index: 100;
       position: relative;
       /* border-radius: 10px; */
       pointer-events: none; }

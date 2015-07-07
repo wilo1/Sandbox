@@ -69,10 +69,6 @@ html
 
 			The main content renders to "#vwf-root", the item with the id "vwf-root".
 
-		//div#vwf-root
-
-		//- Overlay div to display loading information
-
 		//- asset preload loading screen
 		div#preloadGUIBack(style='display:none')
 			span#fullscreenlink Please enter full screen mode. Click here or hit F11.
@@ -88,3 +84,6 @@ html
 			+editorTools_body
 		else
 			#vwf-root.verticalLayout
+				canvas#index-vwf.vwf-scene(width='100', height='100')
+				#glyphOverlay(style='display: none;')
+				iframe#resizer(href='about:blank', frameborder='0')

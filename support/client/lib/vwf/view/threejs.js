@@ -641,7 +641,8 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                 var domWin = window;
 
 
-                this.canvasQuery = jQuery(this.rootSelector["application-root"]).append("<canvas id='" + 'index-vwf' + "' width='" + this.width + "' height='" + this.height + "' class='vwf-scene'/>").children(":last");
+                //this.canvasQuery = jQuery(this.rootSelector["application-root"]).append("<canvas id='" + 'index-vwf' + "' width='" + this.width + "' height='" + this.height + "' class='vwf-scene'/>").children(":last");
+				this.canvasQuery = jQuery('canvas#index-vwf');
                 this.canvasQuery.css('display', 'none');
                 initScene.call(this, this.state.scenes[childID]);
                 require("vwf/view/threejs/editorCameraController").initialize(this.editorCamera);
@@ -1775,7 +1776,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
 
                     if (contextCreated) {
                         sceneNode.renderer.autoUpdateScene = false;
-                        sceneNode.renderer.setSize($('#index-vwf').width(), $('#index-vwf').height());
+                        sceneNode.renderer.setViewport(0, 0, $('#index-vwf').width(), $('#index-vwf').height());
 
                         sceneNode.renderer.shadowMapType = THREE.PCFSoftShadowMap;
                         sceneNode.renderer.shadowMapEnabled = true;

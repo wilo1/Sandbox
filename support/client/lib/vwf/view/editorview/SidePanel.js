@@ -42,7 +42,7 @@ define({
                 'width': $(window).width() - (getLeft('EntityLibrary') + getWidth('EntityLibrary'))
             });
 
-            if ($('#index-vwf').length > 0) {
+            /*if ($('#index-vwf').length > 0) {
                 window.sizeTimeoutHandle = window.setInterval(sizeWindowTimer, 33);
                 $('#index-vwf').animate({
                     'width': $(window).width() - (getLeft('EntityLibrary') + getWidth('EntityLibrary'))
@@ -60,7 +60,7 @@ define({
                         _Editor.findcamera().updateProjectionMatrix();
                     }
                 });
-            }
+            }*/
             $(document).trigger('sidePanelClosed');
             $('#index-vwf').focus();
         }
@@ -74,7 +74,7 @@ define({
             $('#sidepanel').animate({
                 'left': $(window).width() - $('#sidepanel').width()
             });
-            $('#ScriptEditor').animate({
+            /*$('#ScriptEditor').animate({
                 'width': $(window).width() - $('#sidepanel').width() - (getLeft('EntityLibrary') + getWidth('EntityLibrary'))
             });
             $('#index-vwf').animate({
@@ -91,7 +91,7 @@ define({
                     _Editor.findcamera().aspect = ($('#index-vwf').width() / $('#index-vwf').height());
                     _Editor.findcamera().updateProjectionMatrix();
                 }
-            });
+            });*/
         }
 
         function updateScrollBars() {

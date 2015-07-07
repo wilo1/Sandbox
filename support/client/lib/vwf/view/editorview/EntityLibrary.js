@@ -209,7 +209,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 
 		$scope.show = function()
 		{
-			$('#EntityLibrary').animate({
+			/*$('#EntityLibrary').animate({
 				width: 300
 			});
 			var w = $(window).width() - 250 - ($(window).width() - getLeft('sidepanel',$(window).width()));
@@ -219,22 +219,22 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			}, {
 				step: _ScriptEditor.resize
 			});
-			/*$('#index-vwf').animate({
+			$('#index-vwf').animate({
 				left: $('#EntityLibrary').width(),
 				width: w
 			}, {
 				step: sizeWindowTimer
 			});*/
-
-			$('#EntityLibraryAccordion').css('height', $('#index-vwf').css('height') - $('#entitylibrarytitle').height());
-			$('#EntityLibrary').css('height', $('#index-vwf').css('height'));
-			$('#EntityLibraryAccordion').css('overflow', 'auto');
+			$('#EntityLibrary').animate({width: '246px'});
+			//$('#EntityLibraryAccordion').css('height', $('#index-vwf').css('height') - $('#entitylibrarytitle').height());
+			//$('#EntityLibrary').css('height', $('#index-vwf').css('height'));
+			//$('#EntityLibraryAccordion').css('overflow', 'auto');
 			$scope.isOpen = true;
 		}
 
 		$scope.hide = function()
 		{
-			$('#EntityLibrary').animate({
+			/*$('#EntityLibrary').animate({
 				width: 0
 			});
 			var w = $(window).width() - ($(window).width() - getLeft('sidepanel',$(window).width()));
@@ -244,12 +244,13 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			}, {
 				step: _ScriptEditor.resize
 			});
-			/*$('#index-vwf').animate({
+			$('#index-vwf').animate({
 				left: 0,
 				width: w
 			}, {
 				step: sizeWindowTimer
 			});*/
+			$('#EntityLibrary').animate({width: '0px'});
 			$scope.isOpen = false;
 		}
 

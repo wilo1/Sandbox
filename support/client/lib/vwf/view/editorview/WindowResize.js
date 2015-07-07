@@ -110,23 +110,32 @@ define({
         var toolsLoaded = true;
         toolsLoaded = _EditorView.needTools();
 
-		$('#vwf-root > #resizer')[0].contentDocument.defaultView.addEventListener('resize', function()
+		var timeout;
+		window._resizeCanvas = function()
 		{
 			console.log('Resizing canvas');
 			var canvas = $('#vwf-root > canvas');
 			var resolutionScale = _SettingsManager.getKey('resolutionScale');
 			var w = parseInt(canvas.parent().css('width')), h = parseInt(canvas.parent().css('height'));
 
-			canvas.attr('width', w / resolutionScale);
-			canvas.attr('height', h / resolutionScale);
-			if(window._dRenderer){
-				_dRenderer.setViewport(0, 0, w, h);
-                _dRenderer.setSize(w / resolutionScale, h / resolutionScale);
-			}
-            _dView.getCamera().aspect = w/h;
-            _dView.getCamera().updateProjectionMatrix()
-            _dView.windowResized();
-		});
+
+			if(timeout) clearTimeout(timeout);
+			timeout = setTimeout(function()
+			{
+				console.log('Resizing viewport');
+				canvas.attr('width', w / resolutionScale);
+				canvas.attr('height', h / resolutionScale);
+				if(window._dRenderer){
+					_dRenderer.setViewport(0, 0, w / resolutionScale, h / resolutionScale);
+	                //_dRenderer.setSize(w / resolutionScale, h / resolutionScale);
+				}
+	            _dView.getCamera().aspect = w/h;
+	            _dView.getCamera().updateProjectionMatrix()
+	            _dView.windowResized();
+			}, 100);
+		};
+
+		$('#vwf-root > #resizer')[0].contentDocument.defaultView.addEventListener('resize', window._resizeCanvas);
 
         $(window).resize(function(event) {
 
