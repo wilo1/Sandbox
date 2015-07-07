@@ -231,8 +231,8 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
 
                 screen[1] = wh - screen[1];
 
-                div.style.top = (screen[1]) + 'px';
-                div.style.left = (screen[0] - 20 / 2) + 'px';
+                div.style.top = (screen[1] - 10) + 'px';
+                div.style.left = (screen[0] - 10) + 'px';
 
 
                 if ((screen[0] < 0 || screen[0] > ww || screen[1] < 0 || screen[1] > wh)) {
