@@ -346,7 +346,8 @@
                 { library: "vwf/view/WebRTC", active: true },
                 { library: "vwf/view/audio", active: true },
                 { library: "messageCompress", active: true },
-                { library: "vwf/view/xapi", active: true }
+                { library: "vwf/view/xapi", active: true },
+                { library: "vwf/view/SAVE/SAVE", active: true },
 
             ];
 
@@ -375,6 +376,7 @@
                     { library: "vwf/view/audio", active: true },
                     { library: "vwf/view/xapi", active: true },
                     { library: "vwf/view/jqueryui", active: true },
+                    { library: "vwf/view/SAVE/SAVE", active: true }
 
 
 
@@ -510,6 +512,7 @@
                             "vwf/view/audio",
                             "vwf/view/xapi",
                             "vwf/view/jqueryui",
+                            "vwf/view/SAVE/SAVE",
                         ];
 
                         vwf.initialize(application, models, views, callback);

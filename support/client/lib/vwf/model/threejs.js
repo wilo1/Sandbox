@@ -442,7 +442,7 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
                     node.threeObject.add(node.getRoot());
                     threeParent.add(node.threeObject);
                 } 
-                else if (childType == "subDriver/threejs/asset/vnd.raw-morphttarget" ||childType == "subDriver/threejs/asset/vnd.collada+xml" || childType == "subDriver/threejs/asset/vnd.osgjs+json+compressed" || childType == "subDriver/threejs/asset/vnd.collada+xml+optimized" || childType == "subDriver/threejs/asset/vnd.gltf+json" || childType == "subDriver/threejs/asset/vnd.three.js+json" || childType == "subDriver/threejs/asset/vnd.rmx+json") {
+                else if (  childType == "subDriver/threejs/asset/vnd.SAVE+json" || childType == "subDriver/threejs/asset/vnd.raw-morphttarget" ||childType == "subDriver/threejs/asset/vnd.collada+xml" || childType == "subDriver/threejs/asset/vnd.osgjs+json+compressed" || childType == "subDriver/threejs/asset/vnd.collada+xml+optimized" || childType == "subDriver/threejs/asset/vnd.gltf+json" || childType == "subDriver/threejs/asset/vnd.three.js+json" || childType == "subDriver/threejs/asset/vnd.rmx+json") {
 
                     node = this.state.nodes[childID] = this.subDriverFactory.createNode(childID, 'vwf/model/threejs/asset.js', childName, childType, childSource, callback);
 
