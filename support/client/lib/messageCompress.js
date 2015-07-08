@@ -1,7 +1,9 @@
 var disableCompress = false;
 var messageCompress = {
-    encode: function(message)
+    encode: function(message,key)
     {
+        if(key && this.specialCaseEncode[key])
+            return this.specialCaseEncode[key](message);
         if(typeof message == "number")
         {
             return Math.floor(message * 1000000)/1000000;
@@ -27,16 +29,18 @@ var messageCompress = {
                 var key = this.enc_mappings[i];
                 if (key)
                 {
-                    newmessage[key] = this.encode(message[i]);
+                    newmessage[key] = this.encode(message[i],i);
                 }
                 else
-                    newmessage[i] = this.encode(message[i]);
+                    newmessage[i] = this.encode(message[i],i);
             }
             return newmessage;
         }
     },
-    decode: function(message)
+    decode: function(message,key)
     {
+        if(key && this.specialCaseDecode[key])
+            return this.specialCaseDecode[key](message);
         if(typeof message == "string")
         {
             return this.dnc_mappings[message] || message;
@@ -47,7 +51,7 @@ var messageCompress = {
         {
             var newmessage = [];
             for (var i = 0; i < message.length; i++)
-                newmessage[i] = this.decode(message[i])
+                newmessage[i] = this.decode(message[i],i)
             return newmessage;
         }
         else
@@ -58,10 +62,10 @@ var messageCompress = {
                 var key = this.dnc_mappings[i];
                 if (key)
                 {
-                    newmessage[key] = this.decode(message[i]);
+                    newmessage[key] = this.decode(message[i],key);
                 }
                 else
-                    newmessage[i] = this.decode(message[i]);
+                    newmessage[i] = this.decode(message[i],i);
             }
             return newmessage;
         }
@@ -223,6 +227,13 @@ var messageCompress = {
     dnc_mappings:
     {},
     tableSize: 0,
+    specialCaseEncode:{},
+    specialCaseDecode:{},
+    addSpecialCase :function(key,encode,decode)
+    {
+        this.specialCaseEncode[key] = encode;
+        this.specialCaseDecode[key] = decode;
+    },
     addMapping: function(from)
     {
         var key = String.fromCharCode(this.tableSize + 128)
