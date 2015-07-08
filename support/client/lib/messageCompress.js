@@ -1,14 +1,30 @@
 var disableCompress = false;
-var messageCompress = {
-    encode: function(message,key)
+
+function ab2str(buf)
+{
+    return String.fromCharCode.apply(null, new Uint16Array(buf));
+}
+
+function str2ab(str)
+{
+    var buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
+    var bufView = new Uint16Array(buf);
+    for (var i = 0, strLen = str.length; i < strLen; i++)
     {
-        if(key && this.specialCaseEncode[key])
+        bufView[i] = str.charCodeAt(i);
+    }
+    return buf;
+}
+var messageCompress = {
+    encode: function(message, key)
+    {
+        if (key && this.specialCaseEncode[key])
             return this.specialCaseEncode[key](message);
-        if(typeof message == "number")
+        if (typeof message == "number")
         {
-            return Math.floor(message * 1000000)/1000000;
+            return Math.floor(message * 1000000) / 1000000;
         }
-        if(typeof message == "string")
+        if (typeof message == "string")
         {
             return this.enc_mappings[message] || message;
         }
@@ -29,19 +45,19 @@ var messageCompress = {
                 var key = this.enc_mappings[i];
                 if (key)
                 {
-                    newmessage[key] = this.encode(message[i],i);
+                    newmessage[key] = this.encode(message[i], i);
                 }
                 else
-                    newmessage[i] = this.encode(message[i],i);
+                    newmessage[i] = this.encode(message[i], i);
             }
             return newmessage;
         }
     },
-    decode: function(message,key)
+    decode: function(message, key)
     {
-        if(key && this.specialCaseDecode[key])
+        if (key && this.specialCaseDecode[key])
             return this.specialCaseDecode[key](message);
-        if(typeof message == "string")
+        if (typeof message == "string")
         {
             return this.dnc_mappings[message] || message;
         }
@@ -51,7 +67,7 @@ var messageCompress = {
         {
             var newmessage = [];
             for (var i = 0; i < message.length; i++)
-                newmessage[i] = this.decode(message[i],i)
+                newmessage[i] = this.decode(message[i], i)
             return newmessage;
         }
         else
@@ -62,10 +78,10 @@ var messageCompress = {
                 var key = this.dnc_mappings[i];
                 if (key)
                 {
-                    newmessage[key] = this.decode(message[i],key);
+                    newmessage[key] = this.decode(message[i], key);
                 }
                 else
-                    newmessage[i] = this.decode(message[i],i);
+                    newmessage[i] = this.decode(message[i], i);
             }
             return newmessage;
         }
@@ -79,6 +95,7 @@ var messageCompress = {
             this.initialize();
         message = this.encode(message);
         packed = JSON.stringify(message);
+        packed = packed.replace(/\"/g,String.fromCharCode(345));
         return packed;
     },
     unpack: function(message)
@@ -88,6 +105,7 @@ var messageCompress = {
             return message;
         if (!this.initialized)
             this.initialize();
+        message = message.replace(new RegExp(String.fromCharCode(345),"g"),"\"");
         message = JSON.parse(message);
         message = this.decode(message);
         return message;
@@ -95,6 +113,26 @@ var messageCompress = {
     initialized: false,
     initialize: function()
     {
+        this.addSpecialCase("transform", function(val)
+            {
+                var t = new Float32Array(16)
+                for (var i = 0; i < 16; i++)
+                    t[i] = val[i]
+                return  btoa(String.fromCharCode.apply(null, new Uint8Array(t.buffer)));
+            },
+            function(val)
+            {
+                var t = new Uint8Array(16*4);
+                val = atob(val);
+                for(var i = 0; i < val.length; i++)
+                    t[i] = val.charCodeAt(i);
+
+                t = new Float32Array(t.buffer);
+                var ret = [];
+                for (var i = 0; i < 16; i++)
+                    ret[i] = t[i];
+                return ret;
+            });
         this.addMapping("tick");
         this.addMapping("eventData");
         this.addMapping("eventNodeData");
@@ -220,6 +258,24 @@ var messageCompress = {
         this.addMapping("extends");
         this.addMapping("source");
         this.addMapping("simulationStateUpdate");
+        this.addMapping("cycles");
+        this.addMapping("stand");
+        this.addMapping("start");
+        this.addMapping("length");
+        this.addMapping("speed");
+        this.addMapping("current");
+        this.addMapping("loop");
+        this.addMapping("walk");
+        this.addMapping("handlerIndex");
+        this.addMapping("handlerLength");
+        this.addMapping("jump");
+        this.addMapping("runningjump");
+        this.addMapping("strafeleft");
+        this.addMapping("straferight");
+        this.addMapping("walkback");
+        this.addMapping("motionStack");
+        this.addMapping("activeCycle");
+        this.addMapping("oldRotZ");
         this.initialized = true;
     },
     enc_mappings:
@@ -227,9 +283,11 @@ var messageCompress = {
     dnc_mappings:
     {},
     tableSize: 0,
-    specialCaseEncode:{},
-    specialCaseDecode:{},
-    addSpecialCase :function(key,encode,decode)
+    specialCaseEncode:
+    {},
+    specialCaseDecode:
+    {},
+    addSpecialCase: function(key, encode, decode)
     {
         this.specialCaseEncode[key] = encode;
         this.specialCaseDecode[key] = decode;
@@ -251,6 +309,8 @@ catch (e)
 try
 {
     exports.messageCompress = messageCompress;
+    global.btoa = require("btoa");
+    global.atob = require("atob");
 }
 catch (e)
 {
