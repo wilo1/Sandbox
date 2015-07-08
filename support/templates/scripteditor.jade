@@ -1,0 +1,91 @@
+mixin scripteditor_head
+	block
+
+mixin scripteditor_body
+
+		#ScriptEditorAbandonChanges.
+			You have are about to load a different script, but you have unsaved changes to this script. Do you want to continue and abandon the changes? This action cannot be undone.
+		#ScriptEditorCreateMethod
+			input#newMethodName(type='text')
+		#ScriptEditorCreateEvent
+			input#newEventName(type='text')
+		#ScriptEditorCreateProperty
+			input#newPropertyName(type='text')
+		#ScriptEditorDeleteMethod Are you sure you want to delete this script? This cannot be undone.
+		#ScriptEditorDeleteProperty Are you sure you want to delete this property? This cannot be undone.
+		#ScriptEditorDeleteEvent Are you sure you want to delete this script? This cannot be undone.
+		#ScriptEditorMessage This script contains syntax errors, and cannot be saved.
+
+		#ScriptEditor.verticalLayout(ng-controller='ScriptEditorController', style='z-index:99')
+
+			#scripteditortitle.ui-dialog-titlebar.ui-widget-header.ui-corner-all.ui-helper-clearfix(style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;')
+				.headericon.script
+				span#scripteditortitletext.ui-dialog-title ScriptEditor 
+					| {{fields.selectedNode ? '- '+(fields.selectedNode.properties.DisplayName || fields.selectedNode.id) : ''}}
+				#maximizescripteditor.icon.glyphicon.glyphicon-chevron-up(style="float:right;margin-right: 20px;")
+				#hidescripteditor.icon.glyphicon.glyphicon-chevron-down(style="float:right;")
+
+			#ScriptEditorTabs.verticalLayout
+				//ul
+					li: a(href="#methods") Methods
+					li: a(href="#events") Events
+					li: a(href="#properties") Properties
+					li: a(href="#options") Options
+				.tabs-nav
+					label(ng-class='{"selected": guiState.openTab === "methods"}')
+						input(type='radio', ng-model='guiState.openTab', value='methods')
+						| Methods
+					label(ng-class='{"selected": guiState.openTab === "events"}')
+						input(type='radio', ng-model='guiState.openTab', value='events')
+						| Events
+					label(ng-class='{"selected": guiState.openTab === "properties"}')
+						input(type='radio', ng-model='guiState.openTab', value='properties')
+						| Properties
+					label(ng-class='{"selected": guiState.openTab === "options"}')
+						input(type='radio', ng-model='guiState.openTab', value='options')
+						| Options
+
+				#methods.tabs-panel.horizontalLayout(ng-show='guiState.openTab === "methods"')
+					#methodlist.list
+						label.listitem(ng-repeat='method in methodList', ng-class='{"selected": methodList.selectedMethod===method.name}')
+							input(type='radio', name='selectedMethod', ng-model='methodList.selectedMethod', ng-value='method.name')
+							| {{method.name}}
+
+						label.listitem.suggestion(ng-repeat='method in methodSuggestions', ng-hide='hasMethod(method.name)'
+							title='Create the "{{method.name}}" method.') {{method.name}}
+							
+					.textinner.verticalLayout
+						ace-code-editor.content(ace-method='methodList.selectedMethod')
+						.buttonPanel.horizontalLayout
+							input#saveMethod(type='button', value='Save Method')
+							.spacer
+							input#callMethod(type='button', value='Call Method')
+							input#deleteMethod(type='button', value='Delete Method')
+							input#newMethod(type='button', value='New Method')
+							input#checkSyntaxMethod(type='button', value='Check Code')
+					
+				//-#events(style="height: 100%;padding:4px")
+					#eventlist.list
+					#textinnere(style="display: inline-block;position:absolute")
+						#eventtext(style="position: absolute;top: 0px;width: 100%;height: 100%;border: 1px black solid;")
+						#saveEvent
+						#callEvent
+						#deleteEvent
+						#newEvent
+						#checkSyntaxEvent
+
+				//-#properties(style="height: 100%;padding:4px")
+					div(style="width: 180px;display: inline-block;vertical-align: top;")
+						#propertylist
+					#textinnerp(style="display: inline-block;position:absolute")
+						#propertytext(style="position: absolute;top: 0px;width: 100%;height: 100%;border: 1px black solid;")
+						#saveProperty
+						#deleteProperty
+						#newProperty
+
+				//-#options(style="height: 100%;padding:4px")
+					input#inheritPrototype(type="checkbox")
+					label(for="inheritPrototype") Show Inherited Properties
+					input#showHiddenProperties(type="checkbox")
+					label(for="showHiddenProperties") Show Hidden Properties
+

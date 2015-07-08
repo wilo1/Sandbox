@@ -215,9 +215,8 @@ var JavaScriptHighlightRules = function() {
                 regex : /[+-]?\d+(?:(?:\.\d*)?(?:[eE][+-]?\d+)?)?\b/
             }, {
 				token : function (one,two,three,four) {
-					
-					if(_ScriptEditor.NodeHasProperty(three))
-						return ["keyword.operator","punctuation.operator","variable.parameter",'punctuation.operator'];
+					//if(_ScriptEditor.NodeHasProperty(three))
+					//	return ["keyword.operator","punctuation.operator","variable.parameter",'punctuation.operator'];
 					return ["keyword.operator","punctuation.operator","text",'punctuation.operator'];;
 				},
 				regex: /(this)(\.)(.*?)([;\)\]\}\(\.\[=\s$]+)/

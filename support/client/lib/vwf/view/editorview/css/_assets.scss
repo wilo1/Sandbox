@@ -234,10 +234,6 @@
 				max-width: 50%;
 			}
 		}
-
-		.spacer {
-			@include flex-grow(1);
-		}
 	}
 
 }

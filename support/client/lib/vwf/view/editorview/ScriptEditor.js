@@ -83,10 +83,43 @@ define(['vwf/view/editorview/angular-app'], function(app)
 {
 	$(document.head).append('<script src="../vwf/view/editorview/lib/ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>');
 
-	app.filter('sortByKeys', function()
+	app.directive('aceCodeEditor', function()
 	{
-		return function(input){
-			return Object.keys(input).sort();
+		var editor = null;
+		return {
+			restrict: 'E',
+			template: '<pre></pre>',
+			link: function($scope,elem,attrs)
+			{
+				if( !editor ){
+					editor = ace.edit(elem.children()[0]);
+					editor.setTheme("ace/theme/monokai");
+					editor.setShowPrintMargin(false);
+					editor.getSession().setMode("ace/mode/javascript");
+					editor.resize();
+					elem[0]._editor = editor;
+				}
+
+				$scope.$watch(attrs.aceMethod, function(newval)
+				{
+					if(newval)
+					{
+						var method = $scope.methodList.reduce(function(old,cur){ return cur.name === newval ? cur.value : old; }, null);
+						var fullBody = 'function '+newval+'('+method.parameters.join(',')+'){'+method.body+'}';
+						var cleanBody = $.trim(js_beautify(fullBody, {
+							max_preserve_newlines: 2,
+							braces_on_own_line: true,
+							opt_keep_array_indentation: true
+						}));
+
+						editor.setValue(cleanBody);
+						editor.scrollToLine(0);
+					}
+					else {
+						editor.setValue('');
+					}
+				});
+			}
 		};
 	});
 
@@ -94,22 +127,67 @@ define(['vwf/view/editorview/angular-app'], function(app)
 	{
 		$scope.showHiddenProperties = false;
 		$scope.inheritPrototype = false;
+		$scope.guiState = {
+			openTab: 'methods'
+		};
+
+		$scope.methodList = [];
+		$scope.methodList.selectedMethod = null;
+
+		$scope.methodSuggestions = [
+			{
+				name: 'attached',
+				comment: "attached is called when the object is hooked up to the scene.\n// Note that this happens after initialize. At this point, you can access the objects parent."
+			}, {
+				name: 'collision',
+				comment: 'The body has collided with another body. The ID of the node is param 1, collision data in param 2'
+			}, {
+				name: 'deinitialize',
+				comment: "Deinitialize is called when the object is being destroyed.\n// Clean up here if your object allocated any resources manually during initialize."
+			}, {
+				name: 'initialize',
+				comment: "Initialize is called when the node is constructed.\n//Write code here to setup the object, or hook up event handlers.\n//Note that the object is not yet hooked into the scene - that will happen during the 'Added' event.\n// You cannot access this.parent in this function."
+			}, {
+				name: 'prerender',
+				comment: "This function is called at every frame. Don't animate object properties here - that can break syncronization.\n//This can happen because each user might have a different framerate.\n//Most of the time, you should probably be using Tick instead."
+			}, {
+				name: 'ready',
+				comment: 'The scene is now completely loaded. This will fire on each client when the client joins, so it`s not a great place to create objects'
+			}, {
+				name: 'tick',
+				comment: "The tick function is called 20 times every second. \n// Write code here to animate over time"
+			}
+		];
+
+		$scope.hasMethod = function(name){
+			return $scope.methodList.reduce(
+				function(old,val){ return old || val.name === name; },
+				false
+			);
+		}
 
 		$scope.$watch('fields.selectedNode', function(node)
 		{
-			$scope.methodList = {};
-
 			// populate methods
-			while (node)
+			$scope.methodList = [];
+			$scope.methodList.selectedMethod = null;
+
+			var curNode = node;
+			while(curNode)
 			{
 				for (var i in node.methods) {
 					if ($scope.methodList[i] === undefined && (i.indexOf('__') !== 0 || $scope.showHiddenProperties) )
-						$scope.methodList[i] = node.methods[i];
+						$scope.methodList.push({'name': i, 'value': node.methods[i]});
 				}
 
-				node = _Editor.getNode(vwf.prototype(node.id), true);
-				if (!$scope.inheritPrototype) break;
+				if($scope.inheritPrototype)
+					curNode = _Editor.getNode(vwf.prototype(node.id), true);
+				else
+					break;
 			}
+			$scope.methodList.sort(function(a,b){
+				return a.name > b.name ? 1 : -1;
+			});
 
 		});
 
@@ -118,7 +196,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 	return {
 		initialize: function()
 		{
-			$('#ScriptEditorTabs').tabs({});
+			//$('#ScriptEditorTabs').tabs({});
 			$('#ScriptEditorAbandonChanges').dialog({
 				title: 'Abandon Changes?',
 				autoOpen: false,
@@ -286,49 +364,6 @@ var oldDefine = function() {
 	function initialize() {
 		this.inheritPrototype = false;
 		this.hideSystemProperties = true;
-		this.resize = function() {
-			$('#ScriptEditorTabs').css('height', $('#ScriptEditor').height() + 'px');
-			var w = ($('#textinnere').parent().width() - 190);
-			if (w <= 0) w = ($('#textinnerm').parent().width() - 190);
-			if (w <= 0) w = ($('#textinnerp').parent().width() - 190);
-			var h = ($('#textinnere').parent().height() - 125);
-			if (h <= 50) h = ($('#textinnerm').parent().height() - 125);
-			if (h <= 50) h = ($('#textinnerp').parent().height() - 125);
-			$('#textinnerm').css('width', w + 'px')
-			$('#textinnere').css('width', w + 'px')
-			$('#textinnerp').css('width', w + 'px')
-			$('#textinnerm').css('height', h + 'px')
-			$('#textinnere').css('height', h + 'px')
-			$('#textinnerp').css('height', h + 'px')
-
-
-			$('#methodlist').css('height', h + 'px');
-			$('#eventlist').css('height', h + 'px');
-			$('#propertylist').css('height', h + 'px');
-
-
-			h += 15;
-			$('#checkSyntaxMethod').css('top', h + 'px');
-			$('#checkSyntaxEvent').css('top', h + 'px');
-			$('#callMethod').css('top', h + 'px');
-			$('#deleteMethod').css('top', h + 'px');
-			$('#newMethod').css('top', h + 'px');
-			$('#newProperty').css('top', h + 'px');
-			$('#saveMethodCopy').css('top', h + 'px');
-			$('#callEvent').css('top', h + 'px');
-			$('#deleteEvent').css('top', h + 'px');
-			$('#deleteProperty').css('top', h + 'px');
-			$('#newEvent').css('top', h + 'px');
-			$('#saveEventCopy').css('top', h + 'px');
-			_ScriptEditor.methodEditor.resize();
-			_ScriptEditor.eventEditor.resize();
-			_ScriptEditor.propertyEditor.resize();
-			$('#saveMethod').css('top', h);
-			$('#saveEvent').css('top', h);
-			$('#saveProperty').css('top', h);
-			$('.ace_scroller').css('left', 40);
-			$('.ace_gutter-layer').css('width', 40);
-		}
 		
 		this.MethodChanged = false;
 		this.EventChanged = false;
@@ -393,170 +428,6 @@ var oldDefine = function() {
 
 			}
 		});
-		$('#ScriptEditor').css('background', 'black');
-		$('#ScriptEditorDeleteMethod').dialog({
-			title: 'Delete Method?',
-			autoOpen: false,
-			height: 'auto',
-			width: '200px',
-			position: 'center',
-			modal: true,
-			buttons: {
-				'Yes': function() {
-					_ScriptEditor.DeleteActiveMethod_imp();
-					$('#ScriptEditorDeleteMethod').dialog('close');
-				},
-				'No': function() {
-					$('#ScriptEditorDeleteMethod').dialog('close');
-				},
-			}
-		});
-		$('#ScriptEditorDeleteProperty').dialog({
-			title: 'Delete Property?',
-			autoOpen: false,
-			height: 'auto',
-			width: '200px',
-			position: 'center',
-			modal: true,
-			buttons: {
-				'Yes': function() {
-					_ScriptEditor.DeleteActiveProperty_imp();
-					$('#ScriptEditorDeleteProperty').dialog('close');
-				},
-				'No': function() {
-					$('#ScriptEditorDeleteProperty').dialog('close');
-				},
-			}
-		});
-		$('#ScriptEditorDeleteEvent').dialog({
-			title: 'Delete Event?',
-			autoOpen: false,
-			height: 'auto',
-			width: '200px',
-			position: 'center',
-			modal: true,
-			buttons: {
-				'Yes': function() {
-					_ScriptEditor.DeleteActiveEvent_imp();
-					$('#ScriptEditorDeleteEvent').dialog('close');
-				},
-				'No': function() {
-					$('#ScriptEditorDeleteEvent').dialog('close');
-				},
-			}
-		});
-		$('#ScriptEditorAbandonChanges').dialog({
-			title: 'Abandon Changes?',
-			autoOpen: false,
-			height: 'auto',
-			width: '200px',
-			position: 'center',
-			modal: true,
-			buttons: {
-				'Yes': function() {
-					_ScriptEditor.AbandonChangesCallback();
-					$('#ScriptEditorAbandonChanges').dialog('close');
-				},
-				'No': function() {
-					$('#ScriptEditorAbandonChanges').dialog('close');
-				},
-			}
-		});
-		$('#ScriptEditorMessage').dialog({
-			title: 'Syntax Error',
-			autoOpen: false,
-			height: 'auto',
-			width: '200px',
-			position: 'center',
-			modal: true,
-			buttons: {
-				'Ok': function() {
-					$('#ScriptEditorMessage').dialog('close');
-				},
-			}
-		});
-		$('#ScriptEditorCreateMethod').dialog({
-			title: 'Enter Method Name',
-			autoOpen: false,
-			height: 'auto',
-			width: '300px',
-			position: 'center',
-			modal: true,
-			buttons: {
-				'Ok': function() {
-					var name = $('#newMethodName').val();
-					_ScriptEditor.setSelectedMethod(name, 'function ' + name + '(){\n\n console.log("got here"); \n\n}');
-					$('#ScriptEditorCreateMethod').dialog('close');
-				},
-				'Cancel': function() {
-					$('#ScriptEditorCreateMethod').dialog('close');
-				}
-			}
-		});
-		$('#ScriptEditorCreateProperty').dialog({
-			title: 'Enter Method Name',
-			autoOpen: false,
-			height: 'auto',
-			width: '300px',
-			position: 'center',
-			modal: true,
-			buttons: {
-				'Ok': function() {
-					var name = $('#newPropertyName').val();
-					_ScriptEditor.setSelectedProperty(name, '"null"');
-					_ScriptEditor.SavePropertyClicked(true);
-					$('#ScriptEditorCreateProperty').dialog('close');
-				},
-				'Cancel': function() {
-					$('#ScriptEditorCreateProperty').dialog('close');
-				}
-			}
-		});
-		$('#ScriptEditorCreateEvent').dialog({
-			title: 'Enter Event Signiture',
-			autoOpen: false,
-			height: 'auto',
-			width: '300px',
-			position: 'center',
-			modal: true,
-			buttons: {
-				'Ok': function() {
-					var name = $('#newEventName').val();
-					name = name.substring(0, name.indexOf('('));
-					name = $.trim(name);
-					_ScriptEditor.setSelectedEvent(name, 'function ' + $('#newEventName').val() + '{\n\n console.log("got here"); \n\n}');
-					$('#ScriptEditorCreateEvent').dialog('close');
-				},
-				'Cancel': function() {
-					$('#ScriptEditorCreateEvent').dialog('close');
-				}
-			}
-		});
-		$('#ScriptEditorTabs').tabs({
-			activate: function(e, ui) {
-
-				_ScriptEditor.eventEditor.renderer.updateFull();
-				_ScriptEditor.methodEditor.renderer.updateFull();
-				_ScriptEditor.propertyEditor.renderer.updateFull();
-				$(_ScriptEditor).resize();
-
-			}
-		});
-		//
-
-		$('#methodlist').css('width', '180px');
-		$('#eventlist').css('width', '180px');
-		$('#propertylist').css('width', '180px');
-
-
-		$('#methodlist').css('overflow-y', 'auto');
-		$('#eventlist').css('overflow-y', 'auto');
-		$('#propertylist').css('overflow-y', 'auto');
-
-		$('#methodlist').css('overflow-x', 'hidden');
-		$('#eventlist').css('overflow-x', 'hidden');
-		$('#propertylist').css('overflow-x', 'hidden');
-
 
 		$('#saveEvent').css('position', 'absolute');
 		$('#saveProperty').css('position', 'absolute');
@@ -564,10 +435,6 @@ var oldDefine = function() {
 		$('#saveEvent').css('width', '175px');
 		$('#saveProperty').css('width', '175px');
 
-
-		//$('#saveMethod').css('position', 'absolute');
-		//$('#saveMethod').css('bottom','6px');
-		//$('#saveMethod').css('width', '175px');
 
 		$('#saveEvent').button({
 			label: 'Save Event'
@@ -1236,7 +1103,6 @@ var oldDefine = function() {
 			return false;
 		} 
 		this.BuildGUI = function(refresh) {
-			$('#scripteditortitletext').text('Script Editor - ' + (vwf.getProperty(this.currentNode.id, 'DisplayName') || this.currentNode.id))
 			if (!refresh) {
 				this.selectedMethod = null;
 				this.selectedEvent = null;
