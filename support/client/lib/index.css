@@ -190,10 +190,7 @@ input {
   padding: 10px;
 }
 
-#vwf-root>#glyphOverlay, #vwf-root>canvas {
-  /*margin-left: auto;
-  margin-right: auto;
-  display: block;*/
+#vwf-root>canvas {
   width: 100%;
   height: 100%;
 }
