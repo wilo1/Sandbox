@@ -113,20 +113,20 @@ function ServeSinglePlayer(socket, namespace, instancedata)
                 "parameters": [scene],
                 "time": 0
             });
-            var joinMessage = messageCompress.pack(JSON.stringify(
+            var joinMessage = messageCompress.pack(
             {
                 "action": "fireEvent",
                 "parameters": ["clientConnected", [socket.id, socket.loginData.Username, socket.loginData.UID]],
                 node: "index-vwf",
                 "time": 0
-            }));
+            });
             socket.emit('message', joinMessage);
-            socket.emit('message', messageCompress.pack(JSON.stringify(
+            socket.emit('message', messageCompress.pack(
             {
                 "action": "startSimulating",
                 "parameters": ["index-vwf"],
                 "time": 0
-            })));
+            }));
             socket.emit('message',
             {
                 "action": "goOffline",

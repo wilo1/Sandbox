@@ -1095,7 +1095,9 @@ this.simulationStateUpdate = function(nodeID,member,state)
             this.setProperty(nodeID,i,state[nodeID][i]);
     }
 }
-this.postSimulationStateUpdates = function()
+
+
+this.postSimulationStateUpdates = function(freqlist)
 {
 
      var updates = {};
@@ -1110,6 +1112,11 @@ this.postSimulationStateUpdates = function()
         {
             if(this.lastPropertyDataUpdates && this.lastPropertyDataUpdates[nodeID]&&this.lastPropertyDataUpdates[nodeID][keys[j]] && JSON.stringify(props[keys[j]]) == this.lastPropertyDataUpdates[nodeID][keys[j]])
                 delete props[keys[j]];
+            // if provided with a frequency list, and the key is not in that list, remove it
+            if(freqlist && freqlist.indexOf(keys[j]) == -1)
+            {
+                 delete props[keys[j]];
+            }
         }
         }
         if(props && Object.keys(props).length)
@@ -1320,7 +1327,7 @@ this.log = function() {
 
 // TODO: remove, in favor of drivers and nodes exclusively using future scheduling;
 // TODO: otherwise, all clients must receive exactly the same ticks at the same times.
-
+this.tickCount = 0;
 this.tick = function() {
 
     // Call ticking() on each model.
@@ -1342,7 +1349,8 @@ this.tick = function() {
         view.ticked && view.ticked( this.now ); // TODO: maintain a list of tickable views and only call those
     }, this );
 
-    this.postSimulationStateUpdates();
+    this.tickCount ++;
+    this.postSimulationStateUpdates(this.tickCount % 20 != 0 ? ['transform','animationFrame'] : null);
 };
 
 // -- setState -----------------------------------------------------------------------------
