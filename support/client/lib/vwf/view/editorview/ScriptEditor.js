@@ -29,7 +29,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 				});
 
 				$scope.sessions = {};
-				$scope.$watchGroup(['guiState.openTab','fields.selectedNode'], function(){
+				$scope.$watch('fields.selectedNode', function(){
 					$scope.$sessions = {};
 				});
 
@@ -39,7 +39,8 @@ define(['vwf/view/editorview/angular-app'], function(app)
 
 					if(newval)
 					{
-						if( !$scope.sessions[newval] )
+						var sessionName = $scope.guiState.openTab+'_'+newval;
+						if( !$scope.sessions[sessionName] )
 						{
 							var newBody = '';
 							if( $scope.guiState.openTab === 'methods' ){
@@ -54,8 +55,8 @@ define(['vwf/view/editorview/angular-app'], function(app)
 								newBody = angular.toJson($scope.field.value, 4);
 							}
 
-							$scope.sessions[newval] = ace.createEditSession(newBody);
-							$scope.sessions[newval].setMode("ace/mode/javascript");
+							$scope.sessions[sessionName] = ace.createEditSession(newBody);
+							$scope.sessions[sessionName].setMode("ace/mode/javascript");
 						}
 
 						editor.setSession( $scope.sessions[newval] );
