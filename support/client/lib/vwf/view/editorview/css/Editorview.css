@@ -490,6 +490,8 @@
         background-color: #2c425e; }
       #ScriptEditor .list .listitem.suggestion {
         color: #B6B6B6; }
+      #ScriptEditor .list .listitem.dirty {
+        border-color: red; }
       #ScriptEditor .list .listitem:last-child {
         margin-bottom: 28px; }
   #ScriptEditor .textinner {
@@ -502,13 +504,17 @@
       -ms-flex: 1 1;
       -webkit-flex-grow: 1;
       flex-grow: 1; }
+      #ScriptEditor .textinner .content.dirty {
+        border-color: red; }
     #ScriptEditor .textinner pre {
       padding: 0;
+      margin: 0;
       border: none;
       border-radius: 0;
       background-color: inherit;
       width: 100%;
-      height: 100%; }
+      height: 100%;
+      position: absolute; }
     #ScriptEditor .textinner .buttonPanel input[type=button] {
       background: #222222 50% 50% repeat-x;
       border: 1px solid #444444;
@@ -518,6 +524,31 @@
       font-family: "Open Sans", Verdana, Arial, sans-serif;
       color: #eee;
       margin: 4px; }
+      #ScriptEditor .textinner .buttonPanel input[type=button]:hover {
+        color: #82b8ff; }
+  #ScriptEditor #options.tabs-panel {
+    -webkit-box-align: flex-start;
+    -moz-align-items: flex-start;
+    -ms-flex-align: flex-start;
+    -webkit-align-items: flex-start;
+    align-items: flex-start; }
+  #ScriptEditor label.toggleButton {
+    font-size: 11px;
+    font-weight: bold;
+    color: #eeeeee;
+    font-family: "Open Sans", Verdana, Arial, sans-serif;
+    border: solid 1px #444444;
+    border-radius: 3px;
+    background-color: #222222;
+    margin: 5px;
+    padding: 5.5px 11px; }
+    #ScriptEditor label.toggleButton:hover {
+      color: #82b8ff; }
+    #ScriptEditor label.toggleButton.checked {
+      background-color: #aeaeae;
+      color: black; }
+    #ScriptEditor label.toggleButton input {
+      display: none; }
 
 @-webkit-keyframes pulsing {
   0% {

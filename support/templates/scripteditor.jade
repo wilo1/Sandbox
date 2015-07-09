@@ -48,7 +48,7 @@ mixin scripteditor_body
 
 				.tabs-panel.horizontalLayout(ng-show='guiState.openTab !== "options"')
 					.list
-						label.listitem(ng-repeat='item in currentList', ng-class='{"selected": currentList.selected===item.name}')
+						label.listitem(ng-repeat='item in currentList', ng-class='{"selected": currentList.selected===item.name, "dirty": item.dirty}')
 							input(type='radio', name='selectedField', ng-model='currentList.selected', ng-value='item.name')
 							| {{item.name}}
 
@@ -56,37 +56,23 @@ mixin scripteditor_body
 							title='Create the "{{item.name}}" method.') {{item.name}}
 							
 					.textinner.verticalLayout
-						ace-code-editor.content(ace-method='methodList.selectedMethod')
+						ace-code-editor.content(ace-field='currentList.selected', disabled='!guiState.openTab || !currentList.selected'
+							ng-class='{"dirty": field.dirty}')
 						.buttonPanel.horizontalLayout
-							input#saveMethod(type='button', value='Save Method')
+							input#save(type='button', value='Save {{getSingular(guiState.openTab)}}')
+							input#clear(type='button', value='Reset {{getSingular(guiState.openTab)}}')
 							.spacer
-							input#callMethod(type='button', value='Call Method')
-							input#deleteMethod(type='button', value='Delete Method')
-							input#newMethod(type='button', value='New Method')
-							input#checkSyntaxMethod(type='button', value='Check Code')
+							input#call(type='button', value='Call {{getSingular(guiState.openTab)}}')
+							input#delete(type='button', value='Delete {{getSingular(guiState.openTab)}}')
+							input#new(type='button', value='New {{getSingular(guiState.openTab)}}')
+							input#checkSyntax(type='button', value='Check Code')
 					
-				//-#events(style="height: 100%;padding:4px")
-					#eventlist.list
-					#textinnere(style="display: inline-block;position:absolute")
-						#eventtext(style="position: absolute;top: 0px;width: 100%;height: 100%;border: 1px black solid;")
-						#saveEvent
-						#callEvent
-						#deleteEvent
-						#newEvent
-						#checkSyntaxEvent
 
-				//-#properties(style="height: 100%;padding:4px")
-					div(style="width: 180px;display: inline-block;vertical-align: top;")
-						#propertylist
-					#textinnerp(style="display: inline-block;position:absolute")
-						#propertytext(style="position: absolute;top: 0px;width: 100%;height: 100%;border: 1px black solid;")
-						#saveProperty
-						#deleteProperty
-						#newProperty
-
-				//-#options(style="height: 100%;padding:4px")
-					input#inheritPrototype(type="checkbox")
-					label(for="inheritPrototype") Show Inherited Properties
-					input#showHiddenProperties(type="checkbox")
-					label(for="showHiddenProperties") Show Hidden Properties
+				#options.tabs-panel.horizontalLayout(ng-show='guiState.openTab === "options"')
+					label.toggleButton(ng-class='{"checked": guiState.inheritPrototype}')
+						input(type="checkbox", ng-model='guiState.inheritPrototype')
+						| Show Inherited Properties
+					label.toggleButton(ng-class='{"checked": guiState.showHiddenProperties}')
+						input(type="checkbox", ng-model='guiState.showHiddenProperties')
+						| Show Hidden Properties
 

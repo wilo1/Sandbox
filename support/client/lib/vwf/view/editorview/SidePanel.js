@@ -38,9 +38,9 @@ define({
             $('#sidepanel').animate({
                 'left': $(window).width()
             });
-            $('#ScriptEditor').animate({
+            /*$('#ScriptEditor').animate({
                 'width': $(window).width() - (getLeft('EntityLibrary') + getWidth('EntityLibrary'))
-            });
+            });*/
 
             /*if ($('#index-vwf').length > 0) {
                 window.sizeTimeoutHandle = window.setInterval(sizeWindowTimer, 33);

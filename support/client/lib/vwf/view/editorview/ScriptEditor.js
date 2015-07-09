@@ -1,44 +1,74 @@
 
 define(['vwf/view/editorview/angular-app'], function(app)
 {
-	$(document.head).append('<script src="../vwf/view/editorview/lib/ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>');
+	$(document.head).append('<script src="../vwf/view/editorview/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>');
 
 	app.directive('aceCodeEditor', function()
 	{
-		var editor = null;
 		return {
 			restrict: 'E',
+			scope: true,
 			template: '<pre></pre>',
 			link: function($scope,elem,attrs)
 			{
-				if( !editor ){
-					editor = ace.edit(elem.children()[0]);
-					editor.setTheme("ace/theme/monokai");
-					editor.setShowPrintMargin(false);
-					editor.getSession().setMode("ace/mode/javascript");
-					editor.resize();
-					elem[0]._editor = editor;
-				}
+				var editor = ace.edit(elem.children()[0]);
+				editor.setTheme("ace/theme/monokai");
+				editor.setShowPrintMargin(false);
+				editor.resize();
+				elem[0]._editor = editor;
 
-				$scope.$watch(attrs.aceMethod, function(newval)
+				$scope.field = null;
+
+				$scope.$watch(attrs.disabled, function(newval){
+					editor.setReadOnly(!!newval);
+				});
+
+				//var suppressUpdates = false;
+				editor.on('change', function(){
+					console.log('Editor changing!');
+					//if(!suppressUpdates){
+						$scope.field.dirty = true;
+						$scope.$apply();
+					//}
+				});
+
+				$scope.sessions = {};
+
+				$scope.$watch(attrs.aceField, function(newval)
 				{
+					$scope.field = $scope.currentList.reduce(function(old,cur){ return cur.name === newval ? cur : old; }, null);
+
 					if(newval)
 					{
-						var method = $scope.methodList.reduce(function(old,cur){ return cur.name === newval ? cur.value : old; }, null);
-						var fullBody = 'function '+newval+'('+method.parameters.join(',')+'){'+method.body+'}';
-						var cleanBody = $.trim(js_beautify(fullBody, {
-							max_preserve_newlines: 2,
-							braces_on_own_line: true,
-							opt_keep_array_indentation: true
-						}));
+						if( !$scope.sessions[newval] )
+						{
+							var newBody = '';
+							if( $scope.guiState.openTab === 'methods' ){
+								var fullBody = 'function '+$scope.field.name+'('+$scope.field.value.parameters.join(',')+'){'+$scope.field.value.body+'}';
+								var newBody = $.trim(js_beautify(fullBody, {
+									max_preserve_newlines: 2,
+									braces_on_own_line: true,
+									opt_keep_array_indentation: true
+								}));
+							}
+							else if( $scope.guiState.openTab === 'properties' ){
+								newBody = angular.toJson($scope.field.value, 4);
+							}
 
-						editor.setValue(cleanBody);
+							$scope.sessions[newval] = ace.createEditSession(newBody);
+							$scope.sessions[newval].setMode("ace/mode/javascript");
+						}
+
+						editor.setSession( $scope.sessions[newval] );
+
+						editor.clearSelection();
 						editor.scrollToLine(0);
 					}
 					else {
-						editor.setValue('');
+						editor.setSession( ace.createEditSession('') );
 					}
 				});
+
 			}
 		};
 	});
@@ -52,11 +82,11 @@ define(['vwf/view/editorview/angular-app'], function(app)
 		};
 
 		$scope.methodList = [];
-		$scope.methodList.selected = null;
+		$scope.methodList.selected = '';
 		$scope.eventList = [];
-		$scope.eventList.selected = null;
+		$scope.eventList.selected = '';
 		$scope.propertyList = [];
-		$scope.propertyList.selected = null;
+		$scope.propertyList.selected = '';
 
 		$scope.currentList = [];
 
@@ -71,7 +101,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			
 				case 'events':
 					$scope.currentList = newvals[2];
-					$scope.currentSuggestions = [];
+					$scope.currentSuggestions = eventSuggestions;
 				break;
 
 				case 'properties':
@@ -81,7 +111,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 
 				default:
 					$scope.currentList = [];
-					$scope.currentList.selected = null;
+					$scope.currentList.selected = '';
 					$scope.currentSuggestions = [];
 				break;
 			}
@@ -112,6 +142,16 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			}
 		];
 
+		var eventSuggestions = [
+			{name: 'pointerClick'},
+			{name: 'pointerDown'},
+			{name: 'pointerMove'},
+			{name: 'pointerOut'},
+			{name: 'pointerOver'},
+			{name: 'pointerUp'},
+			{name: 'pointerWheel'}
+		];
+
 		$scope.hasField = function(name, list){
 			return list.reduce(
 				function(old,val){ return old || val.name === name; },
@@ -122,11 +162,11 @@ define(['vwf/view/editorview/angular-app'], function(app)
 		$scope.$watch('fields.selectedNode', function(node)
 		{
 			$scope.methodList = [];
-			$scope.methodList.selected = null;
+			$scope.methodList.selected = '';
 			$scope.eventList = [];
-			$scope.eventList.selected = null;
+			$scope.eventList.selected = '';
 			$scope.propertyList = [];
-			$scope.propertyList.selected = null;
+			$scope.propertyList.selected = '';
 
 			if( !node ){
 				$scope.guiState.openTab = '';
@@ -169,6 +209,16 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			$scope.propertyList.sort(sortByName);
 
 		});
+
+		$scope.getSingular = function(tabname)
+		{
+			switch(tabname){
+				case 'methods': return 'Method';
+				case 'events': return 'Event';
+				case 'properties': return 'Property';
+				default: return 'Method';
+			}
+		}
 
 	}]);
 
