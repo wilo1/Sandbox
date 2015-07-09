@@ -56,8 +56,7 @@ mixin scripteditor_body
 							title='Create the "{{item.name}}" method.') {{item.name}}
 							
 					.textinner.verticalLayout
-						ace-code-editor.content(ace-field='currentList.selected', disabled='!guiState.openTab || !currentList.selected'
-							ng-class='{"dirty": field.dirty}')
+						ace-code-editor.content(disabled='!guiState.openTab || !currentList.selected', ng-class='{"dirty": field.dirty}')
 						.buttonPanel.horizontalLayout
 							input#save(type='button', value='Save {{getSingular(guiState.openTab)}}')
 							input#clear(type='button', value='Reset {{getSingular(guiState.openTab)}}')

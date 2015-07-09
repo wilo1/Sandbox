@@ -23,18 +23,17 @@ define(['vwf/view/editorview/angular-app'], function(app)
 					editor.setReadOnly(!!newval);
 				});
 
-				//var suppressUpdates = false;
 				editor.on('change', function(){
-					console.log('Editor changing!');
-					//if(!suppressUpdates){
-						$scope.field.dirty = true;
-						$scope.$apply();
-					//}
+					$scope.field.dirty = true;
+					$scope.$apply();
 				});
 
 				$scope.sessions = {};
+				$scope.$watchGroup(['guiState.openTab','fields.selectedNode'], function(){
+					$scope.$sessions = {};
+				});
 
-				$scope.$watch(attrs.aceField, function(newval)
+				$scope.$watch('currentList.selected', function(newval)
 				{
 					$scope.field = $scope.currentList.reduce(function(old,cur){ return cur.name === newval ? cur : old; }, null);
 
@@ -120,25 +119,46 @@ define(['vwf/view/editorview/angular-app'], function(app)
 		var methodSuggestions = [
 			{
 				name: 'attached',
-				comment: "attached is called when the object is hooked up to the scene.\n// Note that this happens after initialize. At this point, you can access the objects parent."
+				value: {
+					parameters: [],
+					body: "// attached is called when the object is hooked up to the scene.\n// Note that this happens after initialize. At this point, you can access the objects parent."
+				}
 			}, {
 				name: 'collision',
-				comment: 'The body has collided with another body. The ID of the node is param 1, collision data in param 2'
+				value: {
+					parameters: ['obstacle', 'data'],
+					body: '// The body has collided with another body. The ID of the node is param 1, collision data in param 2'
+				}
 			}, {
 				name: 'deinitialize',
-				comment: "Deinitialize is called when the object is being destroyed.\n// Clean up here if your object allocated any resources manually during initialize."
+				value: {
+					parameters: [],
+					body: "// Deinitialize is called when the object is being destroyed.\n// Clean up here if your object allocated any resources manually during initialize."
+				}
 			}, {
 				name: 'initialize',
-				comment: "Initialize is called when the node is constructed.\n//Write code here to setup the object, or hook up event handlers.\n//Note that the object is not yet hooked into the scene - that will happen during the 'Added' event.\n// You cannot access this.parent in this function."
+				value: {
+					parameters: [],
+					body: "// Initialize is called when the node is constructed.\n//Write code here to setup the object, or hook up event handlers.\n//Note that the object is not yet hooked into the scene - that will happen during the 'Added' event.\n// You cannot access this.parent in this function."
+				}
 			}, {
 				name: 'prerender',
-				comment: "This function is called at every frame. Don't animate object properties here - that can break syncronization.\n//This can happen because each user might have a different framerate.\n//Most of the time, you should probably be using Tick instead."
+				value: {
+					parameters: [],
+					body: "//This function is called at every frame. Don't animate object properties here - that can break syncronization.\n//This can happen because each user might have a different framerate.\n//Most of the time, you should probably be using Tick instead."
+				}
 			}, {
 				name: 'ready',
-				comment: 'The scene is now completely loaded. This will fire on each client when the client joins, so it`s not a great place to create objects'
+				value: {
+					parameters: [],
+					body: '// The scene is now completely loaded. This will fire on each client when the client joins, so it`s not a great place to create objects'
+				}
 			}, {
 				name: 'tick',
-				comment: "The tick function is called 20 times every second. \n// Write code here to animate over time"
+				value: {
+					parameters: [],
+					body: "// The tick function is called 20 times every second. \n// Write code here to animate over time"
+				}
 			}
 		];
 
@@ -218,6 +238,41 @@ define(['vwf/view/editorview/angular-app'], function(app)
 				case 'properties': return 'Property';
 				default: return 'Method';
 			}
+		}
+
+		function checkPermission()
+		{
+			if (!_UserManager.GetCurrentUserName()) {
+				_Notifier.notify('You must log in to edit scripts');
+				return false;
+			}
+
+			if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(), $scope.fields.currentNode.id) == 0) {
+				_Notifier.notify('You do not have permission to script this object');
+				return false;
+			}
+			return true;
+		}
+
+		function checkSyntax()
+		{
+			var editor = document.querySelector('ace-code-editor')._editor;
+			var s = editor.getSession().getAnnotations();
+			var errors = "";
+			for (var i = 0; i < s.length; i++) {
+				if (s[i].type == 'error') errors += "<br/> line: " + s[i].row + "-" + s[i].text;
+			}
+			if (errors != "") {
+				alertify.alert('This script contains syntax errors, and cannot be saved. The errors are: \n' + errors.toString());
+
+				return false;
+			}
+			return true;
+		}
+
+		$scope.save = function()
+		{
+			
 		}
 
 	}]);
