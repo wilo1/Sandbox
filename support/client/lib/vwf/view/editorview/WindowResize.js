@@ -113,9 +113,6 @@ define({
 		var timeout;
 		window._resizeCanvas = function()
 		{
-			console.log('Resizing canvas');
-
-
 			if(timeout) clearTimeout(timeout);
 			timeout = setTimeout(function()
 			{
@@ -123,7 +120,6 @@ define({
 				var resolutionScale = _SettingsManager.getKey('resolutionScale');
 				var w = parseInt(canvas.parent().css('width')), h = parseInt(canvas.parent().css('height'));
 
-				console.log('Resizing viewport');
 				canvas.attr('width', w / resolutionScale);
 				canvas.attr('height', h / resolutionScale);
 				if(window._dRenderer){

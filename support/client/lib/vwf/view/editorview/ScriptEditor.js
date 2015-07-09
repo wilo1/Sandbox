@@ -1,83 +1,3 @@
-/*jQuery.fn.extend({
-	insertAtCaret: function(textToInsert) {
-		return this.each(function(i) {
-			if (document.selection) {
-				this.focus();
-				sel = document.selection.createRange();
-				sel.text = textToInsert;
-				this.focus();
-			} else if (this.selectionStart || this.selectionStart == '0') {
-				var startPos = this.selectionStart;
-				var endPos = this.selectionEnd;
-				var scrollTop = this.scrollTop;
-				this.value = this.value.substring(0, startPos) + textToInsert + this.value.substring(endPos, this.value.length);
-				this.focus();
-				this.selectionStart = startPos + textToInsert.length;
-				this.selectionEnd = startPos + textToInsert.length;
-				this.scrollTop = scrollTop;
-			} else {
-				this.value += textToInsert;
-				this.focus();
-			}
-		})
-	}
-});
-
- function getHeight(id,_default)
-    {
-        if(!_default) _default = 0;
-        if($('#' + id).is(':visible'))
-            return parseInt($('#' + id).height());
-        else return _default;    
-    }
-
-jQuery.fn.sortElements = (function() {
-
-	var sort = [].sort;
-
-	return function(comparator, getSortable) {
-
-		getSortable = getSortable || function() {
-			return this;
-		};
-
-		var placements = this.map(function() {
-
-			var sortElement = getSortable.call(this),
-				parentNode = sortElement.parentNode,
-
-				// Since the element itself will change position, we have
-				// to have some way of storing its original position in
-				// the DOM. The easiest way is to have a 'flag' node:
-				nextSibling = parentNode.insertBefore(
-					document.createTextNode(''),
-					sortElement.nextSibling
-				);
-
-			return function() {
-
-				if (parentNode === this) {
-					throw new Error(
-						"You can't sort elements if any one is a descendant of another."
-					);
-				}
-
-				// Insert before flag:
-				parentNode.insertBefore(this, nextSibling);
-				// Remove flag:
-				parentNode.removeChild(nextSibling);
-
-			};
-
-		});
-
-		return sort.call(this, comparator).each(function(i) {
-			placements[i].call(getSortable.call(this));
-		});
-
-	};
-
-})();*/
 
 define(['vwf/view/editorview/angular-app'], function(app)
 {
@@ -125,16 +45,49 @@ define(['vwf/view/editorview/angular-app'], function(app)
 
 	app.controller('ScriptEditorController', ['$scope', function($scope)
 	{
-		$scope.showHiddenProperties = false;
-		$scope.inheritPrototype = false;
 		$scope.guiState = {
-			openTab: 'methods'
+			openTab: '',
+			showHiddenProperties: false,
+			inheritPrototype: false
 		};
 
 		$scope.methodList = [];
-		$scope.methodList.selectedMethod = null;
+		$scope.methodList.selected = null;
+		$scope.eventList = [];
+		$scope.eventList.selected = null;
+		$scope.propertyList = [];
+		$scope.propertyList.selected = null;
 
-		$scope.methodSuggestions = [
+		$scope.currentList = [];
+
+		$scope.$watchGroup(['guiState.openTab','methodList','eventList','propertyList'], function(newvals)
+		{
+			switch(newvals[0])
+			{
+				case 'methods':
+					$scope.currentList = newvals[1];
+					$scope.currentSuggestions = methodSuggestions;
+				break;
+			
+				case 'events':
+					$scope.currentList = newvals[2];
+					$scope.currentSuggestions = [];
+				break;
+
+				case 'properties':
+					$scope.currentList = newvals[3];
+					$scope.currentSuggestions = [];
+				break;
+
+				default:
+					$scope.currentList = [];
+					$scope.currentList.selected = null;
+					$scope.currentSuggestions = [];
+				break;
+			}
+		});
+
+		var methodSuggestions = [
 			{
 				name: 'attached',
 				comment: "attached is called when the object is hooked up to the scene.\n// Note that this happens after initialize. At this point, you can access the objects parent."
@@ -159,8 +112,8 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			}
 		];
 
-		$scope.hasMethod = function(name){
-			return $scope.methodList.reduce(
+		$scope.hasField = function(name, list){
+			return list.reduce(
 				function(old,val){ return old || val.name === name; },
 				false
 			);
@@ -168,26 +121,52 @@ define(['vwf/view/editorview/angular-app'], function(app)
 
 		$scope.$watch('fields.selectedNode', function(node)
 		{
-			// populate methods
 			$scope.methodList = [];
-			$scope.methodList.selectedMethod = null;
+			$scope.methodList.selected = null;
+			$scope.eventList = [];
+			$scope.eventList.selected = null;
+			$scope.propertyList = [];
+			$scope.propertyList.selected = null;
 
+			if( !node ){
+				$scope.guiState.openTab = '';
+				return;
+			}
+			else if( !$scope.guiState.openTab ){
+				$scope.guiState.openTab = 'methods';
+			}
+
+			// populate lists
 			var curNode = node;
 			while(curNode)
 			{
-				for (var i in node.methods) {
-					if ($scope.methodList[i] === undefined && (i.indexOf('__') !== 0 || $scope.showHiddenProperties) )
-						$scope.methodList.push({'name': i, 'value': node.methods[i]});
+				for(var i in curNode.methods){
+					if( !$scope.hasField(i, $scope.methodList) && (!/^__/.test(i) || $scope.guiState.showHiddenProperties) )
+						$scope.methodList.push({'name': i, 'value': curNode.methods[i]});
 				}
 
-				if($scope.inheritPrototype)
-					curNode = _Editor.getNode(vwf.prototype(node.id), true);
+				for(var i in curNode.events){
+					if( !$scope.hasField(i, $scope.eventList) && (!/^__/.test(i) || $scope.guiState.showHiddenProperties) )
+						$scope.eventList.push({'name': i, 'value': curNode.events[i]});
+				}
+
+				for(var i in curNode.properties){
+					if( !$scope.hasField(i, $scope.propertyList) && (!/^__/.test(i) || $scope.guiState.showHiddenProperties) )
+						$scope.propertyList.push({'name': i, 'value': curNode.properties[i]});
+				}
+
+				if($scope.guiState.inheritPrototype)
+					curNode = _Editor.getNode(vwf.prototype(curNode.id), true);
 				else
 					break;
 			}
-			$scope.methodList.sort(function(a,b){
+
+			function sortByName(a,b){
 				return a.name > b.name ? 1 : -1;
-			});
+			};
+			$scope.methodList.sort(sortByName);
+			$scope.eventList.sort(sortByName);
+			$scope.propertyList.sort(sortByName);
 
 		});
 
@@ -197,7 +176,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 		initialize: function()
 		{
 			//$('#ScriptEditorTabs').tabs({});
-			$('#ScriptEditorAbandonChanges').dialog({
+			/*$('#ScriptEditorAbandonChanges').dialog({
 				title: 'Abandon Changes?',
 				autoOpen: false,
 				height: 'auto',
@@ -341,7 +320,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 						$('#ScriptEditorMessage').dialog('close');
 					},
 				}
-			});
+			});*/
 
 		}
 	};

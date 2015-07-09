@@ -3,18 +3,19 @@ mixin scripteditor_head
 
 mixin scripteditor_body
 
-		#ScriptEditorAbandonChanges.
-			You have are about to load a different script, but you have unsaved changes to this script. Do you want to continue and abandon the changes? This action cannot be undone.
-		#ScriptEditorCreateMethod
-			input#newMethodName(type='text')
-		#ScriptEditorCreateEvent
-			input#newEventName(type='text')
-		#ScriptEditorCreateProperty
-			input#newPropertyName(type='text')
-		#ScriptEditorDeleteMethod Are you sure you want to delete this script? This cannot be undone.
-		#ScriptEditorDeleteProperty Are you sure you want to delete this property? This cannot be undone.
-		#ScriptEditorDeleteEvent Are you sure you want to delete this script? This cannot be undone.
-		#ScriptEditorMessage This script contains syntax errors, and cannot be saved.
+		//-
+			#ScriptEditorAbandonChanges.
+				You have are about to load a different script, but you have unsaved changes to this script. Do you want to continue and abandon the changes? This action cannot be undone.
+			#ScriptEditorCreateMethod
+				input#newMethodName(type='text')
+			#ScriptEditorCreateEvent
+				input#newEventName(type='text')
+			#ScriptEditorCreateProperty
+				input#newPropertyName(type='text')
+			#ScriptEditorDeleteMethod Are you sure you want to delete this script? This cannot be undone.
+			#ScriptEditorDeleteProperty Are you sure you want to delete this property? This cannot be undone.
+			#ScriptEditorDeleteEvent Are you sure you want to delete this script? This cannot be undone.
+			#ScriptEditorMessage This script contains syntax errors, and cannot be saved.
 
 		#ScriptEditor.verticalLayout(ng-controller='ScriptEditorController', style='z-index:99')
 
@@ -33,26 +34,26 @@ mixin scripteditor_body
 					li: a(href="#options") Options
 				.tabs-nav
 					label(ng-class='{"selected": guiState.openTab === "methods"}')
-						input(type='radio', ng-model='guiState.openTab', value='methods')
+						input(type='radio', name='openTab', ng-model='guiState.openTab', value='methods')
 						| Methods
 					label(ng-class='{"selected": guiState.openTab === "events"}')
-						input(type='radio', ng-model='guiState.openTab', value='events')
+						input(type='radio', name='openTab', ng-model='guiState.openTab', value='events')
 						| Events
 					label(ng-class='{"selected": guiState.openTab === "properties"}')
-						input(type='radio', ng-model='guiState.openTab', value='properties')
+						input(type='radio', name='openTab', ng-model='guiState.openTab', value='properties')
 						| Properties
 					label(ng-class='{"selected": guiState.openTab === "options"}')
-						input(type='radio', ng-model='guiState.openTab', value='options')
+						input(type='radio', name='openTab', ng-model='guiState.openTab', value='options')
 						| Options
 
-				#methods.tabs-panel.horizontalLayout(ng-show='guiState.openTab === "methods"')
-					#methodlist.list
-						label.listitem(ng-repeat='method in methodList', ng-class='{"selected": methodList.selectedMethod===method.name}')
-							input(type='radio', name='selectedMethod', ng-model='methodList.selectedMethod', ng-value='method.name')
-							| {{method.name}}
+				.tabs-panel.horizontalLayout(ng-show='guiState.openTab !== "options"')
+					.list
+						label.listitem(ng-repeat='item in currentList', ng-class='{"selected": currentList.selected===item.name}')
+							input(type='radio', name='selectedField', ng-model='currentList.selected', ng-value='item.name')
+							| {{item.name}}
 
-						label.listitem.suggestion(ng-repeat='method in methodSuggestions', ng-hide='hasMethod(method.name)'
-							title='Create the "{{method.name}}" method.') {{method.name}}
+						label.listitem.suggestion(ng-repeat='item in currentSuggestions', ng-hide='hasField(item.name, currentList)'
+							title='Create the "{{item.name}}" method.') {{item.name}}
 							
 					.textinner.verticalLayout
 						ace-code-editor.content(ace-method='methodList.selectedMethod')
