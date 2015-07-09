@@ -5,12 +5,14 @@ var request = require('request'),
 // get all of a user's assets and format them as a content library
 function entitiesToLibrary(user, type, res)
 {
-	var baseUrl;
+	var baseUrl, clientBaseUrl;
 	if(global.configuration.hostAssets){
 		baseUrl = 'http://localhost:'+global.configuration.port+global.configuration.assetAppPath;
+		clientBaseUrl = global.configuration.assetAppPath;
 	}
 	else {
 		baseUrl = global.configuration.remoteAssetServerURL;
+		clientBaseUrl = global.configuration.remoteAssetServerURL;
 	}
 
 	// set up type aliases
@@ -91,9 +93,9 @@ function entitiesToLibrary(user, type, res)
 
 							var libitem = {
 								name: data.name || id,
-								url: baseUrl+'/assets/'+id,
+								url: clientBaseUrl+'/assets/'+id,
 								preview: data.thumbnail ?
-									baseUrl+'/assets/'+id+'/meta/thumbnail'
+									clientBaseUrl+'/assets/'+id+'/meta/thumbnail'
 									: "./img/VWS_Logo.png",
 								type: type,
 								sourceAssetId: id
