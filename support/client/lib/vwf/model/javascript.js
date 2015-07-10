@@ -1065,7 +1065,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 if(!inContext)
                     this.enterNewContext(["enter" , nodeID, methodName]);
                 try {
-                    var ret = body.apply(node, methodParameters);
+                    var ret = this.tryExec(node,body,methodParameters);//body.apply(node, methodParameters);
                     if (ret && ret.internal_val) return ret.internal_val;
                     {
                         if(!inContext)
@@ -1227,6 +1227,17 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             }
 
         },
+        tryExec:function(node,body,args)
+        {
+            if(node && body)
+            {
+                try{
+                    return body.apply(node,args);
+                }catch(e){
+                    return undefined;
+                }
+            }
+        },
         callMethodTraverse: function(node, method, args) {
 
             if (!node) return;
@@ -1238,7 +1249,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 var inContext = this.contextStack.length > 1;
                 if(!inContext)
                     this.enterNewContext();
-                body.apply(node, args);
+                this.tryExec(node,body,args);
                 if(!inContext)
                     this.exitContext();
             }
@@ -1280,8 +1291,8 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 // phase.
                 if (!phase || listener.phases && listener.phases.indexOf(phase) >= 0) {
 
-                    var result = listener.handler.apply(listener.context || jsDriverSelf.nodes[0], eventParameters); // default context is the global root  // TODO: this presumes this.creatingNode( undefined, 0 ) is retained above
-
+                    //var result = listener.handler.apply(listener.context || jsDriverSelf.nodes[0], eventParameters); // default context is the global root  // TODO: this presumes this.creatingNode( undefined, 0 ) is retained above
+                    var result = jsDriverSelf.tryExec(listener.context || jsDriverSelf.nodes[0],listener.context,eventParameters)
                     return handled || result === true || result === undefined; // interpret no return as "return true"
                 }
                 return handled;
