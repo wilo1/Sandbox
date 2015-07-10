@@ -231,7 +231,7 @@ function runningInstanceList()
     this.remove = function(id)
     {
         //send a signal to the parent process that we are hosting this instance
-        if (global.configuration.cluster)
+        if(global.configuration.cluster && this.instances[id])
         {
             var message = {};
             message.type = 'state';
@@ -279,5 +279,9 @@ exports.closeInstance = function(id)
 {
     var instance = RunningInstances.get(id);
     if (instance)
+    {
         instance.shutdown();
+        RunningInstances.remove(instance);
+    }
+    
 }

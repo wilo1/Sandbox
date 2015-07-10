@@ -610,7 +610,12 @@ server.on('request', function(request, response) {
 		});
 	}
 });
-server.listen(8181);
+var port = 8181;
+
+var p = process.argv.indexOf('-p');
+port = p >= 0 ? parseInt(process.argv[p + 1]) : 8181;
+
+server.listen(port);
 if (process.argv.indexOf('start') > -1)
 	updateAndRunTests(function() {})
 else
