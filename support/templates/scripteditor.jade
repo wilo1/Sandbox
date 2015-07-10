@@ -53,7 +53,10 @@ mixin scripteditor_body
 							| {{item.name}}
 
 						label.listitem.suggestion(ng-repeat='item in currentSuggestions', ng-hide='hasField(item.name, currentList)'
-							title='Create the "{{item.name}}" method.') {{item.name}}
+							ng-class='{"selected": currentList.selected===item.name, "dirty": item.dirty}'
+							title='Create the "{{item.name}}" method.')
+							input(type='radio', name='selectedField', ng-model='currentList.selected', ng-value='item.name')
+							| {{item.name}}
 							
 					.textinner.verticalLayout
 						ace-code-editor.content(disabled='!guiState.openTab || !currentList.selected', ng-class='{"dirty": field.dirty}')

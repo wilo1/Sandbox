@@ -37,14 +37,17 @@ define(['vwf/view/editorview/angular-app'], function(app)
 				{
 					$scope.field = $scope.currentList.reduce(function(old,cur){ return cur.name === newval ? cur : old; }, null);
 
-					if(newval)
+					if($scope.field)
 					{
 						var sessionName = $scope.guiState.openTab+'_'+newval;
 						if( !$scope.sessions[sessionName] )
 						{
 							var newBody = '';
 							if( $scope.guiState.openTab === 'methods' ){
-								var fullBody = 'function '+$scope.field.name+'('+$scope.field.value.parameters.join(',')+'){'+$scope.field.value.body+'}';
+								var fullBody = 'function '+$scope.field.name+'('+$scope.field.value.parameters.join(',')+')\n'
+									+'{\n'
+									+$scope.field.value.body
+									+'\n}';
 								var newBody = $.trim(js_beautify(fullBody, {
 									max_preserve_newlines: 2,
 									braces_on_own_line: true,
@@ -59,10 +62,43 @@ define(['vwf/view/editorview/angular-app'], function(app)
 							$scope.sessions[sessionName].setMode("ace/mode/javascript");
 						}
 
-						editor.setSession( $scope.sessions[newval] );
-
+						editor.setSession( $scope.sessions[sessionName] );
 						editor.clearSelection();
-						editor.scrollToLine(0);
+					}
+					else if(newval)
+					{	
+						$scope.field = $scope.currentSuggestions.reduce(function(old,cur){ return cur.name === newval ? cur : old; }, null);
+						if($scope.field)
+						{
+							var sessionName = $scope.guiState.openTab+'_'+newval;
+							if( !$scope.sessions[sessionName] )
+							{
+								var newBody = '';
+								if( $scope.guiState.openTab === 'methods' ){
+									var fullBody = 'function '+$scope.field.name+'('+$scope.field.value.parameters.join(',')+')\n'
+										+'{\n'
+										+$scope.field.value.body
+										+'\n}';
+									var newBody = $.trim(js_beautify(fullBody, {
+										max_preserve_newlines: 2,
+										braces_on_own_line: true,
+										opt_keep_array_indentation: true
+									}));
+								}
+								else if( $scope.guiState.openTab === 'properties' ){
+									newBody = angular.toJson($scope.field.value, 4);
+								}
+
+								$scope.sessions[sessionName] = ace.createEditSession(newBody);
+								$scope.sessions[sessionName].setMode("ace/mode/javascript");
+							}
+
+							editor.setSession( $scope.sessions[sessionName] );
+							editor.clearSelection();
+						}
+						else {
+							editor.setSession( ace.createEditSession('') );
+						}
 					}
 					else {
 						editor.setSession( ace.createEditSession('') );
