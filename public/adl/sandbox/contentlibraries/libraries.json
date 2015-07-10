@@ -31,5 +31,18 @@
     },
     "Cameras": {
         "url": "./contentlibraries/cameras.json"
+    },
+    "Scripts": {
+        "url": "./contentlibraries/marsgame/scripts.json"
+    },
+    "Rovers": {
+        "url": "./contentlibraries/marsgame/rovers.json"
+    },
+    "Terrain": {
+        "url": "./contentlibraries/marsgame/terrain.json"
+    },
+    "Objects": {
+        "url": "./contentlibraries/marsgame/objects.json"
     }
+
 }
