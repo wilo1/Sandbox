@@ -4,6 +4,9 @@ require.config({
         "vwf": "../vwf"
     },
     shim: {
+		'vwf/view/editorview/lib/angular-resource': {
+			deps: ['vwf/view/editorview/lib/angular']
+		},
         'vwf/view/xapi/xapiwrapper': {
             deps: ['vwf/view/editorview/sha256', "vwf/view/editorview/_3DRIntegration"],
             exports: 'XAPIWrapper'
@@ -44,6 +47,7 @@ define([
     "vwf/model/stage/log",
     "vwf/kernel/view",
     "vwf/view/document",
+    'vwf/view/editorview/lib/angular',
     "vwf/view/EditorView",
     "vwf/view/threejs",
     "vwf/view/googleEarth",
@@ -80,7 +84,7 @@ define([
         
         
 
-        assetLoader.load(stateData, function() {
+        assetLoader.loadList(stateData, function() {
             vwf.loadConfiguration(null, {
                 model: [],
                 view: []

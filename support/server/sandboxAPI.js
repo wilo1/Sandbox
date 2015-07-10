@@ -22,10 +22,14 @@ var sessions = require('./sessions');
 var mailTools = require('./mailTools');
 var xapi = require('./xapi');
 var logger = require('./logger');
+var libraryFormatter = require('./libraryFormatter.js');
+
 // default path to data. over written by setup flags
 //generate a random id.
 var GUID = require('node-uuid')
 	.v4;
+
+
 //simple functio to write a response
 function respond(response, status, message)
 	{
@@ -1437,6 +1441,7 @@ function serve(request, response)
 	//Load the session data
 	sessions.GetSessionData(request, function(__session)
 	{
+		if(!URL.query) URL.query = {};
 		URL.loginData = __session;
 		//Allow requests to submit the username in the URL querystring if not session data
 		var UID;
@@ -1721,6 +1726,32 @@ function serve(request, response)
 				case "getassets":
 					{
 						assetPreload.getAssets(request, response, URL);
+					}
+					break;
+				case "saspath":
+					{
+						if(global.configuration.hostAssets){
+							response.send(global.configuration.assetAppPath);
+						}
+						else {
+							response.send(global.configuration.remoteAssetServerURL);
+						}
+					}
+					break;
+				case "library":
+					{
+						if( /my-entities$/.test(pathAfterCommand) )
+							libraryFormatter.entitiesToLibrary(UID, 'entity', response);
+						else if( /my-materials$/.test(pathAfterCommand) )
+							libraryFormatter.entitiesToLibrary(UID, 'material', response);
+						else if( /my-behaviors$/.test(pathAfterCommand) )
+							libraryFormatter.entitiesToLibrary(UID, 'behavior', response);
+						else if( /my-textures$/.test(pathAfterCommand) )
+							libraryFormatter.entitiesToLibrary(UID, 'texture', response);
+						else if( /my-models$/.test(pathAfterCommand) )
+							libraryFormatter.entitiesToLibrary(UID, 'model', response);
+						else
+							_404(response);
 					}
 					break;
 				default:

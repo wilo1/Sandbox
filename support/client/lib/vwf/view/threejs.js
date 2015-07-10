@@ -456,6 +456,14 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                         }
 
                     }
+                    if(window._Editor && this.nodes[i] && window._Editor.isSelected(i))
+                    {
+                        this.nodes[i].lastAnimationFrame = null;
+                        this.nodes[i].thisAnimationFrame = null;
+                        this.nodes[i].lastTickTransform = null;
+                        this.nodes[i].lastFrameInterp = null;
+                        this.nodes[i].thisTickTransform = null;
+                    }
                 }
 
 
@@ -504,6 +512,8 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                     if (this.state.nodes[i].setAnimationFrameInternal) {
                         if (this.state.nodes[i].lastAnimationInterp)
                             interpA = this.lerp(this.state.nodes[i].lastAnimationInterp, now, lerpStep);
+                        
+                        this.state.nodes[i].backupTransforms(this.nodes[i].currentAnimationFrame);
                         this.state.nodes[i].setAnimationFrameInternal(interpA, false);
                         this.state.nodes[i].lastAnimationInterp = interpA || 0;
                     }
@@ -555,7 +565,11 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                 this.nodes[i].currentAnimationFrame = null;
                 if (now != null) {
                     if (this.state.nodes[i].setAnimationFrameInternal)
+                    {
+                        
+                        //this.state.nodes[i].restoreTransforms();
                         this.state.nodes[i].setAnimationFrameInternal(now, false);
+                    }
 
                 }
 
@@ -852,7 +866,10 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                 if (threeObject instanceof THREE.Scene) {
                     if (propertyName == 'skyColorBlend') {
                         if (window._dSky && _dSky.material)
+                        {
+                        
                             _dSky.material.uniforms.colorBlend.value = propertyValue;
+                        }
                     }
                     if (propertyName == 'skyFogBlend') {
                         if (window._dSky && _dSky.material)
@@ -1133,15 +1150,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
 
         function GetParticleSystems(node, list) {
 
-            for (var i = 0; i < node.children.length; i++) {
-                if (node.children[i] instanceof THREE.PointCloud) {
-                    if (!list)
-                        list = [];
-                    list.push(node.children[i]);
-                }
-                list = GetParticleSystems(node.children[i], list);
-            }
-            return list;
+            return node.__pointclouds;
         }
 
         function resetMaterial(material) {
@@ -1576,11 +1585,11 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                     try {
                         sceneNode.renderer = new THREE.WebGLRenderer({
                             canvas: mycanvas,
-                            antialias: true,
+                            antialias: _SettingsManager.getKey('antialias'),
                             alpha: false,
                             stencil: false,
                             depth: true,
-                            preserveDrawingBuffer: true,
+                            preserveDrawingBuffer: false,
                             devicePixelRatio: window.devicePixelRatio
 
                         });
@@ -1645,7 +1654,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                             //create a new renderer and set all pointers to it
                             renderer = _dRenderer = sceneNode.renderer = new THREE.WebGLRenderer({
                                 canvas: mycanvas,
-                                antialias: true,
+                                antialias: _SettingsManager.getKey('antialias'),
                                 alpha: false,
                                 stencil: false,
                                 devicePixelRatio: window.devicePixelRatio
@@ -2085,21 +2094,35 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
         var lastpoll = performance.now();
         canvas.onmousemove = function(e) {
 
-            var eData = getEventData(e, false);
+           
+
+            //can we bail out of this before calling getEventData? this might have a small performance boost
+            if (mouseLeftDown || mouseRightDown || mouseMiddleDown) {
+                    // lets begin filtering this - it should be possible to only send the data when the change is greater than some value
+                    if (pointerDownID) {
+
+                        var now = performance.now();
+                        var timediff = (now - lastpoll);
+                        if (timediff < 50) //condition for filter
+                        {
+                            return;
+                        }
+                    }
+            }
+            lastpoll = now;
+             var eData = getEventData(e, false);
+
 
             if (eData) {
                 if (mouseLeftDown || mouseRightDown || mouseMiddleDown) {
                     // lets begin filtering this - it should be possible to only send the data when the change is greater than some value
                     if (pointerDownID) {
 
-                        var now = performance.now();
-                        var timediff = (now - lastpoll);
-                        if (timediff > 50) //condition for filter
-                        {
-                            lastpoll = now;
+                        
+                            
                             sceneView.lastData = eData;
                             sceneView.kernel.dispatchEvent(pointerDownID, "pointerMove", eData.eventData, eData.eventNodeData);
-                        }
+                        
                     }
                 } else {
                     if (pointerPickID) {

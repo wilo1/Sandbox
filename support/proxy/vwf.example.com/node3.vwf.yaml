@@ -202,6 +202,7 @@ properties:
                     transform[12] = x;
                     transform[13] = y;
                     transform[14] = z;
+                    self.transform = transform;
                 },
                 rotate:function(x,y,z,coordinateSystem)
                 {

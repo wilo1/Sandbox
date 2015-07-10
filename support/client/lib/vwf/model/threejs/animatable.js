@@ -40,58 +40,119 @@
         //this my be called by the view driver during interpolation
         //in which case, there is no point in dirtying the scenemanager, as you may not 
         //reason over the interpolated values anyway
+        
+        this.backupTransforms =function(time)
+        {
+            this.backupTime = time;
+            var skins = this.getSkin(this.getRoot(),this.getRoot());
+            for (var i = 0; i < skins.length; i++) {
+                if(skins[i].animationHandle)
+                {
+                    if(!skins[i].animationHandle.cache)
+                        skins[i].animationHandle.cache = [];
+                    for(var j =0; j< skins[i].animationHandle.hierarchy.length; j++)
+                    {
+                        var o  = skins[i].animationHandle.hierarchy[j];
+                       
+                        if(!skins[i].animationHandle.cache[j])
+                        {
+                            skins[i].animationHandle.cache[j] = {};
+                            skins[i].animationHandle.cache[j].matrixWorld = new THREE.Matrix4();
+                            skins[i].animationHandle.cache[j].pos = new THREE.Vector3();
+                            skins[i].animationHandle.cache[j].rot = new THREE.Quaternion();
+                            skins[i].animationHandle.cache[j].scl = new THREE.Vector3();
+                        }
+                        var record = skins[i].animationHandle.cache[j];
+                        record.object = o;
+                        record.matrixWorld.copy(o.matrixWorld);
+                        record.pos.copy(o.position)
+                        record.rot.copy(o.quaternion);
+                        record.scl.copy(o.scale);
+                        
+                    }
+
+                }
+            }
+        }
+       
+        this.getSkin = function (node, root, list  )
+        {
+            if(this.skinCache)
+                return this.skinCache;
+            else
+                this.skinCache= getSkin(node, root, list  );
+            return this.skinCache;
+        }
+        this.restoreTransforms = function()
+        {
+            var skins = this.getSkin(this.getRoot(),this.getRoot());
+            for (var i = 0; i < skins.length; i++) {
+                if(skins[i].animationHandle)
+                {
+                    for(var j in skins[i].animationHandle.cache)
+                    {
+                        var record  = skins[i].animationHandle.cache[j];
+                       
+                        //record.object.position.copy(record.pos);
+                        //record.object.quaternion.copy(record.rot);
+                        //record.object.scale.copy(record.scl);
+                        record.object.matrixWorld.copy(record.matrixWorld);
+                      
+                    }
+                    //skins[i].updateMatrixWorld(true);
+                }
+            }
+        }
+        this.childAdded = function()
+        {
+            this.skinCache = null;
+            if(this.parent && this.parent.skinCache)
+                this.parent.skinCache = null;
+        }   
+        this.childRemoved = function()
+        {
+            this.skinCache = null;
+            if(this.parent && this.parent.skinCache)
+                this.parent.skinCache = null;
+        }
         this.setAnimationFrameInternal = function(propertyValue, updateSceneManager) {
 
             if (this.animationFrame === propertyValue) return;
             this.animationFrame = propertyValue;
-            var skins = getSkin(this.getRoot(),this.getRoot());
+
+            if(this.backupTime == propertyValue)
+            {
+                this.restoreTransforms();
+                return;
+            }
+            
+            var skins = this.getSkin(this.getRoot(),this.getRoot());
             for (var i = 0; i < skins.length; i++) {
 
                 var frame = parseInt(propertyValue);
                 var mod = propertyValue - frame;
                 if (frame < 0) return;
 
-                if (frame === null) return;
-
-                if (skins[i].morphTargetInfluences) {
-                    for (var j = 0; j < skins[i].morphTargetInfluences.length; j++) {
-
-                        skins[i].morphTargetInfluences[j] = 0;
-
-
-                    }
-
-                    if (frame == this.animationEnd)
-                        mod = 0;
-
-                    skins[i].morphTargetInfluences[frame] = 1.0 - mod;
-                    if (frame < (this.animationEnd || this.gettingProperty('animationLength')) - 1)
-                        skins[i].morphTargetInfluences[frame + 1] = mod;
-
-                }
+                if (frame === null) return;    
+              
                 if (skins[i].animationHandle) {
                    
                     skins[i].animationHandle.setKey(this.animationFrame,this.animationFPS);
-                    
-                    skins[i].updateMatrixWorld();
-                    
-                    //odd, does not seem to update matrix on first child bone. 
-                    //how does the bone relate to the skeleton?
-
-                    //this is no longer necessary in threejs r68
-                    //for (var j = 0; j < skins[i].children.length; j++) {
-                    //  skins[i].children[j].updateMatrixWorld(true);
+                
+                    //for(var j = 0; j<skins[i].skeleton.bones.length; j++)
+                    //{
+                     //   if(skins[i].skeleton.bones[j].parent == skins[i])
+                      //      skins[i].skeleton.bones[j].updateMatrixWorld(true);
                     //}
-                   
+                    skins[i].updateMatrixWorld(true);
+
                     if (updateSceneManager) {
                         var allMeshes = getAllDrawables(skins[i]);
                         for (var k = 0; k < allMeshes.length; k++)
                             _SceneManager.setDirty(allMeshes[k]);
                     }
-
                 }
             }
-
         }
         this.settingProperty = function(propertyName, propertyValue) {
             if (propertyName == 'animationFrame') {
@@ -114,7 +175,7 @@
             }
             if (propertyName == 'morphTargetInfluences') {
                
-                var skins = getSkin(this.getRoot(),this.getRoot());
+                var skins = this.getSkin(this.getRoot(),this.getRoot());
                 for (var i = 0; i < skins.length; i++) {
                     if (skins[i].geometry.morphTargets && skins[i].geometry.morphTargets.length > 0) {
                         //reset to target 0
@@ -146,8 +207,8 @@
             }
             if (propertyName == 'animationLength') {
 
-                var skins = getSkin(this.getRoot(),this.getRoot());
-                if (skins[0] && skins[0].morphTargetInfluences) return skins[0].morphTargetInfluences.length;
+                var skins = this.getSkin(this.getRoot(),this.getRoot());
+                //if (skins[0] && skins[0].morphTargetInfluences) return skins[0].morphTargetInfluences.length;
                 if (skins[0] && skins[0].animationHandle)
                     return skins[0].animationHandle.data.length * skins[0].animationHandle.data.fps;
                 return 0;

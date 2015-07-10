@@ -1,4 +1,19 @@
 {
+	"My Entities": {
+		"url": "./vwfdatamanager.svc/library/my-entities"
+	},
+	"My Models": {
+		"url": "./vwfdatamanager.svc/library/my-models"
+	},
+	"My Materials": {
+		"url": "./vwfdatamanager.svc/library/my-materials"
+	},
+	"My Behaviors": {
+		"url": "./vwfdatamanager.svc/library/my-behaviors"
+	},
+	"My Textures": {
+		"url": "./vwfdatamanager.svc/library/my-textures"
+	},
     "Demo Entities": {
         "url": "./contentlibraries/entities.json"
     },
@@ -16,5 +31,18 @@
     },
     "Cameras": {
         "url": "./contentlibraries/cameras.json"
+    },
+    "Scripts": {
+        "url": "./contentlibraries/marsgame/scripts.json"
+    },
+    "Rovers": {
+        "url": "./contentlibraries/marsgame/rovers.json"
+    },
+    "Terrain": {
+        "url": "./contentlibraries/marsgame/terrain.json"
+    },
+    "Objects": {
+        "url": "./contentlibraries/marsgame/objects.json"
     }
+
 }

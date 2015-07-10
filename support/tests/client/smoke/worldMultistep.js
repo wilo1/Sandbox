@@ -1,5 +1,5 @@
 module.exports = {
-    'Tests creating and deleting world and verifying persistence': function(browser, finished) {
+    'Create and delete a world and verify persistence': function(browser, finished) {
         global.browser = browser;
         var testUtils = global.testUtils;
 		var passed = true;
@@ -16,20 +16,15 @@ module.exports = {
 				else outStr += "Login successful; ";
 			})
 			
-			//Create world
-			.url("http://localhost:3000/adl/sandbox/createNew2/noTemplate")
-			.waitForExist("#txtInstanceName", 5000)
-			.setValue("#txtInstanceName", "worldMultistep.Test.Title")
-			.click('input[type="submit"]').pause(1000)
-			
-			//Once created, get world id
-			.waitForExist("#content", 5000)
-			.url(function(err, url){
-				var tempArr = url.value.split('/');
-				worldId = tempArr[tempArr.length-1];
-				
-				//navigate to newly created world using id
-				browser.url("http://localhost:3000/adl/sandbox/" + worldId + "?norender=true")
+			.createWorld(function(err, id){
+				if(err){
+					passed = false;
+					outStr += "Unable to create world; ";
+				}
+				else{
+					worldId = id;
+					return browser.url("http://localhost:3000/adl/sandbox/" + id + "?norender=true");
+				}
 			})
 			
 			.waitForExist('#preloadGUIBack', 60000)
@@ -64,29 +59,17 @@ module.exports = {
 			
 			.saveDataBeforeUnload()
 			.pause(1000).then(function(){
-				//Go straight to the delete page because we can safely assume that
-				//the existence of the world has already been tested above
-				browser.url("http://localhost:3000/adl/sandbox/remove?id=" + worldId)	
-			})
-	
-			.waitForExist("input[value='Delete']", 5000)
-			.click("input[value='Delete']")
-			.pause(1000).then(function(){
-				//World should be deleted, attempt to navigate to deleted world page
-				browser.url("http://localhost:3000/adl/sandbox/world/" + worldId)
-			})
-			.pause(2000)
-			.url(function(err, url){
-				//if worldId is in the url, we were not redirected to homepage
-				if(url.value.indexOf(worldId) > 0){
-					passed = false;
-					outStr += "World: " + worldId + " not successfully deleted; ";
-				}
-				else{
-					outStr += "World: " + worldId + " successfully deleted; ";
-				}
-				
-				finished(passed, outStr);
+				browser.deleteWorld(worldId, function(err){
+					if(err){
+						passed = false;
+						outStr += "World: " + worldId + " not successfully deleted; ";
+					}
+					else{
+						outStr += "World: " + worldId + " successfully deleted; ";
+					}
+					
+					finished(passed, outStr);
+				});
 			});			
     }
 }

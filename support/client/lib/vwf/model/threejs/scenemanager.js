@@ -308,7 +308,7 @@ SceneManager.prototype.SphereCast = function(center, r, opts) {
     //let's lazy update only on demand;
    
     var hitlist = this.root.SphereCast(center, r, opts || this.defaultPickOptions);
-    hitlist = hitlist.concat(this.staticRoot.SphereCast(center, opts || this.defaultPickOptions));
+    hitlist = hitlist.concat(this.staticRoot.SphereCast(center, r, opts || this.defaultPickOptions));
     for (var i = 0; i < this.specialCaseObjects.length; i++) {
         var childhits = this.specialCaseObjects[i].SphereCast(center, r, opts || this.defaultPickOptions);
         if (childhits)
@@ -419,153 +419,268 @@ SceneManager.prototype.getDefaultTexture = function() {
 
     return this.defaultTexture;
 }
+function extensionToMimetype(extension)
+{
+    extension = extension.toLowerCase();
+    if(extension == 'png') return 'image/png';
+    if(extension == 'jpg') return 'image/jpg';
+    if(extension == 'jpeg') return 'image/jpg';
+    if(extension == 'gif') return 'image/png';
+    if(extension == 'bmp') return 'image/bmp';
+    if(extension == 'jp2') return 'image/jpg';
+    if(extension == 'dds') return 'image/dds';
+    
+    return null;
+
+}
+function isImage(mimeType)
+{
+    if(mimeType == 'image/png') return true;
+    if(mimeType == 'image/bmp') return true;
+    if(mimeType == 'image/x-windows-bmp') return true;
+    if(mimeType == 'image/gif') return true;
+    if(mimeType == 'image/jpeg') return true;
+    if(mimeType == 'image/jpg') return true;
+    if(mimeType == 'image/bmp') return true;
+    if(mimeType == 'image/jp2') return true;
+    return false;
+}
+function getMimeType(xhr)
+{
+    //is it in the header?
+    var header = xhr.getResponseHeader('content-type');
+    if(header && header !== "application/octet-stream" &&
+    header !== "application/octet-stream")
+    {
+        return header;
+    }
+    //What about the URL? 
+    var reg = /\.([a-zA-Z]*)($|\?)/;
+    var extension = xhr.responseURL.match(reg);
+    if(extension && extension[0])
+    {
+        return extensionToMimetype(extension[0][1])
+    }
+    var intArray = new Uint8Array(xhr.response)
+    //now we need to look at the first few bytes
+    extension = String.fromCharCode(intArray[0])+
+    String.fromCharCode(intArray[1])+
+    String.fromCharCode(intArray[2])
+    return extensionToMimetype(extension)
+}
 SceneManager.prototype.loadTexture = function(url, mapping, onLoad, onError) {
 
-
-    //test to see if the url ends in .dds
-    if ((/^(?!.*\.[^/.]+$).*/).test(url)){
-
-       
-        //create a new texture. This texture will be returned now, and filled with the compressed dds data
-        //once that data is available
-        var temptexture = new THREE.Texture(this.getDefaultTexture().image, mapping);
-        temptexture.format = this.getDefaultTexture().format;
-
-
-        if (_SettingsManager.getKey('filtering')) {
-            temptexture.minFilter = THREE.LinearMipMapLinearFilter;
-            temptexture.magFilter = THREE.LinearFilter;
-        } else {
-            temptexture.minFilter = THREE.NearestFilter;
-            temptexture.magFilter = THREE.NearestFilter;
-        }
-
-
-        temptexture.minFilter = THREE.LinearMipMapLinearFilter;
-        temptexture.magFilter = THREE.LinearFilter;
-        temptexture.anisotropy = 1;
-        temptexture.sourceFile = url;
-        
-        //a variable to hold the loaded texture
-        var texture;
-
-        //callback to copy data from the compressed texture to the one we retuned synchronously from this function
-        var load = function(event) {
-
-
-            //image is in closure scope. Copy all relevant data
-            temptexture.image = texture.image;
-
-
-
-            temptexture._needsUpdate = texture._needsUpdate;
-
-           
-
-            temptexture.image = texture.image;
-            temptexture.flipY = texture.flipY;
-            temptexture.format = texture.format;
-            temptexture.generateMipmaps = texture.generateMipmaps;
-            //temptexture.magFilter = texture.magFilter;
-            temptexture.mapping = texture.mapping;
-            //temptexture.minFilter = texture.minFilter;
-            temptexture.mipmaps = texture.mipmaps;
-
-
-            temptexture.offset = texture.offset;
-
-            temptexture.premultiplyAlpha = texture.premultiplyAlpha;
-            temptexture.repeat = texture.repeat;
-            temptexture.type = texture.type;
-            temptexture.unpackAlignment = texture.unpackAlignment;
-
-            temptexture.wrapS = texture.wrapS;
-            temptexture.wrapT = texture.wrapT;
-
-            temptexture.isActuallyCompressed = true;
-            texture.isActuallyCompressed = true;
-
-            //hit the async callback
-            if (onLoad) onLoad(texture);
-        };
-
-        var error = function(event) {
-
-            if (onError) onError(event.message);
-
-        };
-
-        //create the new texture, and decompress. Copy over with the onload callback above
-        //texture = THREE.ImageUtils.loadCompressedTexture(url, mapping, load, error);
-
-        var loader = new THREE.DDSLoader();
-        texture = loader.load(url, load, error);
-
-        if (_SettingsManager.getKey('filtering')) {
-            texture.minFilter = THREE.LinearMipMapLinearFilter;
-            texture.magFilter = THREE.LinearFilter;
-        } else {
-            texture.minFilter = THREE.NearestFilter;
-            texture.magFilter = THREE.NearestFilter;
-        }
-        texture.generateMipmaps = false;
-
-        if (window._dRenderer)
-            texture.anisotropy = 1; //_dRenderer.getMaxAnisotropy();
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-
-
-
-        //return the temp one, which will be filled later.
-        return temptexture;
-    } else {
-        var image = new Image();
-
-        var texture = new THREE.Texture(this.getDefaultTexture().image, mapping);
-        texture.format = this.getDefaultTexture().format;
-
-        if (_SettingsManager.getKey('filtering')) {
-            texture.minFilter = THREE.LinearMipMapLinearFilter;
-            texture.magFilter = THREE.LinearFilter;
-        } else {
-            texture.minFilter = THREE.NearestFilter;
-            texture.magFilter = THREE.NearestFilter;
-        }
-
-        if (window._dRenderer)
-            texture.anisotropy = 1; //_dRenderer.getMaxAnisotropy();
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        var loader = new THREE.ImageLoader();
-
-        var load = function(event) {
-
-
-            texture.image = event;
-            texture.format = THREE.RGBAFormat;
-            texture.needsUpdate = true;
-
-            if (onLoad) onLoad(texture);
-
-        };
-
-        var error = function(event) {
-
-            if (onError) onError(event.message);
-
-        };
-
-        loader.crossOrigin = 'anonymous';
-        loader.load(url, load, null, error, image);
-
-        texture.sourceFile = url;
-
-        return texture;
-
+    var reg = /\.([a-zA-Z]*)($|\?)/;
+    var extension = url.match(reg);
+    var type = null;
+    if (extension && extension[0]) {
+        type = extensionToMimetype(extension[1])
     }
 
+    var texture = new THREE.Texture(this.getDefaultTexture().image, mapping);
+    texture.format = this.getDefaultTexture().format;
+    var buffer;
 
+
+    if (!type) {
+
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'arraybuffer';
+        xhr.onload = function(e) {
+
+            if (getMimeType(xhr) == 'image/dds') {
+
+                var blob = new Blob([xhr.response]);
+                var dataUrl = window.URL.createObjectURL(blob);
+                var loader = new THREE.DDSLoader();
+                loader.load(dataUrl, function loaded(newTexture) {
+                    texture.image = newTexture.image;
+                    texture._needsUpdate = newTexture._needsUpdate;
+                    texture.image = newTexture.image;
+                    texture.flipY = newTexture.flipY;
+                    texture.format = newTexture.format;
+                    texture.generateMipmaps = newTexture.generateMipmaps;
+                    texture.mapping = newTexture.mapping;
+                    texture.mipmaps = newTexture.mipmaps;
+                    texture.offset = newTexture.offset;
+                    texture.premultiplyAlpha = newTexture.premultiplyAlpha;
+                    texture.repeat = newTexture.repeat;
+                    texture.type = newTexture.type;
+                    texture.unpackAlignment = newTexture.unpackAlignment;
+                    texture.wrapS = newTexture.wrapS;
+                    texture.wrapT = newTexture.wrapT;
+                    texture.isActuallyCompressed = true;
+                    newTexture.isActuallyCompressed = true;
+                    //hit the async callback
+                    if (onLoad) onLoad(texture);
+                }, function error() {});
+            } else {
+
+                var img = new Image();
+                var blob = new Blob([xhr.response]);
+                img.src = window.URL.createObjectURL(blob);
+                texture.image = img;
+                texture.format = THREE.RGBFormat;
+                if (_SettingsManager.getKey('filtering')) {
+                    texture.minFilter = THREE.LinearMipMapLinearFilter;
+                    texture.magFilter = THREE.LinearFilter;
+                } else {
+                    texture.minFilter = THREE.NearestFilter;
+                    texture.magFilter = THREE.NearestFilter;
+                }
+                texture.needsUpdate = true;
+                if (onLoad) onLoad(texture);
+
+            }
+        }
+        xhr.send();
+        return texture;
+    } else {
+
+
+        //test to see if the url ends in .dds
+        if ((/\.dds$/).test(url)) {
+
+
+            //create a new texture. This texture will be returned now, and filled with the compressed dds data
+            //once that data is available
+            var temptexture = new THREE.Texture(this.getDefaultTexture().image, mapping);
+            temptexture.format = this.getDefaultTexture().format;
+
+
+            if (_SettingsManager.getKey('filtering')) {
+                temptexture.minFilter = THREE.LinearMipMapLinearFilter;
+                temptexture.magFilter = THREE.LinearFilter;
+            } else {
+                temptexture.minFilter = THREE.NearestFilter;
+                temptexture.magFilter = THREE.NearestFilter;
+            }
+
+
+            temptexture.minFilter = THREE.LinearMipMapLinearFilter;
+            temptexture.magFilter = THREE.LinearFilter;
+            temptexture.anisotropy = 1;
+            temptexture.sourceFile = url;
+
+            //a variable to hold the loaded texture
+            var texture;
+
+            //callback to copy data from the compressed texture to the one we retuned synchronously from this function
+            var load = function(event) {
+
+
+                //image is in closure scope. Copy all relevant data
+                temptexture.image = texture.image;
+
+
+                temptexture._needsUpdate = texture._needsUpdate;
+
+
+                temptexture.image = texture.image;
+                temptexture.flipY = texture.flipY;
+                temptexture.format = texture.format;
+                temptexture.generateMipmaps = texture.generateMipmaps;
+                //temptexture.magFilter = texture.magFilter;
+                temptexture.mapping = texture.mapping;
+                //temptexture.minFilter = texture.minFilter;
+                temptexture.mipmaps = texture.mipmaps;
+
+
+                temptexture.offset = texture.offset;
+
+                temptexture.premultiplyAlpha = texture.premultiplyAlpha;
+                temptexture.repeat = texture.repeat;
+                temptexture.type = texture.type;
+                temptexture.unpackAlignment = texture.unpackAlignment;
+
+                temptexture.wrapS = texture.wrapS;
+                temptexture.wrapT = texture.wrapT;
+
+                temptexture.isActuallyCompressed = true;
+                texture.isActuallyCompressed = true;
+
+                //hit the async callback
+                if (onLoad) onLoad(texture);
+            };
+
+            var error = function(event) {
+
+                if (onError) onError(event.message);
+
+            };
+
+            //create the new texture, and decompress. Copy over with the onload callback above
+            //texture = THREE.ImageUtils.loadCompressedTexture(url, mapping, load, error);
+
+            var loader = new THREE.DDSLoader();
+            texture = loader.load(url, load, error);
+
+            if (_SettingsManager.getKey('filtering')) {
+                texture.minFilter = THREE.LinearMipMapLinearFilter;
+                texture.magFilter = THREE.LinearFilter;
+            } else {
+                texture.minFilter = THREE.NearestFilter;
+                texture.magFilter = THREE.NearestFilter;
+            }
+            texture.generateMipmaps = false;
+
+            if (window._dRenderer)
+                texture.anisotropy = 1; //_dRenderer.getMaxAnisotropy();
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+
+
+            //return the temp one, which will be filled later.
+            return temptexture;
+        } else {
+            var image = new Image();
+
+            var texture = new THREE.Texture(this.getDefaultTexture().image, mapping);
+            texture.format = this.getDefaultTexture().format;
+
+            if (_SettingsManager.getKey('filtering')) {
+                texture.minFilter = THREE.LinearMipMapLinearFilter;
+                texture.magFilter = THREE.LinearFilter;
+            } else {
+                texture.minFilter = THREE.NearestFilter;
+                texture.magFilter = THREE.NearestFilter;
+            }
+
+            if (window._dRenderer)
+                texture.anisotropy = 1; //_dRenderer.getMaxAnisotropy();
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            var loader = new THREE.ImageLoader();
+
+            var load = function(event) {
+
+
+                texture.image = event;
+                texture.format = THREE.RGBAFormat;
+                texture.needsUpdate = true;
+
+                if (onLoad) onLoad(texture);
+
+            };
+
+            var error = function(event) {
+
+                if (onError) onError(event.message);
+               
+            };
+
+            loader.crossOrigin = 'anonymous';
+            loader.load(url, load, null, error, image);
+
+            texture.sourceFile = url;
+
+            return texture;
+
+        }
+
+    }
 
 }
 SceneManager.prototype.useSimpleMaterials = false;

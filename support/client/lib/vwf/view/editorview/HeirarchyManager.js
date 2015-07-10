@@ -126,8 +126,8 @@ define(function() {
 		this.makeVWFNode = function() {
 			if (HierarchyManager.selectedType == 'three') {
 
-				var node = this.findTHREEChild(_Editor.findviewnode(this.selectedID), this.selectedName);
-				var parent = this.selectedID;
+				var node = this.findTHREEChild(_Editor.findviewnode(_Editor.GetSelectedVWFID()), this.selectedName);
+				var parent = _Editor.GetSelectedVWFID();
 				var childname = HierarchyManager.selectedName;
 				var proto = {
 					extends: 'asset.vwf',
@@ -200,7 +200,7 @@ define(function() {
 				node = _Editor.findviewnode(name);
 				color = [0, 1, .5, 1];
 			}
-			if (type == 'three') node = HierarchyManager.findTHREEChild(_Editor.findviewnode(HierarchyManager.selectedID), name);
+			if (type == 'three') node = HierarchyManager.findTHREEChild(_Editor.findviewnode(_Editor.GetSelectedVWFID()), name);
 			HierarchyManager.makeBounds(node, color);
 			_RenderManager.removeHilightObject(HierarchyManager.previewNode);
 			HierarchyManager.previewNode = node;
@@ -212,7 +212,7 @@ define(function() {
 
 		this.getVWFChildren = function(nodeID) {
 			if (nodeID === undefined) {
-				nodeID = this.selectedID;
+				nodeID = _Editor.GetSelectedVWFID();
 			}
 			var ret = {
 				name: '',
@@ -223,10 +223,8 @@ define(function() {
 			};
 			ret.vwfID = nodeID;
 
-			var vwfnode = _Editor.getNode(nodeID);
-			ret.name = ret.vwfID;
-			if (vwfnode.properties && vwfnode.properties.DisplayName)
-				ret.name = vwfnode.properties.DisplayName;
+			
+			ret.name = vwf.getProperty(nodeID,'DisplayName') || nodeID;
 
 			var children = vwf.children(nodeID);
 			if (children)
@@ -260,7 +258,7 @@ define(function() {
 		}
 		this.getVWFParent = function(node) {
 			if (node === undefined) {
-				node = this.selectedID;
+				node = _Editor.GetSelectedVWFID();
 			}
 			if (!node) return null;
 			var parent = vwf.parent(node);
@@ -284,7 +282,7 @@ define(function() {
 				children: []
 			};
 			if (threenode === undefined) {
-				threenode = _Editor.findviewnode(this.selectedID);
+				threenode = _Editor.findviewnode(_Editor.GetSelectedVWFID());
 			}
 			if (!threenode) {
 				return ret;
@@ -308,6 +306,12 @@ define(function() {
 
 			if(!this.ready)
 				return;
+
+			if (this.SelectionBounds != null) {
+					this.SelectionBounds.parent.remove(this.SelectionBounds);
+					this.SelectionBounds = null;
+			}
+
 			$('#hierarchyManagerMakeNode').hide();
 			_RenderManager.removeHilightObject(HierarchyManager.previewNode);
 			
@@ -363,10 +367,10 @@ define(function() {
 			})
 			
 			$('#heirarchyParent').dblclick(function() {
-				_Editor.SelectObject(vwf.parent(this.selectedID));
+				_Editor.SelectObject(vwf.parent(_Editor.GetSelectedVWFID()));
 			}.bind(this));
 			$('#heirarchyParent').click(this.itemClicked);
-			$('#heirarchyParent').attr('name', vwf.parent(this.selectedID));
+			$('#heirarchyParent').attr('name', vwf.parent(_Editor.GetSelectedVWFID()));
 			$('#heirarchyParent').attr('type', 'vwf');
 			
 			var VWFChildren = HierarchyManager.getVWFChildren(vwf.application());
@@ -378,13 +382,28 @@ define(function() {
 			for (var i = 0; i < VWFChildren.children.length; i++)
 				this.appendThreeChildDOM(VWFChildren.children[i], 'VWFChildren', 'vwf');
 
+
+			//only show the scenenode children of an asset
+			var node = _Editor.GetSelectedVWFID();
+			var found = false;
+			while(node)
+			{
+				if(node == 'asset-vwf')
+					found = true;
+				node = vwf.prototype(node)
+			}
+			if(found)
+			{
 			var THREEChildren = HierarchyManager.getTHREEChildren();
 			for (var i = 0; i < THREEChildren.children.length; i++)
 				this.appendThreeChildDOM(THREEChildren.children[i], 'THREEChildren', 'three');
 
+			}
 
 			if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
 		}
+		this.BuildGUI = this.BuildGUI.bind(this);
+		this.BuildGUI = debounce(this.BuildGUI, 250);
 		this.appendThreeChildDOM = function(node, parentDiv, type) {
 			
 			//there are one or 2 objects that should never be listed in the scene
@@ -445,28 +464,18 @@ define(function() {
 		}
 		this.calledMethod = function(id,method) {
 
-				if(method == 'ready')
+				if(method == 'ready' && this.isOpen())
 				{
-				window.setTimeout(function() {
 					this.BuildGUI();
-				}.bind(this), 500)
 			    }
-
 			
 		}
 		this.deletedNode = function(id) {
-
-			
-				window.setTimeout(function() {
-					this.BuildGUI();
-				}.bind(this), 500)
-
-			
+				this.BuildGUI();
 		}
 		this.satProperty = function(id,propname,val)
 		{
-			if(propname == 'DisplayName' && this.isOpen())
-				this.BuildGUI();
+			this.BuildGUI();
 		}
 		
 		

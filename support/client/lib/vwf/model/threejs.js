@@ -54,7 +54,7 @@ function setMeshStatic(node, val) {
         setMeshStatic(node.children[i], val);
 }
 
-define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/threejs/backgroundLoader", "vwf/model/threejs/glTFCloner", "vwf/model/threejs/glTFLoaderUtils", "vwf/model/threejs/glTFLoader", "vwf/model/threejs/glTFAnimation", "vwf/model/threejs/glTFAnimation", "vwf/model/threejs/materialCache", "vwf/model/threejs/assetRegistry"], function(module, model, utility, Color, backgroundLoader) {
+define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/threejs/backgroundLoader", "vwf/model/threejs/glTFCloner", "vwf/model/threejs/glTFLoaderUtils", "vwf/model/threejs/glTFLoader", "vwf/model/threejs/glTFAnimation", "vwf/model/threejs/glTFAnimation", "vwf/model/threejs/materialCache", "vwf/model/threejs/assetRegistry","vwf/model/threejs/RMXLoader"], function(module, model, utility, Color, backgroundLoader) {
 
 
 
@@ -177,6 +177,8 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
 
             if (node.initializingNode)
                 node.initializingNode();
+            if(node.threeObject)
+                node.threeObject.updateMatrixWorld(true);
         },
         // == Model API ============================================================================
 
@@ -425,7 +427,22 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
                     node.threeObject.add(node.getRoot());
                     threeParent.add(node.threeObject);
                 } 
-                else if (childType == "subDriver/threejs/asset/vnd.raw-morphttarget" ||childType == "subDriver/threejs/asset/vnd.collada+xml" || childType == "subDriver/threejs/asset/vnd.osgjs+json+compressed" || childType == "subDriver/threejs/asset/vnd.collada+xml+optimized" || childType == "subDriver/threejs/asset/vnd.gltf+json") {
+                else if (isAvatarDefinition.call(this, protos)) {
+
+                    node = this.state.nodes[childID] = this.subDriverFactory.createNode(childID, 'vwf/model/threejs/avatar.js', childName, childType, childSource, callback);
+
+                    node.name = childName,
+                    node.ID = childID;
+                    node.parentID = nodeID;
+                    node.sourceType = childType;
+                    node.type = childExtendsID;
+                    node.sceneID = this.state.sceneRootID;
+
+                    node.threeObject = new THREE.Object3D();
+                    node.threeObject.add(node.getRoot());
+                    threeParent.add(node.threeObject);
+                } 
+                else if (childType == "subDriver/threejs/asset/vnd.raw-morphttarget" ||childType == "subDriver/threejs/asset/vnd.collada+xml" || childType == "subDriver/threejs/asset/vnd.osgjs+json+compressed" || childType == "subDriver/threejs/asset/vnd.collada+xml+optimized" || childType == "subDriver/threejs/asset/vnd.gltf+json" || childType == "subDriver/threejs/asset/vnd.three.js+json" || childType == "subDriver/threejs/asset/vnd.rmx+json") {
 
                     node = this.state.nodes[childID] = this.subDriverFactory.createNode(childID, 'vwf/model/threejs/asset.js', childName, childType, childSource, callback);
 
@@ -518,7 +535,8 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
 
                     if (parentNode && parentNode.children)
                         delete parentNode.children[nodeID];
-
+                    if(parentNode && parentNode.childRemoved)
+                        parentNode.childRemoved(childNode)
                     delete this.state.nodes[nodeID];
                 }
             }
@@ -1198,11 +1216,15 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
 
         ticking: function(vwfTime) {
 
+            //this takes 5% of our CPU time... do any of these nodes do anything with the tick?
+           
             for (var i in this.state.nodes) {
                 var node = this.state.nodes[i];
                 var threeObject = node.threeObject;
                 if (node.ticking)
+                {
                     node.ticking();
+                }
             }
         }
 
@@ -1247,6 +1269,16 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
         if (prototypes) {
             for (var i = 0; i < prototypes.length && !foundMaterial; i++) {
                 foundMaterial = (prototypes[i] == "phantomAsset-vwf");
+            }
+        }
+        return foundMaterial;
+    }
+
+    function isAvatarDefinition(prototypes) {
+        var foundMaterial = false;
+        if (prototypes) {
+            for (var i = 0; i < prototypes.length && !foundMaterial; i++) {
+                foundMaterial = (prototypes[i] == "character-vwf");
             }
         }
         return foundMaterial;
@@ -2080,7 +2112,11 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
             if (node.inherits)
                 if (node.inherits.constructor == Array) {
                     for (var i = 0; i < node.inherits.length; i++) {
-                        var proto = this.createNode('', node.inherits[i], '');
+                        var proto = null;
+                        if(node.inheritFullBase)  //does the node do full construction for the base, or partial
+                          proto = this.createNode(childID, node.inherits[i], childName, sourceType, assetSource, asyncCallback);
+                        else
+                          proto = this.createNode('', node.inherits[i], '');
 
                         for (var j = 0; j < APINames.length; j++) {
                             var api = APINames[j];

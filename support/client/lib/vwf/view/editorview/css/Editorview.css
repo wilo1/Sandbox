@@ -550,6 +550,9 @@ transition: background 1s, opacity 1s;
 		margin-bottom: 2px;
 		background-color:lightblue;
 	}
+	.icon:active {
+		background-color: #7B7B7B;
+	}
 	.iconselected
 	{
 		background-color: rgb(58, 143, 255);
@@ -639,6 +642,17 @@ border-left: 1px solid;
 		width: 100%;
 		left: 0px;
 	
+	}
+	#hidescripteditor{
+		text-align: center;
+		line-height: 20px;
+		margin-left: 3px; /* Adding this here because .icon:hover will change it to 2px */
+		
+	}
+	#maximizescripteditor{
+		text-align: center;
+		line-height: 19px;
+		margin-left: 3px; /* Adding this here because .icon:hover will change it to 2px */
 	}
 	#toolbar
 	{

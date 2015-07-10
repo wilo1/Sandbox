@@ -4461,23 +4461,24 @@ THREE.Matrix4.prototype = {
 
 
 
-
-
         temp_m.copy(this)
 
         var te = this.elements;
         var me = temp_m.elements;
 
-        var scaleX = 1 / temp_v1.set(me[0], me[1], me[2]).length();
-        var scaleY = 1 / temp_v1.set(me[4], me[5], me[6]).length();
-        var scaleZ = 1 / temp_v1.set(me[8], me[9], me[10]).length();
+        
+
+        var scaleX = 1 / Math.sqrt(me[0] * me[0] + me[1] * me[1] + me[2] * me[2]);
+        var scaleY = 1 / Math.sqrt(me[4] * me[4] + me[5] * me[5] + me[6] * me[6]);
+        var scaleZ = 1 / Math.sqrt(me[8] * me[8] + me[9] * me[9] + me[10] * me[10]);
+
 
         if (p) {
             var pe = p.elements;
 
-            var px = temp_v1.set(pe[0], pe[1], pe[2]).length();
-            var py = temp_v1.set(pe[4], pe[5], pe[6]).length();
-            var pz = temp_v1.set(pe[8], pe[9], pe[10]).length();
+            var px = 1 / Math.sqrt(pe[0] * pe[0] + pe[1] * pe[1] + pe[2] * pe[2]);
+        	var py = 1 / Math.sqrt(pe[4] * pe[4] + pe[5] * pe[5] + pe[6] * pe[6]);
+        	var pz = 1 / Math.sqrt(pe[8] * pe[8] + pe[9] * pe[9] + pe[10] * pe[10]);
 
             te[0] = me[0] * scaleX * px;
             te[1] = me[1] * scaleX * px;
@@ -7796,14 +7797,13 @@ THREE.Object3D.prototype = {
 
             this.orthoMatrixWorld.copy(this.matrixWorld);
             if (this instanceof THREE.Bone) {
-                var skin = this.skin || this;
-                while (!(skin instanceof THREE.SkinnedMesh))
-                    skin = skin.parent;
-                this.orthoMatrixWorld.orthogonalize(skin.matrixWorld);
+               if(this.skin)
+                	this.orthoMatrixWorld.orthogonalize(this.skin.matrixWorld);
+                
             } else {
 
                 this.orthoMatrixWorld.orthogonalize();
-            }
+           }
 
             this.matrixWorldNeedsUpdate = false;
 
@@ -16035,13 +16035,22 @@ THREE.Scene = function () {
 
 	this.__objectsAdded = [];
 	this.__objectsRemoved = [];
-
+	this.__skins = [];
+	this.__pointclouds = [];
 };
 
 THREE.Scene.prototype = Object.create( THREE.Object3D.prototype );
 
 THREE.Scene.prototype.__addObject = function ( object ) {
 
+	if ( object instanceof THREE.SkinnedMesh )
+	{
+		this.__skins.push(object);
+	}
+	if ( object instanceof THREE.PointCloud )
+	{
+		this.__pointclouds.push(object);
+	}
 	if ( object instanceof THREE.Light ) {
 
 		if ( this.__lights.indexOf( object ) === - 1 ) {
@@ -16085,6 +16094,14 @@ THREE.Scene.prototype.__addObject = function ( object ) {
 
 THREE.Scene.prototype.__removeObject = function ( object ) {
 
+	if ( object instanceof THREE.SkinnedMesh )
+	{
+		this.__skins.splice(this.__skins.indexOf(object),1);
+	}
+	if ( object instanceof THREE.PointCloud )
+	{
+		this.__pointclouds.splice(this.__pointclouds.indexOf(object),1);
+	}
 	if ( object instanceof THREE.Light ) {
 
 		var i = this.__lights.indexOf( object );
@@ -17307,7 +17324,7 @@ THREE.ShaderChunk = {};
 
 // File:src/renderers/shaders/ShaderChunk/alphatest_fragment.glsl
 
-THREE.ShaderChunk[ 'alphatest_fragment'] = "#ifdef ALPHATEST\n\n	if ( gl_FragColor.a < ALPHATEST ) discard;\n\n#endif\n";
+THREE.ShaderChunk[ 'alphatest_fragment'] = "#ifdef ALPHATEST\n\n	if ( gl_FragColor.a < float(ALPHATEST) ) discard;\n\n#endif\n";
 
 // File:src/renderers/shaders/ShaderChunk/lights_lambert_vertex.glsl
 
@@ -17779,8 +17796,8 @@ THREE.ShaderLib = {
             "tFogColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );\n" +
             "#endif\n" +
             "#endif\n" +
-            "   gl_FragColor = vec4(mix(cubeColor.xyz,skycolor,colorBlend),1.0);\n" +
-            "   gl_FragColor = vec4(mix(gl_FragColor.xyz,tFogColor.xyz,fogBlend),1.0);\n" +
+            "   vec4 temp = vec4(mix(cubeColor.xyz,skycolor,colorBlend),1.0);\n" +
+            "   gl_FragColor = vec4(mix(temp.xyz,tFogColor.xyz,fogBlend),1.0);\n" +
             "}\n",
 
         //the default shader - the one used by the analytic solver, just has some simple stuff
@@ -17804,15 +17821,15 @@ THREE.ShaderLib = {
                 },
                 colorBlend: {
                     type: "f",
-                    value: 0
+                    value: 1
                 },
                 ApexColor: {
                     type: "c",
-                    value: new THREE.Color(0x0077FF)
+                    value: new THREE.Color(0xCCCCCC)
                 },
                 HorizonColor: {
                     type: "c",
-                    value: new THREE.Color(0xffffff)
+                    value: new THREE.Color(0x999999)
                 },
 
             }
@@ -21655,8 +21672,10 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function setupVertexAttributes( material, programAttributes, geometryAttributes, startIndex ) {
 
-		for ( var attributeName in programAttributes ) {
+		var keys = Object.keys(programAttributes)
+		for ( var i = 0; i < keys.length; i++ ) {
 
+			var attributeName = keys[i];
 			var attributePointer = programAttributes[ attributeName ];
 			var attributeItem = geometryAttributes[ attributeName ];
 
@@ -22420,15 +22439,12 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			}
 
-			for ( var i = 0, l = object.children.length; i < l; i ++ ) {
-
-				updateSkeletons( object.children[ i ] );
-
-			}
+			
 
 		}
 
-		updateSkeletons( scene );
+		for( var i = 0; i < scene.__skins.length; i++)
+			updateSkeletons( scene.__skins[i] );
 
 		camera.matrixWorldInverse.getInverse( camera.matrixWorld );
 
@@ -29655,6 +29671,10 @@ THREE.Animation.prototype.debug = function(size) {
     this.debugroot = debugroot;
 }
 
+var tempAniPos = new THREE.Vector3();
+var tempAniScale = new THREE.Vector3(1,1,1);
+var tempAniQuat = new THREE.Quaternion();
+var tempAniMatrix = new THREE.Matrix4();
 THREE.Animation.prototype.setKey = function(keyf) {
 
     if (!this.data) return;
@@ -29664,31 +29684,47 @@ THREE.Animation.prototype.setKey = function(keyf) {
     var l = keyf - Math.floor(keyf);
     var l2 = 1 - l;
 
-    for (var h = 0, hl = this.hierarchy.length; h < hl; h++) {
+    for (var h = 0, hl = this.data.hierarchy.length; h < hl; h++) {
         var object = this.hierarchy[h];
         var key = this.data.hierarchy[h].keys[Math.floor(keyf)];
         var key2 = this.data.hierarchy[h].keys[Math.floor(keyf + 1)];
 
-        object.matrixAutoUpdate = true;
+        object.matrixAutoUpdate = false;
         //object.matrix.copy(key.matrix);
         //object.updateMatrixWorld();
         //object.matrixWorldNeedsUpdate = true;
 
         if (key && key2) {
 
-            object.position.x = key.pos[0] * l2 + key2.pos[0] * l;
-            object.position.y = key.pos[1] * l2 + key2.pos[1] * l;
-            object.position.z = key.pos[2] * l2 + key2.pos[2] * l;
+/*
+ key.parentspacePos = new THREE.Vector3();
+            key.parentspaceScl = new THREE.Vector3();
+            key.parentspaceRot = new THREE.Quaternion()
+            */
+        	var keypos =  key.parentspacePos || key.pos;
+        	var keyrot =  key.parentspaceRot || key.rot;
+      //  	var keyscl =  key.parentspaceScl || key.scl;
 
-            object.scale.x = key.scl[0] * l2 + key2.scl[0] * l;
-            object.scale.y = key.scl[1] * l2 + key2.scl[1] * l;
-            object.scale.z = key.scl[2] * l2 + key2.scl[2] * l;
+        	var key2pos =  key2.parentspacePos || key2.pos;
+        	var key2rot =  key2.parentspaceRot || key2.rot;
+        //	var key2scl =  key2.parentspaceScl || key2.scl;
 
-            object.quaternion.set(key.rot.x, key.rot.y, key.rot.z, key.rot.w);
-            object.quaternion.slerp(key2.rot, l);
+            tempAniPos.x = keypos[0] * l2 + key2pos[0] * l;
+            tempAniPos.y = keypos[1] * l2 + key2pos[1] * l;
+            tempAniPos.z = keypos[2] * l2 + key2pos[2] * l;
 
+       //     tempAniScale.x = keyscl[0] * l2 + key2scl[0] * l;
+       //     tempAniScale.y = keyscl[1] * l2 + key2scl[1] * l;
+       //     tempAniScale.z = keyscl[2] * l2 + key2scl[2] * l;
 
-            object.updateMatrix();
+            tempAniQuat.set(keyrot.x, keyrot.y, keyrot.z, keyrot.w);
+            tempAniQuat.slerp(key2rot, l);
+
+            tempAniMatrix.compose(tempAniPos,tempAniQuat,tempAniScale);
+            object.matrix.copy(tempAniMatrix);
+            object.matrixWorldNeedsUpdate = true;
+            //object.matrixWorld.multiplyMatrices(this.root.matrixWorld,object.matrix);
+
 
 
             if (object.debugobject) {
@@ -29697,19 +29733,29 @@ THREE.Animation.prototype.setKey = function(keyf) {
             }
         } else if (key) {
 
-            object.position.x = key.pos[0]
-            object.position.y = key.pos[1]
-            object.position.z = key.pos[2]
+        	var keypos =  key.parentspacePos || key.pos;
+        	var keyrot =  key.parentspaceRot || key.rot;
+        	var keyscl =  key.parentspaceScl || key.scl;
 
-            object.scale.x = key.scl[0]
-            object.scale.y = key.scl[1]
-            object.scale.z = key.scl[2]
+            object.position.x = keypos[0]
+            object.position.y = keypos[1]
+            object.position.z = keypos[2]
 
-            object.quaternion.w = key.rot.w;
-            object.quaternion.y = key.rot.y;
-            object.quaternion.z = key.rot.z;
-            object.quaternion.x = key.rot.x;
+            object.scale.x = keyscl[0]
+            object.scale.y = keyscl[1]
+            object.scale.z = keyscl[2]
 
+            object.quaternion.w = keyrot.w;
+            object.quaternion.y = keyrot.y;
+            object.quaternion.z = keyrot.z;
+            object.quaternion.x = keyrot.x;
+
+            //the object matrix is now directly in the space of this.root. No need to walk whole tree updating 
+            //matrix
+			object.updateMatrix();
+            //object.matrixWorld.multiplyMatrices(this.root.matrixWorld,object.matrix);
+
+            
             if (object.debugobject) {
                 object.debugobject.matrix.copy(object.matrix);
                 object.debugobject.updateMatrixWorld();
@@ -34884,7 +34930,7 @@ THREE.LensFlarePlugin = function () {
 
 		flares.length = 0;
 
-		scene.traverseVisible( function ( child ) {
+		/*scene.traverseVisible( function ( child ) {
 
 			if ( child instanceof THREE.LensFlare ) {
 
@@ -34892,7 +34938,7 @@ THREE.LensFlarePlugin = function () {
 
 			}
 
-		} );
+		} );*/ //this is too slow!
 
 		if ( flares.length === 0 ) return;
 
@@ -35681,7 +35727,7 @@ THREE.SpritePlugin = function () {
 
 		sprites.length = 0;
 
-		scene.traverseVisible( function ( child ) {
+		/*scene.traverseVisible( function ( child ) {
 
 			if ( child instanceof THREE.Sprite ) {
 
@@ -35689,7 +35735,7 @@ THREE.SpritePlugin = function () {
 
 			}
 
-		} );
+		} );*/ //this is way too slow!
 
 		if ( sprites.length === 0 ) return;
 
