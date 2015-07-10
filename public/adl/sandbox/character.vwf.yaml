@@ -467,7 +467,7 @@ scripts:
         var _cycles = this.activeCycle;
         if(! _cycles)
         {
-          //debugger;
+          
           _cycles = this.activeCycle;
         }
         var _length = _cycles.length;

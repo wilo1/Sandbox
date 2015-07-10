@@ -145,11 +145,11 @@ properties:
             }.bind(this);
             this.___physicsAPI.getLinearVelocity = function()
             {
-               return this.___physics_velocity_linear.internal_val;
+               return this.___physics_velocity_linear;
             }.bind(this);
             this.___physicsAPI.getAngularVelocity = function()
             {
-               return this.___physics_velocity_angular.internal_val;
+               return this.___physics_velocity_angular;
             }.bind(this);
         }
         return this.___physicsAPI;
