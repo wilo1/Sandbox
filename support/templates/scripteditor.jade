@@ -48,18 +48,19 @@ mixin scripteditor_body
 
 				.tabs-panel.horizontalLayout(ng-show='guiState.openTab !== "options"')
 					.list
-						label.listitem(ng-repeat='item in currentList', ng-class='{"selected": currentList.selected===item.name, "dirty": item.dirty}')
+						label.listitem(ng-repeat='item in currentList | filter: (guiState.showHiddenProperties ? {} : {name:"!__"})'
+							ng-class='{"selected": currentList.selected===item.name, "dirty": item.dirty}')
 							input(type='radio', name='selectedField', ng-model='currentList.selected', ng-value='item.name')
 							| {{item.name}}
 
 						label.listitem.suggestion(ng-repeat='item in currentSuggestions', ng-hide='hasField(item.name, currentList)'
 							ng-class='{"selected": currentList.selected===item.name, "dirty": item.dirty}'
-							title='Create the "{{item.name}}" method.')
+							title='Create the "{{item.name}}" {{guiState.openTab.slice(0,-1)}}')
 							input(type='radio', name='selectedField', ng-model='currentList.selected', ng-value='item.name')
 							| {{item.name}}
 							
 					.textinner.verticalLayout
-						ace-code-editor.content(disabled='!guiState.openTab || !currentList.selected', ng-class='{"dirty": field.dirty}')
+						ace-code-editor.content(disabled='!guiState.openTab || !currentList.selected', ng-class='{"dirty": selectedField.dirty}')
 						.buttonPanel.horizontalLayout
 							input#save(type='button', value='Save {{getSingular(guiState.openTab)}}')
 							input#clear(type='button', value='Reset {{getSingular(guiState.openTab)}}')

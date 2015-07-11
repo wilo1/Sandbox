@@ -33,20 +33,18 @@ define(['vwf/view/editorview/angular-app'], function(app)
 					$scope.$sessions = {};
 				});
 
-				$scope.$watch('currentList.selected', function(newval)
+				$scope.$watch('selectedField', function(newval)
 				{
-					$scope.field = $scope.currentList.reduce(function(old,cur){ return cur.name === newval ? cur : old; }, null);
-
-					if($scope.field)
+					if(newval)
 					{
-						var sessionName = $scope.guiState.openTab+'_'+newval;
+						var sessionName = $scope.guiState.openTab+'_'+newval.name;
 						if( !$scope.sessions[sessionName] )
 						{
 							var newBody = '';
-							if( $scope.guiState.openTab === 'methods' ){
-								var fullBody = 'function '+$scope.field.name+'('+$scope.field.value.parameters.join(',')+')\n'
+							if( /^(methods|events)$/.test($scope.guiState.openTab) ){
+								var fullBody = 'function '+newval.name+'('+newval.value.parameters.join(',')+')\n'
 									+'{\n'
-									+$scope.field.value.body
+									+newval.value.body
 									+'\n}';
 								var newBody = $.trim(js_beautify(fullBody, {
 									max_preserve_newlines: 2,
@@ -55,7 +53,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 								}));
 							}
 							else if( $scope.guiState.openTab === 'properties' ){
-								newBody = angular.toJson($scope.field.value, 4);
+								newBody = angular.toJson(newval.value, 4);
 							}
 
 							$scope.sessions[sessionName] = ace.createEditSession(newBody);
@@ -64,41 +62,6 @@ define(['vwf/view/editorview/angular-app'], function(app)
 
 						editor.setSession( $scope.sessions[sessionName] );
 						editor.clearSelection();
-					}
-					else if(newval)
-					{	
-						$scope.field = $scope.currentSuggestions.reduce(function(old,cur){ return cur.name === newval ? cur : old; }, null);
-						if($scope.field)
-						{
-							var sessionName = $scope.guiState.openTab+'_'+newval;
-							if( !$scope.sessions[sessionName] )
-							{
-								var newBody = '';
-								if( $scope.guiState.openTab === 'methods' ){
-									var fullBody = 'function '+$scope.field.name+'('+$scope.field.value.parameters.join(',')+')\n'
-										+'{\n'
-										+$scope.field.value.body
-										+'\n}';
-									var newBody = $.trim(js_beautify(fullBody, {
-										max_preserve_newlines: 2,
-										braces_on_own_line: true,
-										opt_keep_array_indentation: true
-									}));
-								}
-								else if( $scope.guiState.openTab === 'properties' ){
-									newBody = angular.toJson($scope.field.value, 4);
-								}
-
-								$scope.sessions[sessionName] = ace.createEditSession(newBody);
-								$scope.sessions[sessionName].setMode("ace/mode/javascript");
-							}
-
-							editor.setSession( $scope.sessions[sessionName] );
-							editor.clearSelection();
-						}
-						else {
-							editor.setSession( ace.createEditSession('') );
-						}
 					}
 					else {
 						editor.setSession( ace.createEditSession('') );
@@ -111,6 +74,8 @@ define(['vwf/view/editorview/angular-app'], function(app)
 
 	app.controller('ScriptEditorController', ['$scope', function($scope)
 	{
+		window._ScriptEditor = $scope;
+
 		$scope.guiState = {
 			openTab: '',
 			showHiddenProperties: false,
@@ -150,6 +115,20 @@ define(['vwf/view/editorview/angular-app'], function(app)
 					$scope.currentList.selected = '';
 					$scope.currentSuggestions = [];
 				break;
+			}
+		});
+
+		$scope.$watchGroup(['currentList','currentList.selected'], function(newvals)
+		{
+			if( newvals[0] )
+			{
+				$scope.selectedField = 
+					newvals[0].reduce(function(old,cur){ return cur.name === newvals[1] ? cur : old; }, null)
+					||
+					$scope.currentSuggestions.reduce(function(old,cur){ return cur.name === newvals[1] ? cur : old; }, null);
+			}
+			else {
+				$scope.selectedField = null;
 			}
 		});
 
@@ -199,14 +178,57 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			}
 		];
 
+		// event, 'function ' + event + '(eventData,nodeData){\n\n console.log("got here"); \n\n}');
 		var eventSuggestions = [
-			{name: 'pointerClick'},
-			{name: 'pointerDown'},
-			{name: 'pointerMove'},
-			{name: 'pointerOut'},
-			{name: 'pointerOver'},
-			{name: 'pointerUp'},
-			{name: 'pointerWheel'}
+			{
+				name: 'pointerClick',
+				value: {
+					parameters: ['eventData','nodeData'],
+					body: 'console.log("got here");'
+				}
+			},
+			{
+				name: 'pointerDown',
+				value: {
+					parameters: ['eventData','nodeData'],
+					body: 'console.log("got here");'
+				}
+			},
+			{
+				name: 'pointerMove',
+				value: {
+					parameters: ['eventData','nodeData'],
+					body: 'console.log("got here");'
+				}
+			},
+			{
+				name: 'pointerOut',
+				value: {
+					parameters: ['eventData','nodeData'],
+					body: 'console.log("got here");'
+				}
+			},
+			{
+				name: 'pointerOver',
+				value: {
+					parameters: ['eventData','nodeData'],
+					body: 'console.log("got here");'
+				}
+			},
+			{
+				name: 'pointerUp',
+				value: {
+					parameters: ['eventData','nodeData'],
+					body: 'console.log("got here");'
+				}
+			},
+			{
+				name: 'pointerWheel',
+				value: {
+					parameters: ['eventData','nodeData'],
+					body: 'console.log("got here");'
+				}
+			},
 		];
 
 		$scope.hasField = function(name, list){
@@ -216,7 +238,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			);
 		}
 
-		$scope.$watch('fields.selectedNode', function(node)
+		$scope.$watchGroup(['fields.selectedNode','guiState.inheritPrototype'], function(newvals)
 		{
 			$scope.methodList = [];
 			$scope.methodList.selected = '';
@@ -225,7 +247,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			$scope.propertyList = [];
 			$scope.propertyList.selected = '';
 
-			if( !node ){
+			if( !newvals[0] ){
 				$scope.guiState.openTab = '';
 				return;
 			}
@@ -234,21 +256,21 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			}
 
 			// populate lists
-			var curNode = node;
+			var curNode = newvals[0];
 			while(curNode)
 			{
 				for(var i in curNode.methods){
-					if( !$scope.hasField(i, $scope.methodList) && (!/^__/.test(i) || $scope.guiState.showHiddenProperties) )
+					if( !$scope.hasField(i, $scope.methodList) )
 						$scope.methodList.push({'name': i, 'value': curNode.methods[i]});
 				}
 
 				for(var i in curNode.events){
-					if( !$scope.hasField(i, $scope.eventList) && (!/^__/.test(i) || $scope.guiState.showHiddenProperties) )
+					if( !$scope.hasField(i, $scope.eventList) )
 						$scope.eventList.push({'name': i, 'value': curNode.events[i]});
 				}
 
 				for(var i in curNode.properties){
-					if( !$scope.hasField(i, $scope.propertyList) && (!/^__/.test(i) || $scope.guiState.showHiddenProperties) )
+					if( !$scope.hasField(i, $scope.propertyList) )
 						$scope.propertyList.push({'name': i, 'value': curNode.properties[i]});
 				}
 
@@ -309,7 +331,32 @@ define(['vwf/view/editorview/angular-app'], function(app)
 
 		$scope.save = function()
 		{
-			
+			if( checkPermission() && checkSyntax() && $scope.currentList.dirty ) return;
+			if (!_ScriptEditor.MethodChanged) return;
+			if (!_ScriptEditor.checkMethodSyntax()) {
+				//show dialog;
+				return false;
+			}
+			var methodname = $.trim(_ScriptEditor.selectedMethod);
+			var rawtext = _ScriptEditor.methodEditor.getValue();
+			var params = rawtext.substring(rawtext.indexOf('(') + 1, rawtext.indexOf(')'));
+			params = params.split(',');
+			var cleanParams = [];
+			for (var i = 0; i < params.length; i++) {
+				params[i] = $.trim(params[i]);
+				if (params[i] != '' && params[i] != null && params[i] !== undefined) cleanParams.push(params[i]);
+			}
+			var body = rawtext.substring(rawtext.indexOf('{') + 1, rawtext.lastIndexOf('}'));
+			body = $.trim(body);
+			body += '\n';
+			//body = body.replace(/\s*\n\s+/gm,'\n');
+			if (_ScriptEditor.currentNode.methods && _ScriptEditor.currentNode.methods[methodname]) {
+				vwf_view.kernel.deleteMethod(_ScriptEditor.currentNode.id, methodname);
+			}
+			vwf_view.kernel.createMethod(_ScriptEditor.currentNode.id, methodname, cleanParams, body);
+			window.setTimeout(_ScriptEditor.PostSaveMethod, 500);
+			return true;
+
 		}
 
 	}]);
