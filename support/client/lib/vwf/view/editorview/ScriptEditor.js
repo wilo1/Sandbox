@@ -57,7 +57,11 @@ define(['vwf/view/editorview/angular-app'], function(app)
 							}
 
 							$scope.sessions[sessionName] = ace.createEditSession(newBody);
-							$scope.sessions[sessionName].setMode("ace/mode/javascript");
+
+							if( $scope.guiState.openTab === 'properties' )
+								$scope.sessions[sessionName].setMode("ace/mode/json");
+							else
+								$scope.sessions[sessionName].setMode("ace/mode/javascript");
 						}
 
 						editor.setSession( $scope.sessions[sessionName] );
@@ -331,32 +335,45 @@ define(['vwf/view/editorview/angular-app'], function(app)
 
 		$scope.save = function()
 		{
-			if( checkPermission() && checkSyntax() && $scope.currentList.dirty ) return;
-			if (!_ScriptEditor.MethodChanged) return;
-			if (!_ScriptEditor.checkMethodSyntax()) {
-				//show dialog;
-				return false;
-			}
-			var methodname = $.trim(_ScriptEditor.selectedMethod);
-			var rawtext = _ScriptEditor.methodEditor.getValue();
-			var params = rawtext.substring(rawtext.indexOf('(') + 1, rawtext.indexOf(')'));
-			params = params.split(',');
-			var cleanParams = [];
-			for (var i = 0; i < params.length; i++) {
-				params[i] = $.trim(params[i]);
-				if (params[i] != '' && params[i] != null && params[i] !== undefined) cleanParams.push(params[i]);
-			}
-			var body = rawtext.substring(rawtext.indexOf('{') + 1, rawtext.lastIndexOf('}'));
-			body = $.trim(body);
-			body += '\n';
-			//body = body.replace(/\s*\n\s+/gm,'\n');
-			if (_ScriptEditor.currentNode.methods && _ScriptEditor.currentNode.methods[methodname]) {
-				vwf_view.kernel.deleteMethod(_ScriptEditor.currentNode.id, methodname);
-			}
-			vwf_view.kernel.createMethod(_ScriptEditor.currentNode.id, methodname, cleanParams, body);
-			window.setTimeout(_ScriptEditor.PostSaveMethod, 500);
-			return true;
+			if( checkPermission() && checkSyntax() && $scope.selectedField.dirty )
+			{
+				var editor = document.querySelector('ace-code-editor')._editor;
 
+				var fieldName = $.trim($scope.selectedField.name);
+				var rawtext = editor.getValue();
+
+				if( $scope.guiState.openTab === 'methods' )
+				{
+					var params = rawtext.substring(rawtext.indexOf('(') + 1, rawtext.indexOf(')'));
+					params = params.split(',');
+					var cleanParams = [];
+
+					for (var i = 0; i < params.length; i++) {
+						params[i] = $.trim(params[i]);
+						if (params[i] != '' && params[i] != null && params[i] !== undefined)
+							cleanParams.push(params[i]);
+					}
+
+					var body = rawtext.substring(rawtext.indexOf('{') + 1, rawtext.lastIndexOf('}'));
+					body = $.trim(body);
+					body += '\n';
+
+					if( $scope.fields.selectedNode.methods && $scope.fields.selectedNode.methods[fieldName] ){
+						vwf_view.kernel.deleteMethod($scope.fields.selectedNode.id, fieldName);
+					}
+
+					vwf_view.kernel.createMethod($scope.fields.selectedNode.id, fieldName, cleanParams, body);
+				}
+				else if( $scope.guiState.openTab === 'properties' )
+				{
+					var val = JSON.parse(rawtext);
+
+					if( $scope.fields.selectedNode.properties && $scope.fields.selectedNode.properties[fieldName] )
+						vwf_view.kernel.setProperty($scope.fields.selectedNode.id, fieldName, val);
+					else
+						vwf_view.kernel.createProperty($scope.fields.selectedNode.id, fieldName, val);
+				}
+			}
 		}
 
 	}]);
