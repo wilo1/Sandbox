@@ -13,13 +13,17 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 var jsDriverSelf = this;
-
-
+var propertiesSet = {};
+var contextPostTime;
 function defaultContext()
 {
     this.setProperty = function(id,name,val)
     {
+        var now = performance.now();
        vwf.setProperty(id,name,val);
+       if(!propertiesSet[name])
+        propertiesSet[name] = 0;
+        propertiesSet[name]+= (performance.now() - now);
     }
     this.getProperty = function(id,name)
     {
@@ -109,6 +113,14 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             jsDriverSelf = this;
             this.nodes = {}; // maps id => new type()
             this.creatingNode(undefined, 0); // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
+            this.test = function()
+            {
+                console.profile('set');
+                for(var i = 0; i < 10000; i++)
+                vwf.setProperty("CharacterTest-vwf-Nf583588f",'transform',[1,0,0,0,0,1,0,0,0,0,1,0,Math.random() * 100,0,0,1]);
+                console.profileEnd();
+
+            }
         },
 
         // == Model API ============================================================================
@@ -1259,7 +1271,9 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 }
         },
         ticking: function() {
+            propertiesSet = {}
             this.callMethodTraverse(this.nodes['index-vwf'], 'tick', []);
+            console.log(propertiesSet);
         },
         isBehavior: function(node) {
             if (!node)

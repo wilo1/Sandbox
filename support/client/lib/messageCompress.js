@@ -114,7 +114,7 @@ var messageCompress = {
     initialize: function()
     {
         var self = this;
-        this.addSpecialCase("transform", function(val)
+       /* this.addSpecialCase("transform", function(val)
             {
                 var t = new Float32Array(16);
                 for (var i = 0; i < 16; i++)
@@ -157,7 +157,7 @@ var messageCompress = {
         //    {
         //        val = self.decompress(val);
         //        return val;
-        //    });
+        //    });*/
         this.addMapping("tick");
         this.addMapping("eventData");
         this.addMapping("eventNodeData");

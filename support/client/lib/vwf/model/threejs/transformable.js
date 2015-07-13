@@ -66,7 +66,8 @@ function getAllDrawables(threeObject, list) {
                 threeObject.matrixAutoUpdate = false;
                 for (var i = 0; i < 16; i++)
                     threeObject.matrix.elements[i] = transform[i];
-                threeObject.updateMatrixWorld(true);
+                //threeObject.updateMatrixWorld(true);
+                threeObject.matrixWorldNeedsUpdate = true;
 
                 //walk and find mesh for the bone, update it
                 if (threeObject instanceof THREE.Bone) {
@@ -75,7 +76,8 @@ function getAllDrawables(threeObject, list) {
                     var parent = threeObject.parent;
                     while (parent) {
                         if (parent instanceof THREE.SkinnedMesh) {
-                            parent.updateMatrixWorld();
+                            //parent.updateMatrixWorld();
+                            parent.matrixWorldNeedsUpdate = true;
                             //since it makes no sense for a bone to effect the skin farther up the hierarchy
                             break;
                         }
@@ -112,7 +114,7 @@ function getAllDrawables(threeObject, list) {
 
                 if (!this.TransformEnabled()) {
 
-                    return;
+                    return true;
                 };
 
                 this.setTransformInternal(propertyValue, true);
@@ -129,12 +131,14 @@ function getAllDrawables(threeObject, list) {
 
                 //walk(this.getRoot(), propertyValue, true);
                 this.getRoot().inheritScale = propertyValue;
-                this.getRoot().updateMatrixWorld(true);
+                //this.getRoot().updateMatrixWorld(true);
+                this.getRoot().matrixWorldNeedsUpdate = true;
                 if (this.getRoot() instanceof THREE.Bone) {
                     var skin = this.getRoot();
                     while (!(skin instanceof THREE.SkinnedMesh))
                         skin = skin.parent;
-                    skin.updateMatrixWorld(true);
+                    //skin.updateMatrixWorld(true);
+                    skin.matrixWorldNeedsUpdate = true;
                 }
                 //need to set this to update bone handle positions
                 if (this.setAnimationFrameInternal)
@@ -199,7 +203,7 @@ function getAllDrawables(threeObject, list) {
 
 
 
-                    threeObject.updateMatrixWorld(true);
+                    //threeObject.updateMatrixWorld(true);
                     var mat = threeObject.matrixWorld.clone();
                     //	mat = (new THREE.Matrix4()).multiplyMatrices(skinmat,mat);
                     return mat.elements;
@@ -225,7 +229,7 @@ function getAllDrawables(threeObject, list) {
 
 
 
-                    threeObject.updateMatrixWorld(true);
+                    //threeObject.updateMatrixWorld(true);
                     var mat = threeObject.orthoMatrixWorld.clone();
                     //  mat = (new THREE.Matrix4()).multiplyMatrices(skinmat,mat);
                     return mat.elements;

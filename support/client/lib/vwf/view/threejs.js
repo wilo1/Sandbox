@@ -525,7 +525,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
 
 
             }
-
+            _dScene.updateMatrixWorld();
 
         },
         windowResized: function() {
@@ -574,6 +574,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                 }
 
             }
+            _dScene.updateMatrixWorld();
         },
         setRenderModeStereo: function() {
             this.renderMode = STEREORENDER;

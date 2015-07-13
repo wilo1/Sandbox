@@ -1226,6 +1226,7 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
                     node.ticking();
                 }
             }
+            _dScene.updateMatrixWorld();
         }
 
     });

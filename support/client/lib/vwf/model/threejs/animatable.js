@@ -144,7 +144,8 @@
                      //   if(skins[i].skeleton.bones[j].parent == skins[i])
                       //      skins[i].skeleton.bones[j].updateMatrixWorld(true);
                     //}
-                    skins[i].updateMatrixWorld(true);
+                    //skins[i].updateMatrixWorld(true);
+                    skins[i].matrixWorldNeedsUpdate = true;
 
                     if (updateSceneManager) {
                         var allMeshes = getAllDrawables(skins[i]);

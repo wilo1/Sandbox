@@ -475,7 +475,8 @@ define(function() {
 		}
 		this.satProperty = function(id,propname,val)
 		{
-			this.BuildGUI();
+			if(propname == 'DisplayName')
+				this.BuildGUI();
 		}
 		
 		
