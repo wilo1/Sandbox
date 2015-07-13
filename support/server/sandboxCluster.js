@@ -70,7 +70,8 @@ function DecodeArgs(args)
     {
         if(i =='$regex')
         {
-            args[i] = new RegExp(args[i]);
+            args[i] = new RegExp(args[i],'ig');
+
 
         }
         else

@@ -1530,7 +1530,7 @@ function getStatesFilelist(id, cb)
 
 function searchStates(query, cb, start, count)
 {
-    query = new RegExp('.*' + query + '.*');
+    query = new RegExp('.*' + query + '.*','ig');
     var search = {
         $or: [
         {
