@@ -217,6 +217,8 @@ var sandboxState = function(id, metadata)
     }
     this.setProperty = function(nodeid, prop, val)
     {
+       
+
         //We need to keep track internally of the properties
         //mostly just to check that the user has not messed with the ownership manually
         var node = this.findNode(nodeid);
@@ -224,22 +226,23 @@ var sandboxState = function(id, metadata)
         if (!node.properties)
             node.properties = {};
         node.properties[prop] = val;
+
     }
     this.validate = function(type, nodeID, client)
     {
         var node = this.findNode(nodeID);
         if (!node)
         {
-            this.Log('server has no record of ' + nodeID, 1);
+            console.log('server has no record of ' + nodeID, 1);
             return false;
         }
-        if (this.metadata.allowAnonymous || checkOwner(node, client.loginData.UID))
+        if ((this.metadata.publishSettings || {}).allowAnonymous || checkOwner(node, client.loginData.UID))
         {
             return true;
         }
         else
         {
-            this.Error('permission denied for modifying ' + node.id, 1);
+            console.log('permission denied for modifying ' + node.id, 1);
             return;
         }
     }
@@ -251,7 +254,7 @@ var sandboxState = function(id, metadata)
             this.Error('server has no record of ' + nodeid, 1);
             return;
         }
-        if (this.metadata.allowAnonymous || checkOwner(node, client.loginData.UID) || childComponent.extends == 'character.vwf')
+        if ((this.metadata.publishSettings || {}).allowAnonymous || checkOwner(node, client.loginData.UID) || childComponent.extends == 'character.vwf')
         {
             return true;
         }
