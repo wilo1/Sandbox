@@ -70,9 +70,10 @@ function onEvent(event, param)
 }
 onmessage = function(e)
 {
-	if(e.constructor == String)
-		e = JSON.parse(e);
+	
 	var message = e.data;
+	if(message.constructor == String)
+		message = JSON.parse(message);
 	if (message.type == PING)
 		postMessage(
 		{
