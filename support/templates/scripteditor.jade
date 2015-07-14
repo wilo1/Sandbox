@@ -49,26 +49,26 @@ mixin scripteditor_body
 				.tabs-panel.horizontalLayout(ng-show='guiState.openTab !== "options"')
 					.list
 						label.listitem(ng-repeat='item in currentList | filter: (guiState.showHiddenProperties ? {} : {name:"!__"})'
-							ng-class='{"selected": currentList.selected===item.name, "dirty": item.dirty}')
+							ng-class='{"selected": currentList.selected===item.name, "dirty": dirty[item.id]}')
 							input(type='radio', name='selectedField', ng-model='currentList.selected', ng-value='item.name')
 							| {{item.name}}
 
 						label.listitem.suggestion(ng-repeat='item in currentSuggestions', ng-hide='hasField(item.name, currentList)'
-							ng-class='{"selected": currentList.selected===item.name, "dirty": item.dirty}'
+							ng-class='{"selected": currentList.selected===item.name, "dirty": dirty[item.id]}'
 							title='Create the "{{item.name}}" {{guiState.openTab.slice(0,-1)}}')
 							input(type='radio', name='selectedField', ng-model='currentList.selected', ng-value='item.name')
 							| {{item.name}}
 							
 					.textinner.verticalLayout
-						ace-code-editor.content(disabled='!guiState.openTab || !currentList.selected', ng-class='{"dirty": selectedField.dirty}')
+						ace-code-editor.content(disabled='!guiState.openTab || !currentList.selected', ng-class='{"dirty": dirty[selectedField.id]}')
 						.buttonPanel.horizontalLayout
-							input#save(type='button', value='Save {{getSingular(guiState.openTab)}}')
-							input#clear(type='button', value='Reset {{getSingular(guiState.openTab)}}')
+							input#save(type='button', ng-click='save()', value='Save {{getSingular(guiState.openTab)}}')
+							input#clear(type='button', value='Discard Changes')
 							.spacer
-							input#call(type='button', value='Call {{getSingular(guiState.openTab)}}')
+							input#call(type='button', ng-hide='guiState.openTab === "properties"', value='Call {{getSingular(guiState.openTab)}}')
 							input#delete(type='button', value='Delete {{getSingular(guiState.openTab)}}')
 							input#new(type='button', value='New {{getSingular(guiState.openTab)}}')
-							input#checkSyntax(type='button', value='Check Code')
+							input#checkSyntax(type='button', ng-click='checkSyntax()', value='Check Code')
 					
 
 				#options.tabs-panel.horizontalLayout(ng-show='guiState.openTab === "options"')

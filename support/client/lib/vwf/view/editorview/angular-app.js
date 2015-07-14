@@ -20,17 +20,33 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 
 	app.initialize = function(){
 		angular.bootstrap( document.body, ['SandboxEditor'] );
-	};
+	}
 
-	app.calledMethod = function(id, evt, data)
+	app.createdMethod = function(id, name, params, body)
 	{
-		
-	};
+		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
+			app.root.fields.selectedNode.methods[name] = {
+				parameters: params,
+				body: body
+			};
+			app.root.$apply();
+		}
+	}
+
+	app.createdEvent = function(id, name, params, body)
+	{
+		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
+			app.root.fields.selectedNode.events[name] = {
+				parameters: params,
+				body: body
+			};
+			app.root.$apply();
+		}
+	}
 
 	app.satProperty = function(id, prop, val)
 	{
 		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
-			console.log('Property set:', prop, val);
 			app.root.fields.selectedNode.properties[prop] = val;
 			app.root.$apply();
 		}
