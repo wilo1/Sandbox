@@ -6,7 +6,7 @@ var request = require('request'),
 function entitiesToLibrary(user, type, res)
 {
 	var baseUrl, clientBaseUrl;
-	if(global.configuration.hostAssets){
+	if(global.configuration.hostAssets || !global.configuration.remoteAssetServerURL){
 		baseUrl = 'http://localhost:'+global.configuration.port+global.configuration.assetAppPath;
 		clientBaseUrl = global.configuration.assetAppPath;
 	}
