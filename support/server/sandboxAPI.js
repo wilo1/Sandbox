@@ -1730,7 +1730,7 @@ function serve(request, response)
 					break;
 				case "saspath":
 					{
-						if(global.configuration.hostAssets){
+						if(global.configuration.hostAssets || !global.configuration.remoteAssetServerURL){
 							response.send(global.configuration.assetAppPath);
 						}
 						else {
