@@ -62,13 +62,17 @@ mixin scripteditor_body
 					.textinner.verticalLayout
 						ace-code-editor.content(disabled='!guiState.openTab || !currentList.selected', ng-class='{"dirty": dirty[selectedField.id]}')
 						.buttonPanel.horizontalLayout
-							input#save(type='button', ng-click='save()', value='Save {{getSingular(guiState.openTab)}}')
-							input#clear(type='button', value='Discard Changes')
+							input#save(type='button', value='Save {{getSingular(guiState.openTab)}}'
+								ng-disabled='!dirty[selectedField.id]', ng-click='save()')
+							input#discard(type='button', value='Discard Changes'
+								ng-disabled='!dirty[selectedField.id]', ng-click='discard()')
 							.spacer
-							input#call(type='button', ng-hide='guiState.openTab === "properties"', value='Call {{getSingular(guiState.openTab)}}')
-							input#delete(type='button', value='Delete {{getSingular(guiState.openTab)}}')
+							input#call(type='button', value='Call {{getSingular(guiState.openTab)}}'
+								ng-hide='guiState.openTab === "properties"', ng-click='call()')
+							input#delete(type='button', value='Delete {{getSingular(guiState.openTab)}}'
+								ng-hide='guiState.openTab === "properties"', ng-click='delete()')
 							input#new(type='button', value='New {{getSingular(guiState.openTab)}}')
-							input#checkSyntax(type='button', ng-click='checkSyntax()', value='Check Code')
+							input#checkSyntax(type='button', ng-click='checkSyntax(true)', value='Check Code')
 					
 
 				#options.tabs-panel.horizontalLayout(ng-show='guiState.openTab === "options"')

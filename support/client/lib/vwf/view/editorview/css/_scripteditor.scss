@@ -171,6 +171,10 @@
 			&:hover {
 				color: #82b8ff;
 			}
+			
+			&:disabled, &:disabled:hover {
+				color: grey;
+			}
 		}
 	}
 

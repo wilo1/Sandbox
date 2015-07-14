@@ -25,10 +25,20 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 	app.createdMethod = function(id, name, params, body)
 	{
 		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
+			console.log('create method', name);
 			app.root.fields.selectedNode.methods[name] = {
 				parameters: params,
 				body: body
 			};
+			app.root.$apply();
+		}
+	}
+
+	app.deletedMethod = function(id, name)
+	{
+		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
+			console.log('delete method', name);
+			delete app.root.fields.selectedNode.methods[name];
 			app.root.$apply();
 		}
 	}
@@ -40,6 +50,13 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				parameters: params,
 				body: body
 			};
+			app.root.$apply();
+		}
+	}
+
+	app.deletedEvent = function(id, name){
+		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
+			delete app.root.fields.selectedNode.events[name];
 			app.root.$apply();
 		}
 	}

@@ -28,37 +28,41 @@ define(['vwf/view/editorview/angular-app'], function(app)
 
 				$scope.sessions = {};
 
-				$scope.$watch('selectedField', function(newval)
+				function regenerateBody(item)
 				{
-					if(newval)
+					var newBody = '';
+					if( /^(methods|events)$/.test($scope.guiState.openTab) ){
+						var fullBody = 'function '+item.name+'('+item.value.parameters.join(',')+')\n'
+							+'{\n'
+							+item.value.body
+							+'\n}';
+						var newBody = $.trim(js_beautify(fullBody, {
+							max_preserve_newlines: 2,
+							braces_on_own_line: true,
+							opt_keep_array_indentation: true
+						}));
+					}
+					else if( $scope.guiState.openTab === 'properties' ){
+						newBody = angular.toJson(item.value, 4);
+					}
+
+					$scope.sessions[item.id] = ace.createEditSession(newBody);
+
+					if( $scope.guiState.openTab === 'properties' )
+						$scope.sessions[item.id].setMode("ace/mode/json");
+					else
+						$scope.sessions[item.id].setMode("ace/mode/javascript");
+				}
+
+				$scope.$watchGroup(['selectedField','dirty[selectedField.id]'], function(newvals)
+				{
+					if(newvals[0])
 					{
-						if( !$scope.sessions[newval.id] || !$scope.dirty[newval.id] )
-						{
-							var newBody = '';
-							if( /^(methods|events)$/.test($scope.guiState.openTab) ){
-								var fullBody = 'function '+newval.name+'('+newval.value.parameters.join(',')+')\n'
-									+'{\n'
-									+newval.value.body
-									+'\n}';
-								var newBody = $.trim(js_beautify(fullBody, {
-									max_preserve_newlines: 2,
-									braces_on_own_line: true,
-									opt_keep_array_indentation: true
-								}));
-							}
-							else if( $scope.guiState.openTab === 'properties' ){
-								newBody = angular.toJson(newval.value, 4);
-							}
-
-							$scope.sessions[newval.id] = ace.createEditSession(newBody);
-
-							if( $scope.guiState.openTab === 'properties' )
-								$scope.sessions[newval.id].setMode("ace/mode/json");
-							else
-								$scope.sessions[newval.id].setMode("ace/mode/javascript");
+						if( !$scope.sessions[newvals[0].id] || !newvals[1] ){
+							regenerateBody(newvals[0]);
 						}
 
-						editor.setSession( $scope.sessions[newval.id] );
+						editor.setSession( $scope.sessions[newvals[0].id] );
 						editor.clearSelection();
 					}
 					else {
@@ -339,6 +343,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 		});
 
 		$scope.$watchCollection('fields.selectedNode.methods', function(){
+			console.log('methods updated');
 			methodsDirty = true;
 			if(!timeoutSet){
 				timeoutSet = $timeout(function(){
@@ -390,7 +395,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			return true;
 		}
 
-		$scope.checkSyntax = function()
+		$scope.checkSyntax = function(dialog)
 		{
 			var editor = document.querySelector('ace-code-editor')._editor;
 			var s = editor.getSession().getAnnotations();
@@ -403,6 +408,11 @@ define(['vwf/view/editorview/angular-app'], function(app)
 
 				return false;
 			}
+
+			if(dialog){
+				alertify.alert('This script contains no syntax errors.');
+			}
+
 			return true;
 		}
 
@@ -429,7 +439,6 @@ define(['vwf/view/editorview/angular-app'], function(app)
 
 					var body = rawtext.substring(rawtext.indexOf('{') + 1, rawtext.lastIndexOf('}'));
 					body = $.trim(body);
-					body += '\n';
 
 					if( $scope.guiState.openTab === 'methods' )
 					{
@@ -464,6 +473,44 @@ define(['vwf/view/editorview/angular-app'], function(app)
 				}
 
 				$scope.dirty[$scope.selectedField.id] = false;
+			}
+		}
+
+		$scope.discard = function()
+		{
+			alertify.confirm('Are you SURE you want to discard your unsaved changes?', function(ok){
+				if(ok){
+					$scope.dirty[$scope.selectedField.id] = false;
+					$scope.$apply();
+				}
+			});
+		}
+
+		$scope.call = function()
+		{
+			var map = {
+				'methods': vwf_view.kernel.callMethod.bind(vwf_view.kernel),
+				'events': vwf_view.kernel.fireEvent.bind(vwf_view.kernel)
+			};
+
+			map[ $scope.guiState.openTab ]($scope.fields.selectedNode.id, $scope.currentList.selected);
+		}
+
+		$scope.delete = function()
+		{
+			if( checkPermission() )
+			{
+				var map = {
+					'methods': vwf_view.kernel.deleteMethod.bind(vwf_view.kernel),
+					'events': vwf_view.kernel.deleteEvent.bind(vwf_view.kernel)
+				};
+
+				alertify.confirm('Are you SURE you want to delete "'+$scope.currentList.selected+'" '+$scope.getSingular($scope.guiState.openTab).toLowerCase()+'?',
+					function(ok){
+						if(ok)
+							map[ $scope.guiState.openTab ]($scope.fields.selectedNode.id, $scope.currentList.selected);
+					}
+				);
 			}
 		}
 

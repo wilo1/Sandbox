@@ -526,6 +526,8 @@
       margin: 4px; }
       #ScriptEditor .textinner .buttonPanel input[type=button]:hover {
         color: #82b8ff; }
+      #ScriptEditor .textinner .buttonPanel input[type=button]:disabled, #ScriptEditor .textinner .buttonPanel input[type=button]:disabled:hover {
+        color: grey; }
   #ScriptEditor #options.tabs-panel {
     -webkit-box-align: flex-start;
     -moz-align-items: flex-start;
