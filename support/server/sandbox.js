@@ -242,7 +242,7 @@ function startVWF() {
 
 						var assetServer = require('SandboxAssetServer');
 						app.use(global.configuration.assetAppPath, assetServer({
-							dataDir: libpath.resolve(__dirname, '..','..', global.configuration.assetDataDir),
+							dataDir: datadir,
 							sessionCookieName: 'session',
 							sessionHeader: global.configuration.assetSessionHeader || 'X-Session-Header',
 							sessionSecret: global.configuration.sessionSecret || 'unsecure cookie secret'
