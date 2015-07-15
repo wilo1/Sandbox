@@ -225,11 +225,17 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/lib/alertify.js-0.
         calledMethod: function(nodeID, methodName, methodParameters) {
             this.viewAPINotify('calledMethod', arguments);
         },
+        deletedMethod: function(nodeID, methodName, methodParameters, body){
+            this.viewAPINotify('deletedMethod', arguments);
+        },
         createdEvent: function(nodeID, eventName, eventParameters) {
             this.viewAPINotify('createdEvent', arguments);
         },
         firedEvent: function(nodeID, eventName, eventParameters) {
             this.viewAPINotify('firedEvent', arguments);
+        },
+        deletedEvent: function(nodeID, eventName, eventParams){
+            this.viewAPINotify('deletedEvent', arguments);
         },
         executed: function(nodeID, scriptText, scriptType) {
             this.viewAPINotify('executed', arguments);

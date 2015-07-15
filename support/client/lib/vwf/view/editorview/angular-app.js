@@ -61,7 +61,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		}
 	}
 
-	app.satProperty = function(id, prop, val)
+	app.initializedProperty = app.createdProperty = app.satProperty = function(id, prop, val)
 	{
 		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
 			app.root.fields.selectedNode.properties[prop] = val;
