@@ -2,15 +2,14 @@
 
 #ScriptEditor
 {
-	&.maximized
-	{
+	&.maximized	{
 		@include flex-grow(1);
 	}
-	&:not(.maximized)
-	{
-		height: 400px;
+	&.minimized {
+		height: 0;
 	}
 
+	height: 400px;
 	overflow: hidden;
 	padding: 0px 0px 0px 0px;
 	background: #111 url(images/ui-bg_hexagon_5_111111_12x10.png) 50% 50% repeat;

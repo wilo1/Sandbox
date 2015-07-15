@@ -372,7 +372,6 @@
       color: #82b8ff; }
   #EntityLibrary #EntityLibraryMain {
     width: 245px;
-    overflow: auto;
     margin-top: 3px;
     padding-right: 3px; }
   #EntityLibrary #EntityLibraryAccordion {
@@ -406,6 +405,7 @@
       transition: opactiy 2s; }
 
 #ScriptEditor {
+  height: 400px;
   overflow: hidden;
   padding: 0px 0px 0px 0px;
   background: #111111 url(images/ui-bg_hexagon_5_111111_12x10.png) 50% 50% repeat;
@@ -418,8 +418,8 @@
     -ms-flex: 1 1;
     -webkit-flex-grow: 1;
     flex-grow: 1; }
-  #ScriptEditor:not(.maximized) {
-    height: 400px; }
+  #ScriptEditor.minimized {
+    height: 0; }
   #ScriptEditor #scripteditortitle .icon {
     float: right;
     text-align: center;
@@ -729,17 +729,6 @@ input[type="text"]:focus, input[type="password"]:focus {
 
 #alertify-logs {
   font-size: 2em; }
-
-/*canvas:focus {
-	border: 4px ridge #82b8ff;
-	box-sizing: border-box;
-}*/
-#vwf-root.minimized {
-  height: 0;
-  -moz-flex-grow: 0;
-  -ms-flex: 0 0;
-  -webkit-flex-grow: 0;
-  flex-grow: 0; }
 
 .playerlabel {
   cursor: pointer;

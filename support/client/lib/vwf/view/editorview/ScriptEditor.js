@@ -15,6 +15,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 				editor.setTheme("ace/theme/monokai");
 				editor.setShowPrintMargin(false);
 				editor.resize();
+				elem[0]._editor = editor;
 				_ScriptEditor._editor = editor;
 
 				$scope.$watch(attrs.disabled, function(newval){
@@ -41,7 +42,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 							+'{\n'
 							+item.value.body
 							+'\n}';
-						var newBody = $.trim(js_beautify(fullBody, {
+						newBody = $.trim(js_beautify(fullBody, {
 							max_preserve_newlines: 2,
 							braces_on_own_line: true,
 							opt_keep_array_indentation: true
@@ -358,6 +359,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			}
 		});
 		$scope.$watchCollection('fields.selectedNode.events', function(){
+			console.log('events updated');
 			eventsDirty = true;
 			if(!timeoutSet){
 				timeoutSet = $timeout(function(){
@@ -367,6 +369,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			}
 		});
 		$scope.$watchCollection('fields.selectedNode.properties', function(){
+			console.log('properties updated');
 			propertiesDirty = true;
 			if(!timeoutSet){
 				timeoutSet = $timeout(function(){
@@ -390,6 +393,10 @@ define(['vwf/view/editorview/angular-app'], function(app)
 		{
 			if (!_UserManager.GetCurrentUserName()) {
 				_Notifier.notify('You must log in to edit scripts');
+				return false;
+			}
+
+			if( !$scope.fields.selectedNode ){
 				return false;
 			}
 
@@ -471,13 +478,17 @@ define(['vwf/view/editorview/angular-app'], function(app)
 						val = rawtext;
 					}
 
-					if( $scope.fields.selectedNode.properties && $scope.fields.selectedNode.properties[fieldName] )
+					if( $scope.fields.selectedNode.properties && $scope.fields.selectedNode.properties[fieldName] !== undefined ){
 						vwf_view.kernel.setProperty($scope.fields.selectedNode.id, fieldName, val);
-					else
+					}
+					else {
 						vwf_view.kernel.createProperty($scope.fields.selectedNode.id, fieldName, val);
+					}
 				}
 
-				$scope.dirty[$scope.selectedField.id] = false;
+				//$timeout(function(){
+					$scope.dirty[$scope.selectedField.id] = false;
+				//});
 			}
 		}
 
@@ -521,25 +532,62 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			}
 		}
 
+		$scope.new = function()
+		{
+			var idRE = /^\w+$/;
+			var type = $scope.getSingular($scope.guiState.openTab).toLowerCase();
+			if( checkPermission() )
+			{
+				alertify.prompt('What is the new '+type+' called?', function(e, name)
+				{
+					if( !idRE.test(name) ){
+						alertify.alert('That name is invalid!');
+					}
+					else if( $scope.hasField(name, $scope.propertyList) ){
+						alertify.alert('There is already a'+(type[0]==='e'?'n ':' ')+type+' by that name!');
+					}
+					else if( $scope.guiState.openTab === 'methods')
+					{
+						vwf_view.kernel.createMethod($scope.fields.selectedNode.id, name, [], 'console.log("got here");');
+						$scope.methodList.selected = name;
+					}
+					else if( $scope.guiState.openTab === 'events')
+					{
+						vwf_view.kernel.createEvent($scope.fields.selectedNode.id, name, ['eventData','nodeData'], 'console.log("got here");');
+						$scope.eventList.selected = name;
+					}
+					else if( $scope.guiState.openTab === 'properties' )
+					{
+						vwf_view.kernel.createProperty($scope.fields.selectedNode.id, name, '');
+						$scope.propertyList.selected = name;
+					}
+				});
+			}
+		}
+
+
 		$scope.isOpen = function(){
 			return !! parseInt($('#ScriptEditor').css('height'));
 		}
 
 		$scope.show = function(){
-			$('#ScriptEditor').animate({height: 400});
+			$('#ScriptEditor').removeClass('minimized');
 		}
 		$scope.hide = function(){
-			$('#ScriptEditor').animate({height: 0});
+			if($scope.maximized){
+				$scope.unmaximize();
+			}
+			$('#ScriptEditor').addClass('minimized');
 		}
 
 		$scope.maximized = false;
 		$scope.maximize = function(){
-			$('#vwf-root').addClass('minimized');
+			$('#vwf-root').hide();
 			$('#ScriptEditor').addClass('maximized');
 			$scope.maximized = true;
 		}
 		$scope.unmaximize = function(){
-			$('#vwf-root').removeClass('minimized');
+			$('#vwf-root').show();
 			$('#ScriptEditor').removeClass('maximized');
 			$scope.maximized = false;
 		}

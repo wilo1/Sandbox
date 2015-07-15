@@ -134,7 +134,7 @@ define({
 				var evt = new Event('viewportresize');
 				document.dispatchEvent(evt);
 
-			}, 400);
+			}, 80);
 		};
 
 		$('#vwf-root > #resizer')[0].contentDocument.defaultView.addEventListener('resize', window._resizeCanvas);

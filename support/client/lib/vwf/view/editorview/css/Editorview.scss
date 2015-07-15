@@ -182,16 +182,6 @@ input[type="text"]:focus, input[type="password"]:focus {
 	font-size: 2em;
 }
 
-/*canvas:focus {
-	border: 4px ridge #82b8ff;
-	box-sizing: border-box;
-}*/
-
-#vwf-root.minimized {
-	height: 0;
-	@include flex-grow(0);
-}
-
 .playerlabel {
 	cursor: pointer;
 	font-size: 1.3em;

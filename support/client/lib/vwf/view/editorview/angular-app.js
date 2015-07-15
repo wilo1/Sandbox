@@ -9,6 +9,13 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 
 		$(document).on('selectionChanged', function(e,node){
 			$rootScope.fields.selectedNode = node;
+
+			if(node){
+				node.methods = node.methods || {};
+				node.events = node.events || {};
+				node.properties = node.properties || {};
+			}
+
 			$rootScope.$apply();
 		});
 
@@ -25,7 +32,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 	app.createdMethod = function(id, name, params, body)
 	{
 		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
-			console.log('create method', name);
+			console.log('create method', name, params, body);
 			app.root.fields.selectedNode.methods[name] = {
 				parameters: params,
 				body: body
@@ -46,6 +53,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 	app.createdEvent = function(id, name, params, body)
 	{
 		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
+			console.log('create event', name, params, body);
 			app.root.fields.selectedNode.events[name] = {
 				parameters: params,
 				body: body
@@ -56,6 +64,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 
 	app.deletedEvent = function(id, name){
 		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
+			console.log('delete event', name);
 			delete app.root.fields.selectedNode.events[name];
 			app.root.$apply();
 		}
@@ -64,6 +73,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 	app.initializedProperty = app.createdProperty = app.satProperty = function(id, prop, val)
 	{
 		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
+			console.log('create property', prop);
 			app.root.fields.selectedNode.properties[prop] = val;
 			app.root.$apply();
 		}

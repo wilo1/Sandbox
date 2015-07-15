@@ -17,7 +17,7 @@ mixin scripteditor_body
 			#ScriptEditorDeleteEvent Are you sure you want to delete this script? This cannot be undone.
 			#ScriptEditorMessage This script contains syntax errors, and cannot be saved.
 
-		#ScriptEditor.verticalLayout(ng-controller='ScriptEditorController', style='z-index:99')
+		#ScriptEditor.verticalLayout.minimized(ng-controller='ScriptEditorController', style='z-index:99')
 
 			#scripteditortitle.ui-dialog-titlebar.ui-widget-header.ui-corner-all.ui-helper-clearfix(style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;')
 				.headericon.script
@@ -72,7 +72,7 @@ mixin scripteditor_body
 								ng-hide='guiState.openTab === "properties"', ng-click='call()')
 							input#delete(type='button', value='Delete {{getSingular(guiState.openTab)}}'
 								ng-hide='guiState.openTab === "properties"', ng-click='delete()')
-							input#new(type='button', value='New {{getSingular(guiState.openTab)}}')
+							input#new(type='button', ng-click='new()', value='New {{getSingular(guiState.openTab)}}')
 							input#checkSyntax(type='button', ng-click='checkSyntax(true)', value='Check Code')
 					
 

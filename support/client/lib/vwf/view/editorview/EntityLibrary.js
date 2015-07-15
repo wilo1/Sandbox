@@ -195,13 +195,16 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 
 		$scope.show = function()
 		{
+			$('#EntityLibraryMain').show();
 			$('#EntityLibrary').animate({width: '246px'});
 			$scope.isOpen = true;
 		}
 
 		$scope.hide = function()
 		{
-			$('#EntityLibrary').animate({width: '0px'});
+			$('#EntityLibrary').animate({width: '0px'}, 400, 'swing', function(){
+				$('#EntityLibraryMain').hide();
+			});
 			$scope.isOpen = false;
 		}
 
