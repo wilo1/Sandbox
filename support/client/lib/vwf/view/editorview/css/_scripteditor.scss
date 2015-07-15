@@ -2,30 +2,37 @@
 
 #ScriptEditor
 {
-	height: 400px;
+	&.maximized
+	{
+		@include flex-grow(1);
+	}
+	&:not(.maximized)
+	{
+		height: 400px;
+	}
+
 	overflow: hidden;
 	padding: 0px 0px 0px 0px;
 	background: #111 url(images/ui-bg_hexagon_5_111111_12x10.png) 50% 50% repeat;
 	@include flex-shrink(0);
 
-	#hidescripteditor
+	#scripteditortitle .icon
 	{
+		float: right;
 		text-align: center;
 		line-height: 20px;
 		margin-left: 3px;
-		/* Adding this here because .icon:hover will change it to 2px */
+		padding: 3px;
+		cursor: pointer;
+
+		&:hover {
+			background-color: lightblue;
+		}
 	}
 
-	#maximizescripteditor
+	#ScriptEditorTabs
 	{
-		text-align: center;
-		line-height: 19px;
-		margin-left: 3px;
-		/* Adding this here because .icon:hover will change it to 2px */
-	}
-
-	#ScriptEditorTabs {
-		height: 100%;
+		@include flex-grow(1);
 	}
 
 	.tabs-nav
@@ -66,9 +73,9 @@
 
 	.tabs-panel
 	{
+		@include flex-grow(1);
 		@include display-flex();
 		padding: 4px 0 0 0;
-		height: 100%;
 	}
 
 	.list

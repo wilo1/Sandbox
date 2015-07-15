@@ -116,9 +116,10 @@ define({
 			if(timeout) clearTimeout(timeout);
 			timeout = setTimeout(function()
 			{
-				var canvas = $('#vwf-root > canvas');
+				var viewport = $('#vwf-root');
+				var canvas = $('#index-vwf', viewport);
 				var resolutionScale = _SettingsManager.getKey('resolutionScale');
-				var w = parseInt(canvas.parent().css('width')), h = parseInt(canvas.parent().css('height'));
+				var w = parseInt(viewport.css('width')), h = parseInt(viewport.css('height'));
 
 				canvas.attr('width', w / resolutionScale);
 				canvas.attr('height', h / resolutionScale);
@@ -129,11 +130,20 @@ define({
 	            _dView.getCamera().aspect = w/h;
 	            _dView.getCamera().updateProjectionMatrix()
 	            _dView.windowResized();
-			}, 500);
+
+				var evt = new Event('viewportresize');
+				document.dispatchEvent(evt);
+
+			}, 400);
 		};
 
 		$('#vwf-root > #resizer')[0].contentDocument.defaultView.addEventListener('resize', window._resizeCanvas);
-
+		$('#vwf-root > canvas').on('focusin', function(e){
+			$(this).parent().css({border: '4px ridge #82b8ff'});
+		});
+		$('#vwf-root > canvas').on('focusout', function(e){
+			$(this).parent().css({border: 'none'});
+		});
         
         window.hideTools = function() {
             if (!toolsLoaded) return;
@@ -151,13 +161,13 @@ define({
             $('#index-vwf').css('top', 0 + 'px');
             $('#index-vwf').css('left', 0 + 'px');
              $('#index-vwf').css('border','none');*/
-            _Editor.findcamera().aspect = (parseInt($('#index-vwf').css('width')) / parseInt($('#index-vwf').css('height')));
+            //_Editor.findcamera().aspect = (parseInt($('#index-vwf').css('width')) / parseInt($('#index-vwf').css('height')));
             $('#index-vwf').focus()
-            _Editor.findcamera().updateProjectionMatrix();
+            //_Editor.findcamera().updateProjectionMatrix();
             _Editor.SelectObject(null);
             _Editor.SetSelectMode('none');
             _Editor.hidePeerSelections();
-            $(window).resize();
+            //$(window).resize();
         }
         window.showTools = function() {
             if (!toolsLoaded) return;
@@ -178,11 +188,11 @@ define({
             $('#index-vwf').css('top', $('#smoothmenu1').height() + $('#toolbar').height() + 'px');
             $('#index-vwf').css('height', $(window).height() - ($('#smoothmenu1').height() + $('#toolbar').height() + $('#statusbar').height()) + 'px');
             $('#index-vwf').css('left', parseInt($('#EntityLibrary').css('left')) + $('#EntityLibrary').width());*/
-            _Editor.findcamera().aspect = (parseInt($('#index-vwf').css('width')) / parseInt($('#index-vwf').css('height')));
-            _Editor.findcamera().updateProjectionMatrix();
+            //_Editor.findcamera().aspect = (parseInt($('#index-vwf').css('width')) / parseInt($('#index-vwf').css('height')));
+            //_Editor.findcamera().updateProjectionMatrix();
             _Editor.SetSelectMode('Pick');
             //$('#index-vwf').css('border','');
-            $(window).resize();
+            //$(window).resize();
 
 
         }

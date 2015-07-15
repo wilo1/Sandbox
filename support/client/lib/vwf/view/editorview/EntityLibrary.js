@@ -193,20 +193,6 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 
 		$scope.isOpen = false;
 
-		function sizeWindowTimer()
-		{
-			if (!_Editor.findcamera()) return;
-			_Editor.findcamera().aspect = ($('#index-vwf').width() / $('#index-vwf').height());
-			_Editor.findcamera().updateProjectionMatrix();
-			_ScriptEditor.resize();
-
-			if ($('#index-vwf').offset()) {
-				$('#glyphOverlay').css('position', 'absolute');
-				$('#glyphOverlay').css('left', $('#index-vwf').offset().left);
-				$('#glyphOverlay').css('top', $('#index-vwf').offset().top);
-			}
-		}
-
 		$scope.show = function()
 		{
 			$('#EntityLibrary').animate({width: '246px'});

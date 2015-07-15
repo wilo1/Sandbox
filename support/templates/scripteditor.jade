@@ -23,8 +23,9 @@ mixin scripteditor_body
 				.headericon.script
 				span#scripteditortitletext.ui-dialog-title ScriptEditor 
 					| {{fields.selectedNode ? '- '+(fields.selectedNode.properties.DisplayName || fields.selectedNode.id) : ''}}
-				#maximizescripteditor.icon.glyphicon.glyphicon-chevron-up(style="float:right;margin-right: 20px;")
-				#hidescripteditor.icon.glyphicon.glyphicon-chevron-down(style="float:right;")
+				#maximizescripteditor.icon.glyphicon.glyphicon-chevron-up(ng-hide='maximized', ng-click='maximize()')
+				#unmaximizescripteditor.icon.glyphicon.glyphicon-resize-small(ng-show='maximized', ng-click='unmaximize()')
+				#hidescripteditor.icon.glyphicon.glyphicon-chevron-down(ng-click='hide()')
 
 			#ScriptEditorTabs.verticalLayout
 				//ul

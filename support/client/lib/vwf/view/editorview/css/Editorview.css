@@ -406,7 +406,6 @@
       transition: opactiy 2s; }
 
 #ScriptEditor {
-  height: 400px;
   overflow: hidden;
   padding: 0px 0px 0px 0px;
   background: #111111 url(images/ui-bg_hexagon_5_111111_12x10.png) 50% 50% repeat;
@@ -414,18 +413,27 @@
   -ms-flex-shrink: 0;
   -webkit-flex-shrink: 0;
   flex-shrink: 0; }
-  #ScriptEditor #hidescripteditor {
+  #ScriptEditor.maximized {
+    -moz-flex-grow: 1;
+    -ms-flex: 1 1;
+    -webkit-flex-grow: 1;
+    flex-grow: 1; }
+  #ScriptEditor:not(.maximized) {
+    height: 400px; }
+  #ScriptEditor #scripteditortitle .icon {
+    float: right;
     text-align: center;
     line-height: 20px;
     margin-left: 3px;
-    /* Adding this here because .icon:hover will change it to 2px */ }
-  #ScriptEditor #maximizescripteditor {
-    text-align: center;
-    line-height: 19px;
-    margin-left: 3px;
-    /* Adding this here because .icon:hover will change it to 2px */ }
+    padding: 3px;
+    cursor: pointer; }
+    #ScriptEditor #scripteditortitle .icon:hover {
+      background-color: lightblue; }
   #ScriptEditor #ScriptEditorTabs {
-    height: 100%; }
+    -moz-flex-grow: 1;
+    -ms-flex: 1 1;
+    -webkit-flex-grow: 1;
+    flex-grow: 1; }
   #ScriptEditor .tabs-nav {
     -moz-flex-shrink: 0;
     -ms-flex-shrink: 0;
@@ -452,13 +460,16 @@
     #ScriptEditor .tabs-nav input {
       display: none; }
   #ScriptEditor .tabs-panel {
+    -moz-flex-grow: 1;
+    -ms-flex: 1 1;
+    -webkit-flex-grow: 1;
+    flex-grow: 1;
     display: -webkit-box;
     display: -moz-flex;
     display: -ms-flexbox;
     display: -webkit-flex;
     display: flex;
-    padding: 4px 0 0 0;
-    height: 100%; }
+    padding: 4px 0 0 0; }
   #ScriptEditor .list {
     width: 190px;
     margin-right: 5px;
@@ -719,9 +730,16 @@ input[type="text"]:focus, input[type="password"]:focus {
 #alertify-logs {
   font-size: 2em; }
 
-canvas:focus {
-  border: 4px ridge #82b8ff;
-  box-sizing: border-box; }
+/*canvas:focus {
+	border: 4px ridge #82b8ff;
+	box-sizing: border-box;
+}*/
+#vwf-root.minimized {
+  height: 0;
+  -moz-flex-grow: 0;
+  -ms-flex: 0 0;
+  -webkit-flex-grow: 0;
+  flex-grow: 0; }
 
 .playerlabel {
   cursor: pointer;

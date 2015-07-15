@@ -15,10 +15,15 @@ define(['vwf/view/editorview/angular-app'], function(app)
 				editor.setTheme("ace/theme/monokai");
 				editor.setShowPrintMargin(false);
 				editor.resize();
-				elem[0]._editor = editor;
+				_ScriptEditor._editor = editor;
 
 				$scope.$watch(attrs.disabled, function(newval){
 					editor.setReadOnly(!!newval);
+				});
+
+				$(document).on('viewportresize', function(e){
+					console.log('Viewport resized');
+					editor.resize();
 				});
 
 				editor.on('change', function(){
@@ -505,13 +510,38 @@ define(['vwf/view/editorview/angular-app'], function(app)
 					'events': vwf_view.kernel.deleteEvent.bind(vwf_view.kernel)
 				};
 
-				alertify.confirm('Are you SURE you want to delete "'+$scope.currentList.selected+'" '+$scope.getSingular($scope.guiState.openTab).toLowerCase()+'?',
+				alertify.confirm('Are you SURE you want to delete the "'+$scope.currentList.selected+'" '+$scope.getSingular($scope.guiState.openTab).toLowerCase()+'?',
 					function(ok){
-						if(ok)
+						if(ok){
 							map[ $scope.guiState.openTab ]($scope.fields.selectedNode.id, $scope.currentList.selected);
+							$scope.currentList.selected = '';
+						}
 					}
 				);
 			}
+		}
+
+		$scope.isOpen = function(){
+			return !! parseInt($('#ScriptEditor').css('height'));
+		}
+
+		$scope.show = function(){
+			$('#ScriptEditor').animate({height: 400});
+		}
+		$scope.hide = function(){
+			$('#ScriptEditor').animate({height: 0});
+		}
+
+		$scope.maximized = false;
+		$scope.maximize = function(){
+			$('#vwf-root').addClass('minimized');
+			$('#ScriptEditor').addClass('maximized');
+			$scope.maximized = true;
+		}
+		$scope.unmaximize = function(){
+			$('#vwf-root').removeClass('minimized');
+			$('#ScriptEditor').removeClass('maximized');
+			$scope.maximized = false;
 		}
 
 	}]);
