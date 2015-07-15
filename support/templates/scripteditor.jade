@@ -3,20 +3,6 @@ mixin scripteditor_head
 
 mixin scripteditor_body
 
-		//-
-			#ScriptEditorAbandonChanges.
-				You have are about to load a different script, but you have unsaved changes to this script. Do you want to continue and abandon the changes? This action cannot be undone.
-			#ScriptEditorCreateMethod
-				input#newMethodName(type='text')
-			#ScriptEditorCreateEvent
-				input#newEventName(type='text')
-			#ScriptEditorCreateProperty
-				input#newPropertyName(type='text')
-			#ScriptEditorDeleteMethod Are you sure you want to delete this script? This cannot be undone.
-			#ScriptEditorDeleteProperty Are you sure you want to delete this property? This cannot be undone.
-			#ScriptEditorDeleteEvent Are you sure you want to delete this script? This cannot be undone.
-			#ScriptEditorMessage This script contains syntax errors, and cannot be saved.
-
 		#ScriptEditor.verticalLayout.minimized(ng-controller='ScriptEditorController', style='z-index:99')
 
 			#scripteditortitle.ui-dialog-titlebar.ui-widget-header.ui-corner-all.ui-helper-clearfix(style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;')
@@ -28,11 +14,6 @@ mixin scripteditor_body
 				#hidescripteditor.icon.glyphicon.glyphicon-chevron-down(ng-click='hide()')
 
 			#ScriptEditorTabs.verticalLayout
-				//ul
-					li: a(href="#methods") Methods
-					li: a(href="#events") Events
-					li: a(href="#properties") Properties
-					li: a(href="#options") Options
 				.tabs-nav
 					label(ng-class='{"selected": guiState.openTab === "methods"}')
 						input(type='radio', name='openTab', ng-model='guiState.openTab', value='methods')
@@ -61,7 +42,8 @@ mixin scripteditor_body
 							| {{item.name}}
 							
 					.textinner.verticalLayout
-						ace-code-editor.content(disabled='!guiState.openTab || !currentList.selected', ng-class='{"dirty": dirty[selectedField.id]}')
+						ace-code-editor.content(disabled='fields.selectedNode.id==="index-vwf" || !guiState.openTab || !currentList.selected'
+							ng-class='{"dirty": dirty[selectedField.id]}')
 						.buttonPanel.horizontalLayout
 							input#save(type='button', value='Save {{getSingular(guiState.openTab)}}'
 								ng-disabled='!dirty[selectedField.id]', ng-click='save()')
