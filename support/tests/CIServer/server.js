@@ -1,3 +1,5 @@
+var helper = require('./helper.js');
+
 var async = require("async")
 var http = require("http");
 var path = require("path");
@@ -14,60 +16,30 @@ var CANCELING = 2;
 var NOTSTARTED = 3;
 var status = NOTSTARTED;
 var tests = [];
-var files = [];
+var files = helper.files;
+var findFiles = helper.findFiles;
 
-function findFiles(nextStep, dir) {
-	logger.log("findFiles")
-	var foundFiles;
-	var baseDir = "../client/";
-	var dirList = [];
+var runner = childprocess.fork("runner.js");
+runner.send("run");
 
-	dir = dir ? dir : "";
+runner.on("message", function(nope, yup){
+	console.log("Message!!!: ", nope, yup);
+});
 
-	try {
-		foundFiles = fs.readdirSync(baseDir + dir);
-	} catch (e) {
-		if (nextStep) nextStep();
-		return;
-	}
+runner.on("error", function(a, b){
+	
+	console.log("This is the error: ", a, b);
+});
 
-	//iterate over "foundFiles" and if directory, recursively call findFiles...
-	for (var i = 0; i < foundFiles.length; i++) {
-		if (fs.lstatSync(baseDir + dir + foundFiles[i]).isDirectory())
-			dirList.push(dir + foundFiles[i] + "/");
-
-		else
-			files.push(dir + foundFiles[i]);
-	}
-
-	for (var i = 0; i < dirList.length; i++)
-		findFiles(null, dirList[i]);
-
-	if (nextStep) nextStep();
-};
-
-global.logger = {
-	log: function() {
-		for (var i = 0; i < arguments.length; i++) {
-			var arg = arguments[i];
-			if (arg instanceof Number)
-				this._log += arg + '\n';
-			else if (arg instanceof String)
-				this._log += arg + '\n';
-			else if (arg instanceof Object)
-				this._log += JSON.stringify(arg) + '\n';
-			else if (arg)
-				this._log += arg.toString() + '\n';
-		}
-	},
-	_log: ""
-}
+runner.on("exit", function(a, b){
+	console.log("Runner exited");
+});
 
 function readFiles(nextStep) {
 	logger.log("readFiles")
 	//for each file
 	async.eachSeries(files, function(filename, nextfile) {
-		logger.log(filename)
+		logger.log(filename);
 		//bail out of all tests if canceling
 		if (status == CANCELING) {
 			logger.log("canceling run")
@@ -75,58 +47,27 @@ function readFiles(nextStep) {
 			return;
 		}
 		try {
-			//each test can be a function that returns an array of tests, or a single test
-			delete require.cache["../client/" + filename] // remove so the results are not cached, and the above git pull can update tests
-			var test = require("../client/" + filename);
-			var newTests = null;
-			//the module is a function that returns an array of tests
-			if (test instanceof Function)
-				newTests = test();
-			//the module is a test
-			else if (test.test instanceof Function)
-				newTests = [test]
-			else //the module is a nightwatch style test
-			{
-				var title = Object.keys(test)[0]
-				var newtest = test[title];
-				if (newtest instanceof Function)
-					newTests = [{
-						title: title,
-						test: newtest
-					}]
-			}
+			var newTests = helper.getAllTestData(filename);
 			tests = tests.concat(newTests)
 			for (var i in newTests) {
-				var test = newTests[i]
-				test.filename = filename;
+				var test = helper.createTest(newTests[i].title, filename);
 				var id = test.filename + ":" + test.title;
-				report.tests[id] = {
-					status: "not started",
-					result: null,
-					message: null,
-					title: test.title,
-					filename: test.filename,
-					runs:[]
-				}
+				report.tests[id] = test;
 			}
 		} catch (e) {
-			report.tests[filename] = {
-				status: "test load error",
-				result: null,
-				message: null,
-				title: filename,
-				filename: filename,
-				runs:[]
-			}
-
+			report.tests[filename] = helper.createTest(filename, filename);
+			report.tests[filename].status = "test load error";
 		}
 		nextfile();
 	}, nextStep);
 }
 
-function run_one_test(test, nextTest) {
+function runTest(test, nextTest) {
 
 	var id = test.filename + ":" + test.title;
+	
+	console.log(report.tests[id]);
+	
 	report.tests[id] = {
 		status: "running",
 		result: null,
@@ -154,7 +95,7 @@ function run_one_test(test, nextTest) {
 			},
 			function runTheTest(cb) {
 				test.title = originalTitle ;
-				run_one_test_one_browser(test, options.desiredCapabilities.browserName, report.tests[id], cb)
+				runTest_one_browser(test, options.desiredCapabilities.browserName, report.tests[id], cb)
 			},
 			function closeTheBrowser(cb)
 			{
@@ -172,7 +113,7 @@ function run_one_test(test, nextTest) {
 	})
 }
 
-function run_one_test_one_browser(thistest, browsername, report, next) {
+function runTest_one_browser(thistest, browsername, report, next) {
 
 	//setup reporting data
 	var run = {
@@ -224,24 +165,26 @@ function run_one_test_one_browser(thistest, browsername, report, next) {
 		}, 500)
 	}
 	var timeout = function(e) {
-			//should return false or true
-			logger.log("TIMEOUT")
+		//should return false or true
+		logger.log("TIMEOUT")
 
-			run.status = "timeout";
+		run.status = "timeout";
 
-			run.result = "timeout"
+		run.result = "timeout"
 
-			run.message = e;
-			global.clearTimeout(timeoutID);
-			domain.exit();
-			process.removeListener('uncaughtException', handler);
-			global.setTimeout(function() {
+		run.message = e;
+		global.clearTimeout(timeoutID);
+		domain.exit();
+		process.removeListener('uncaughtException', handler);
+		global.setTimeout(function() {
 
-				next();
-			}, 500)
-		}
-		//	timeoutID = global.setTimeout(timeout, 60 * 1000)
+			next();
+		}, 500)
+	}
+	
+	//	timeoutID = global.setTimeout(timeout, 60 * 1000)
 	process.on('uncaughtException', handler);
+	
 	//the actual test
 	domain.bind(thistest.test)(global.browser, global.testUtils.completeTest(function(success, message) {
 		//should return false or true
@@ -262,83 +205,6 @@ function run_one_test_one_browser(thistest, browsername, report, next) {
 		}, 500)
 
 	}));
-
-
-}
-
-function startup_tests(cb) {
-	status = RUNNING;
-	stdoutLog = "";
-	stderrLog = "";
-	sandbox = null;
-	webdriverio = require('webdriverio');
-	options = {
-		desiredCapabilities: {
-			browserName: 'firefox'
-		}
-	};
-	global.browser = webdriverio.remote(options);
-	console.log(Object.keys(global.browser));
-
-	global.testUtils = require('../utils/testutils');
-	global.testUtils.hookupUtils(browser);
-
-	report.gitLog = "";
-	cb();
-}
-
-function startSandbox(cb) {
-	logger.log("Sandbox start");
-	//start the sandbox server
-	sandbox = childprocess.spawn("node", ["app.js"], {
-		cwd: "../../../"
-	});
-	var startupGood = false;
-	sandbox.stdout.on('data', function(data) {
-		//Wait for startup complete
-		if (data.toString().indexOf("Startup complete") > -1) {
-			startupGood = true;
-			sandbox.removeAllListeners('exit')
-			cb();
-		}
-	})
-	sandbox.on('exit', function(code) {
-		if (sandbox && startupGood == false) {
-			logger.log('sandbox exit without good start')
-			sandbox = null;
-			cb();
-		}
-	});
-}
-
-function startBrowser(cb) {
-	browser.init().then(function() {
-		cb()
-	});
-}
-
-function killSandbox(cb) {
-	logger.log("Sandbox stop");
-	var called = false;
-	if (sandbox) {
-		var timeoutid = setTimeout(function() {
-			called = true;
-			logger.log('exiting calling callback')
-			cb();
-		}, 2000)
-		sandbox.on('exit', function(code) {
-			sandbox = null;
-			if (!called) {
-				clearTimeout(timeoutid)
-				called = true;
-				logger.log('exiting calling callback')
-				cb();
-			}
-		});
-		sandbox.kill();
-	} else {
-		cb()
-	}
 }
 
 function updateAndRunTests(cb2) {
@@ -369,11 +235,14 @@ function updateAndRunTests(cb2) {
 			function findAndRunTests(cb) {
 				logger.log("findAndRunTests")
 				report.tests = {};
-				files = [];
-				tests = [];
+				
+				//Remove all elements from files and tests arrays
+				//files.length = 0;
+				tests.length = 0;
+				
 				async.series([
 
-					findFiles,
+					helper.findFiles,
 					readFiles,
 					function runTests(nextStep) {
 						//for each test in this file
@@ -388,7 +257,7 @@ function updateAndRunTests(cb2) {
 							}
 							logger.log('browser starting')
 							startBrowser(function() {
-								run_one_test(thistest, function() {
+								runTest(thistest, function() {
 									logger.log('browser ending')
 									browser.end()
 									nextTest();
@@ -417,11 +286,13 @@ function updateAndRunTests(cb2) {
 }
 
 function cancel_run(cancelComplete) {
+	cancelComplete();
+	return; 
+	
 	if (status == CANCELING) {
 		logger.log('already canceling')
 		return;
 	}
-	logger.log(status);
 	if (status == RUNNING)
 		status = CANCELING;
 	async.until(function() {
@@ -456,53 +327,46 @@ function gitPull(pullComplete) {
 	});
 };
 
-function quit_and_reload() {
+function quit(done){
 	logger.log("staring run")
 	server._connections = 0;
-	server.close(function() {
-		gitPull(function() {
-			logger.log('restart');
-			global.setTimeout(function() {
-				logger.log('spawn');
-				var child = require('child_process').spawn('node', ['server.js'], {
-					detached: true,
-					stdio: 'ignore'
-				});
-				child.unref();
-				logger.log('close');
-				global.setTimeout(function() {
-					logger.log('killing server');
-					process.kill(process.pid);
-					process.exit();
-				}, 1000);
-			});
-		}, 500)
-	});
+	server.close(done);
 }
 
-function quit_and_restart() {
-	logger.log("staring run")
-	server._connections = 0;
-	server.close(function() {
-		gitPull(function() {
-			logger.log('restart');
-			global.setTimeout(function() {
-				logger.log('spawn');
-				var child = require('child_process').spawn('node', ['server.js', 'start'], {
-					detached: true,
-					stdio: 'ignore'
-				});
-				child.unref();
-				logger.log('close');
-				global.setTimeout(function() {
-					logger.log('killing server');
-					process.kill(process.pid);
-					process.exit();
-				}, 1000);
-			});
-		}, 500)
-	});
+function loadChildProcess(done){
+	var params = this.params ? this.params : ['server.js'];
+	
+	logger.log('restart');
+	global.setTimeout(function() {
+		logger.log('spawn');
+		var child = require('child_process').spawn('node', params, {
+			detached: true,
+			stdio: 'ignore'
+		});
+		child.unref();
+		logger.log('close');
+		done();
+		
+		global.setTimeout(function() {
+			logger.log('killing server');
+			process.kill(process.pid);
+			process.exit();
+		}, 1000);
+	}, 500);
 }
+
+function reload() {
+	//quit, then do a git pull, then (re)load the child process, binding it to a parameters object
+	var paramObj = {params: ['server.js']};
+	async.series([quit, gitPull, loadChildProcess.bind(paramObj)]);
+}
+
+function restart() {
+	//quit, then do a git pull, then (re)start the child process, binding it to a parameters object
+	var paramObj = {params: ['server.js', 'start']};
+	async.series([quit, gitPull, loadChildProcess.bind(paramObj)]);
+}
+
 var server = http.createServer();
 server.on('request', function(request, response) {
 	request.url = decodeURI(request.url);
@@ -523,11 +387,11 @@ server.on('request', function(request, response) {
 	if (request.url == "/runTests") {
 
 		setTimeout(function() {
-			quit_and_restart();
+			restart();
 		}, 5000)
 		response.end();
 		request.connection.destroy();
-		cancel_run(quit_and_restart);
+		cancel_run(restart);
 
 
 	}
@@ -557,9 +421,9 @@ server.on('request', function(request, response) {
 	if (request.url == "/reload") {
 
 		setTimeout(function() {
-			quit_and_reload();
+			reload();
 		}, 5000)
-		cancel_run(quit_and_reload);
+		cancel_run(reload);
 
 	}
 	if (request.url == "/status") {
@@ -569,21 +433,28 @@ server.on('request', function(request, response) {
 		response.end();
 	}
 	if (request.url.indexOf("/runOne") == 0) {
+		logger.log("Awesome stuff..");
 		cancel_run(function() {
 			var tid = request.url.substr(request.url.indexOf('?') + 1)
 			tid = decodeURIComponent(tid)
 			logger.log(tid);
 			response.end();
+			
+			helper.sendCommand(runner, helper.RUN, tid);
 			for (var i in tests) {
 				var tid2 = tests[i].filename + ":" + tests[i].title;
+				
 				if (tid == tid2) {
+					
+					
+					/*
 					status = RUNNING;
 					async.series([
 						startup_tests,
 						startSandbox,
 						startBrowser,
 						function(cb) {
-							run_one_test(tests[i], cb)
+							runTest(tests[i], cb)
 						},
 						function wait(cb) {
 							logger.log('Wait for browser close')
@@ -603,6 +474,7 @@ server.on('request', function(request, response) {
 						status = COMPLETE;
 					});
 					return;
+					*/
 
 				}
 			}
@@ -619,6 +491,6 @@ server.listen(port);
 if (process.argv.indexOf('start') > -1)
 	updateAndRunTests(function() {})
 else
-	findFiles(function() {
+	helper.findFiles(function() {
 		readFiles(function() {})
 	})
