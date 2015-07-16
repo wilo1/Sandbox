@@ -440,7 +440,7 @@ server.on('request', function(request, response) {
 			logger.log(tid);
 			response.end();
 			
-			helper.sendCommand(runner, helper.RUN, tid);
+			helper.sendMessage(runner, helper.command.RUN, tid);
 			for (var i in tests) {
 				var tid2 = tests[i].filename + ":" + tests[i].title;
 				

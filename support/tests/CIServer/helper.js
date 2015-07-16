@@ -1,11 +1,22 @@
 var fs = require('fs');
 
 var exports = module.exports = {
+	DELIMITER: "$$",
+	files: []
+};
+
+exports.command = {
 	RUN: "run",
 	STOP: "stop", 
 	TERMINATE: "terminate",
-	DELIMITER: "$$",
-	files: []
+	STATE: "state",
+	RESULT: "result"
+};
+
+exports.state = {
+	RUNNING: 1,
+	STOPPED: 2,
+	READY: 3
 };
 
 /*
@@ -14,15 +25,19 @@ var exports = module.exports = {
 
 var cacheTests = {};
 var sandbox;
+var webdriverio;
+var is
 
 /*
 * Public Functions
 */
 
-exports.sendCommand = function(runner, command, param){
-	console.log("helper is sending commnad...");
-	runner.send(command + exports.DELIMITER + param);	
-}
+exports.sendMessage = function(runner, command, param){
+	console.log("sending command...");
+	
+	if(param) runner.send(command + exports.DELIMITER + param);	
+	else runner.send(command);	
+};
 
 exports.clearCache = function(){
 	for(filename in cacheTests){
@@ -32,9 +47,9 @@ exports.clearCache = function(){
 			delete cacheTests[filename];
 		}
 	}
-}
+};
 
-exports.getAllTestData = function getAllTestData(filename){	
+exports.getAllTestData = function(filename){	
 	//each test can be a function that returns an array of tests, or a single test
 	if(cacheTests[filename]){
 		return cacheTests[filename];
@@ -101,86 +116,20 @@ exports.findFiles = function(nextStep, dir){
 	findFiles(nextStep, dir)
 };
 
-exports.initAll = function(){
-	
-};
-
-function startup_tests(cb) {
-	status = RUNNING;
-	stdoutLog = "";
-	stderrLog = "";
-	sandbox = null;
-	
-	
+exports.initRunner = function(){
 	webdriverio = require('webdriverio');
-	options = {
+	var options = {
 		desiredCapabilities: {
 			browserName: 'firefox'
 		}
 	};
+	
 	global.browser = webdriverio.remote(options);
 	console.log(Object.keys(global.browser));
 
 	global.testUtils = require('../utils/testutils');
 	global.testUtils.hookupUtils(browser);
-
-	report.gitLog = "";
-	cb();
-}
-
-function startSandbox(cb) {
-	logger.log("Sandbox start");
-	//start the sandbox server
-	sandbox = childprocess.spawn("node", ["app.js"], {
-		cwd: "../../../"
-	});
-	var startupGood = false;
-	sandbox.stdout.on('data', function(data) {
-		//Wait for startup complete
-		if (data.toString().indexOf("Startup complete") > -1) {
-			startupGood = true;
-			sandbox.removeAllListeners('exit')
-			cb();
-		}
-	})
-	sandbox.on('exit', function(code) {
-		if (sandbox && startupGood == false) {
-			logger.log('sandbox exit without good start')
-			sandbox = null;
-			cb();
-		}
-	});
-}
-
-function startBrowser(cb) {
-	browser.init().then(function() {
-		cb()
-	});
-}
-
-function killSandbox(cb) {
-	logger.log("Sandbox stop");
-	var called = false;
-	if (sandbox) {
-		var timeoutid = setTimeout(function() {
-			called = true;
-			logger.log('exiting calling callback')
-			cb();
-		}, 2000)
-		sandbox.on('exit', function(code) {
-			sandbox = null;
-			if (!called) {
-				clearTimeout(timeoutid)
-				called = true;
-				logger.log('exiting calling callback')
-				cb();
-			}
-		});
-		sandbox.kill();
-	} else {
-		cb()
-	}
-}
+};
 
 /*
 * Internal Utility Functions
@@ -215,7 +164,7 @@ function findFiles(nextStep, dir) {
 		findFiles(null, dirList[i]);
 
 	if (nextStep) nextStep();	
-};
+}
 
 /*
 * Global Functions
