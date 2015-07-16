@@ -15,17 +15,25 @@
 	background: #111 url(images/ui-bg_hexagon_5_111111_12x10.png) 50% 50% repeat;
 	@include flex-shrink(0);
 
-	#scripteditortitle .icon
+	#scripteditortitle
 	{
-		float: right;
-		text-align: center;
-		line-height: 20px;
-		margin-left: 3px;
-		padding: 3px;
-		cursor: pointer;
+		padding: 3px 4px;
+		font: 1.5em sans-serif;
+		font-weight: bold;
+		@include flex-shrink(0);
 
-		&:hover {
-			background-color: lightblue;
+		.icon
+		{
+			float: right;
+			text-align: center;
+			line-height: 20px;
+			margin-left: 3px;
+			padding: 3px;
+			cursor: pointer;
+
+			&:hover {
+				background-color: lightblue;
+			}
 		}
 	}
 
@@ -73,7 +81,6 @@
 	.tabs-panel
 	{
 		@include flex-grow(1);
-		@include display-flex();
 		padding: 4px 0 0 0;
 	}
 
@@ -161,25 +168,32 @@
 			position: absolute;
 		}
 
-		.buttonPanel input[type=button]
+		.buttonPanel
 		{
-			background: #222 50% 50% repeat-x;
-			border: 1px solid #444;
-			border-radius: 2px;
+			@include align-items(center);
 
 			font-size: 11px;
 			font-weight: bold;
 			font-family: 'Open Sans', Verdana, Arial, sans-serif;
 			color: #eee;
 
-			margin: 4px;
+			input[type=button]
+			{
+				background: #222 50% 50% repeat-x;
+				border: 1px solid #444;
+				border-radius: 2px;
 
-			&:hover {
-				color: #82b8ff;
-			}
+				font-size: inherit;
+
+				margin: 4px;
+
+				&:hover {
+					color: #82b8ff;
+				}
 			
-			&:disabled, &:disabled:hover {
-				color: grey;
+				&:disabled, &:disabled:hover {
+					color: grey;
+				}
 			}
 		}
 	}

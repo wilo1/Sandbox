@@ -1,7 +1,129 @@
+'use strict';
 
 define(['vwf/view/editorview/angular-app'], function(app)
 {
 	$(document.head).append('<script src="../vwf/view/editorview/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>');
+
+	var methodSuggestions = [
+		{
+			name: 'attached',
+			value: {
+				parameters: [],
+				body: [
+					"// attached is called when the object is hooked up to the scene.",
+					"// Note that this happens after initialize. At this point, you can access the objects parent."
+				].join('\n')
+			}
+		}, {
+			name: 'collision',
+			value: {
+				parameters: ['obstacle', 'data'],
+				body: '// The body has collided with another body. The ID of the node is param 1, collision data in param 2'
+			}
+		}, {
+			name: 'deinitialize',
+			value: {
+				parameters: [],
+				body: [
+					"// Deinitialize is called when the object is being destroyed.",
+					"// Clean up here if your object allocated any resources manually during initialize."
+				].join('\n')
+			}
+		}, {
+			name: 'initialize',
+			value: {
+				parameters: [],
+				body: [
+					"// Initialize is called when the node is constructed.",
+					"// Write code here to setup the object, or hook up event handlers.",
+					"// Note that the object is not yet hooked into the scene - that will happen during the 'Added' event.",
+					"// You cannot access this.parent in this function."
+				].join('\n')
+			}
+		}, {
+			name: 'prerender',
+			value: {
+				parameters: [],
+				body: [
+					"// This function is called at every frame. Don't animate object properties here - that can break syncronization.",
+					"// This can happen because each user might have a different framerate.",
+					"// Most of the time, you should probably be using Tick instead."
+				].join('\n')
+			}
+		}, {
+			name: 'ready',
+			value: {
+				parameters: [],
+				body: '// The scene is now completely loaded. This will fire on each client when the client joins, so it`s not a great place to create objects'
+			}
+		}, {
+			name: 'tick',
+			value: {
+				parameters: [],
+				body: [
+					"// The tick function is called 20 times every second.",
+					"// Write code here to animate over time"
+				].join('\n')
+			}
+		}
+	];
+
+	var eventSuggestions = [
+		{
+			name: 'pointerClick',
+			value: {
+				parameters: ['eventData','nodeData'],
+				body: 'console.log("got here");'
+			}
+		},
+		{
+			name: 'pointerDown',
+			value: {
+				parameters: ['eventData','nodeData'],
+				body: 'console.log("got here");'
+			}
+		},
+		{
+			name: 'pointerMove',
+			value: {
+				parameters: ['eventData','nodeData'],
+				body: 'console.log("got here");'
+			}
+		},
+		{
+			name: 'pointerOut',
+			value: {
+				parameters: ['eventData','nodeData'],
+				body: 'console.log("got here");'
+			}
+		},
+		{
+			name: 'pointerOver',
+			value: {
+				parameters: ['eventData','nodeData'],
+				body: 'console.log("got here");'
+			}
+		},
+		{
+			name: 'pointerUp',
+			value: {
+				parameters: ['eventData','nodeData'],
+				body: 'console.log("got here");'
+			}
+		},
+		{
+			name: 'pointerWheel',
+			value: {
+				parameters: ['eventData','nodeData'],
+				body: 'console.log("got here");'
+			}
+		},
+	];
+
+	/*****************************************************************************
+	 * aceCodeEditor directive
+	 * All of the text editor code is here
+	 ****************************************************************************/
 
 	app.directive('aceCodeEditor', function()
 	{
@@ -20,10 +142,10 @@ define(['vwf/view/editorview/angular-app'], function(app)
 
 				$scope.$watch(attrs.disabled, function(newval){
 					editor.setReadOnly(!!newval);
+					$('.ace_content', elem).css('opacity', newval ? 0.3 : 1);
 				});
 
 				$(document).on('viewportresize', function(e){
-					console.log('Viewport resized');
 					editor.resize();
 				});
 
@@ -33,6 +155,22 @@ define(['vwf/view/editorview/angular-app'], function(app)
 				});
 
 				$scope.sessions = {};
+
+				$scope.$watchGroup(['selectedField','dirty[selectedField.id]'], function(newvals)
+				{
+					if(newvals[0])
+					{
+						if( !$scope.sessions[newvals[0].id] || !newvals[1] ){
+							regenerateBody(newvals[0]);
+						}
+
+						editor.setSession( $scope.sessions[newvals[0].id] );
+						editor.clearSelection();
+					}
+					else {
+						editor.setSession( ace.createEditSession('') );
+					}
+				});
 
 				function regenerateBody(item)
 				{
@@ -60,28 +198,58 @@ define(['vwf/view/editorview/angular-app'], function(app)
 						$scope.sessions[item.id].setMode("ace/mode/javascript");
 				}
 
-				$scope.$watchGroup(['selectedField','dirty[selectedField.id]'], function(newvals)
+				$('textarea.ace_text-input', elem).keydown(function(e)
 				{
-					if(newvals[0])
+					// implement ctrl-s to save
+					if(e.which == 83 && e.ctrlKey == true)
 					{
-						if( !$scope.sessions[newvals[0].id] || !newvals[1] ){
-							regenerateBody(newvals[0]);
-						}
+						e.preventDefault();
+						$scope.save();
+					}
 
-						editor.setSession( $scope.sessions[newvals[0].id] );
-						editor.clearSelection();
-					}
-					else {
-						editor.setSession( ace.createEditSession('') );
-					}
+					// trigger autocomplete
+					/*else if(e.which == 32 && e.ctrlKey == true)
+					{
+						e.preventDefault();
+
+						var cur = editor.getCursorPosition();
+						var session = editor.getSession();
+						var line = session.getLine(cur.row);
+
+						line = /[^\s;(),!]*$/.exec(line)[0];
+
+						var triggerkeyloc = Math.max(line.lastIndexOf('.'), line.lastIndexOf('['));
+						var triggerkey = line[triggerkeyloc];
+						var filter = line.substr(triggerkeyloc + 1);
+						line = line.substring(0, triggerkeyloc);
+						line = line || 'window';
+						triggerkey = triggerkey || '.';
+						//Don't show for lines that have ( or ) (other than the one that triggered the autocomplete) because function calls
+						//might have side effects
+						if (line.indexOf('(') == -1 && line.indexOf('=') == -1) {
+							self.beginAutoComplete(editor, triggerkey, line, filter);
+						}
+					}*/
+
 				});
 
 			}
 		};
 	});
 
+	/***************************************************************************
+	 * ScriptEditorController
+	 * All the business logic, and some of the presentation logic, used to
+	 * drive the script editor is found here.
+	 **************************************************************************/
+
 	app.controller('ScriptEditorController', ['$scope','$timeout', function($scope, $timeout)
 	{
+		/*
+		 * All variables specific to this scope
+		 *
+		 */
+
 		window._ScriptEditor = $scope;
 
 		$scope.guiState = {
@@ -89,6 +257,10 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			showHiddenProperties: false,
 			inheritPrototype: false
 		};
+
+		$scope.dirty = {};
+
+		var methodsDirty = false, eventsDirty = false, propertiesDirty = false, timeoutSet = false;
 
 		$scope.methodList = [];
 		$scope.methodList.selected = '';
@@ -98,6 +270,30 @@ define(['vwf/view/editorview/angular-app'], function(app)
 		$scope.propertyList.selected = '';
 
 		$scope.currentList = [];
+
+		/*
+		 * All watchers, most of them synchronizing derived values
+		 *
+		 * Summary of relevant root-scope values:
+		 * 	fields.selectedNode:
+		 * 		The selected VWF editor node, as determined by _Editor.GetSelectedVWFNode(), and as updated by
+		 * 		the 'selectionChanged' event and the VWF events created/deletedMethod, created/deletedEvent,
+		 * 		initialized/created/satProperty
+		 *
+		 * Summary of derived values:
+		 *	methodList:
+		 *		A sorted array version of fields.selectedNode.methods, with an additional 'selected' property
+		 *	eventList:
+		 *		A sorted array version of fields.selectedNode.events, with an additional 'selected' property
+		 *	propertyList:
+		 *		A sorted array version of fields.selectedNode.properties, with an additional 'selected' property
+		 * 	currentList:
+		 * 		Either methodList, eventList, or propertyList, as determined by the currently open tab
+		 *	currentSuggestions:
+		 *		A sorted list of pseudo-methods/events. Used for the grey items in the method/event list
+		 *	selectedField:
+		 *		The method, event, or property currently being viewed/edited, as determined by currentList.selected
+		 */
 
 		$scope.$watchGroup(['guiState.openTab','methodList','eventList','propertyList'], function(newvals)
 		{
@@ -144,122 +340,49 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			}
 		});
 
-		var methodSuggestions = [
-			{
-				name: 'attached',
-				value: {
-					parameters: [],
-					body: [
-						"// attached is called when the object is hooked up to the scene.",
-						"// Note that this happens after initialize. At this point, you can access the objects parent."
-					].join('\n')
-				}
-			}, {
-				name: 'collision',
-				value: {
-					parameters: ['obstacle', 'data'],
-					body: '// The body has collided with another body. The ID of the node is param 1, collision data in param 2'
-				}
-			}, {
-				name: 'deinitialize',
-				value: {
-					parameters: [],
-					body: [
-						"// Deinitialize is called when the object is being destroyed.",
-						"// Clean up here if your object allocated any resources manually during initialize."
-					].join('\n')
-				}
-			}, {
-				name: 'initialize',
-				value: {
-					parameters: [],
-					body: [
-						"// Initialize is called when the node is constructed.",
-						"// Write code here to setup the object, or hook up event handlers.",
-						"// Note that the object is not yet hooked into the scene - that will happen during the 'Added' event.",
-						"// You cannot access this.parent in this function."
-					].join('\n')
-				}
-			}, {
-				name: 'prerender',
-				value: {
-					parameters: [],
-					body: [
-						"// This function is called at every frame. Don't animate object properties here - that can break syncronization.",
-						"// This can happen because each user might have a different framerate.",
-						"// Most of the time, you should probably be using Tick instead."
-					].join('\n')
-				}
-			}, {
-				name: 'ready',
-				value: {
-					parameters: [],
-					body: '// The scene is now completely loaded. This will fire on each client when the client joins, so it`s not a great place to create objects'
-				}
-			}, {
-				name: 'tick',
-				value: {
-					parameters: [],
-					body: [
-						"// The tick function is called 20 times every second.",
-						"// Write code here to animate over time"
-					].join('\n')
-				}
+		$scope.$watch('fields.selectedNode', function(){
+			$scope.methodList.selected = $scope.eventList.selected = $scope.propertyList.selected = null;
+		});
+
+		$scope.$watch('guiState.inheritPrototype', function(newval){
+			$scope.rebuildLists();
+		});
+
+		$scope.$watchCollection('fields.selectedNode.methods', function(){
+			console.log('methods updated');
+			methodsDirty = true;
+			if(!timeoutSet){
+				timeoutSet = $timeout(function(){
+					$scope.rebuildLists();
+					methodsDirty = eventsDirty = propertiesDirty = timeoutSet = false;
+				});
 			}
-		];
+		});
 
-		var eventSuggestions = [
-			{
-				name: 'pointerClick',
-				value: {
-					parameters: ['eventData','nodeData'],
-					body: 'console.log("got here");'
-				}
-			},
-			{
-				name: 'pointerDown',
-				value: {
-					parameters: ['eventData','nodeData'],
-					body: 'console.log("got here");'
-				}
-			},
-			{
-				name: 'pointerMove',
-				value: {
-					parameters: ['eventData','nodeData'],
-					body: 'console.log("got here");'
-				}
-			},
-			{
-				name: 'pointerOut',
-				value: {
-					parameters: ['eventData','nodeData'],
-					body: 'console.log("got here");'
-				}
-			},
-			{
-				name: 'pointerOver',
-				value: {
-					parameters: ['eventData','nodeData'],
-					body: 'console.log("got here");'
-				}
-			},
-			{
-				name: 'pointerUp',
-				value: {
-					parameters: ['eventData','nodeData'],
-					body: 'console.log("got here");'
-				}
-			},
-			{
-				name: 'pointerWheel',
-				value: {
-					parameters: ['eventData','nodeData'],
-					body: 'console.log("got here");'
-				}
-			},
-		];
+		$scope.$watchCollection('fields.selectedNode.events', function(){
+			console.log('events updated');
+			eventsDirty = true;
+			if(!timeoutSet){
+				timeoutSet = $timeout(function(){
+					$scope.rebuildLists();
+					methodsDirty = eventsDirty = propertiesDirty = timeoutSet = false;
+				});
+			}
+		});
 
+		$scope.$watchCollection('fields.selectedNode.properties', function(){
+			console.log('properties updated');
+			propertiesDirty = true;
+			if(!timeoutSet){
+				timeoutSet = $timeout(function(){
+					$scope.rebuildLists();
+					methodsDirty = eventsDirty = propertiesDirty = timeoutSet = false;
+				});
+			}
+		});
+
+		// Life would be easier if currentList could be an object, but alas.
+		// This function does a name lookup on the given list.
 		$scope.hasField = function(name, list){
 			return list.reduce(
 				function(old,val){ return old || val.name === name; },
@@ -267,10 +390,13 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			);
 		}
 
-		$scope.dirty = {};
+		$scope.hasFieldFilter = function(item){
+			return !$scope.hasField(item.name, $scope.currentList);
+		}
 
-		var methodsDirty = false, eventsDirty = false, propertiesDirty = false, timeoutSet = false;
-
+		// This method regenerates the field lists as needed from the selected node's
+		// "methods", "events", and "properties" objects. Used by the watchers of those
+		// objects above
 		$scope.rebuildLists = function()
 		{
 			var oldMethods = $scope.methodList,
@@ -340,45 +466,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 
 		}
 
-		$scope.$watch('fields.selectedNode', function(){
-			$scope.methodList.selected = $scope.eventList.selected = $scope.propertyList.selected = null;
-		});
-
-		$scope.$watch('guiState.inheritPrototype', function(newval){
-			$scope.rebuildLists();
-		});
-
-		$scope.$watchCollection('fields.selectedNode.methods', function(){
-			console.log('methods updated');
-			methodsDirty = true;
-			if(!timeoutSet){
-				timeoutSet = $timeout(function(){
-					$scope.rebuildLists();
-					methodsDirty = eventsDirty = propertiesDirty = timeoutSet = false;
-				});
-			}
-		});
-		$scope.$watchCollection('fields.selectedNode.events', function(){
-			console.log('events updated');
-			eventsDirty = true;
-			if(!timeoutSet){
-				timeoutSet = $timeout(function(){
-					$scope.rebuildLists();
-					methodsDirty = eventsDirty = propertiesDirty = timeoutSet = false;
-				});
-			}
-		});
-		$scope.$watchCollection('fields.selectedNode.properties', function(){
-			console.log('properties updated');
-			propertiesDirty = true;
-			if(!timeoutSet){
-				timeoutSet = $timeout(function(){
-					$scope.rebuildLists();
-					methodsDirty = eventsDirty = propertiesDirty = timeoutSet = false;
-				});
-			}
-		});
-
+		// simple string formatting
 		$scope.getSingular = function(tabname)
 		{
 			switch(tabname){
@@ -389,6 +477,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			}
 		}
 
+		// determine if the session is capable of editing scripts
 		function checkPermission()
 		{
 			if (!_UserManager.GetCurrentUserName()) {
@@ -407,6 +496,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			return true;
 		}
 
+		// determine if Ace has detected any syntax errors in the current code window
 		$scope.checkSyntax = function(dialog)
 		{
 			var editor = document.querySelector('ace-code-editor')._editor;
@@ -428,9 +518,10 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			return true;
 		}
 
+		// The 'Save Method/Event/Property' click handler
 		$scope.save = function()
 		{
-			if( checkPermission() && $scope.checkSyntax() && $scope.dirty[$scope.selectedField.id] )
+			if( checkPermission() && $scope.checkSyntax() && $scope.dirty[$scope.selectedField.id] && $scope.fields.selectedNode.id !== 'index-vwf' )
 			{
 				var editor = document.querySelector('ace-code-editor')._editor;
 
@@ -492,6 +583,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			}
 		}
 
+		// The 'Discard Changes' click handler
 		$scope.discard = function()
 		{
 			alertify.confirm('Are you SURE you want to discard your unsaved changes?', function(ok){
@@ -502,6 +594,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			});
 		}
 
+		// The 'Call Method/Event' click handler
 		$scope.call = function()
 		{
 			var map = {
@@ -512,6 +605,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			map[ $scope.guiState.openTab ]($scope.fields.selectedNode.id, $scope.currentList.selected);
 		}
 
+		// The 'Delete Method/Event' click handler
 		$scope.delete = function()
 		{
 			if( checkPermission() )
@@ -532,6 +626,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			}
 		}
 
+		// The 'New Method/Event/Property' click handler
 		$scope.new = function()
 		{
 			var idRE = /^\w+$/;
@@ -565,6 +660,9 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			}
 		}
 
+		/*
+		 * Manage the visibility state of the script editor
+		 */
 
 		$scope.isOpen = function(){
 			return !! parseInt($('#ScriptEditor').css('height'));
@@ -602,6 +700,12 @@ define(['vwf/view/editorview/angular-app'], function(app)
 	};
 });
 
+
+
+/**********************************************************************
+ * Everything below this point is legacy unused code, but might be
+ * useful as a guide later, once we reimplement autocomplete.
+ *********************************************************************/
 
 var oldDefine = function() {
 
@@ -994,36 +1098,9 @@ var oldDefine = function() {
 		});
 
 
-		this.eventEditor = ace.edit("eventtext");
-		this.eventEditor.setTheme("ace/theme/monokai");
-		this.eventEditor.getSession().setMode("ace/mode/javascript");
-
-		//route change events to check for autocomplete
-		this.eventEditor.getSession().on('change', function(e) {
-			self.EventChange();
-			self.triggerAutoComplete(self.eventEditor);
-			self.triggerFunctionTip(self.eventEditor);
-		});
-
 		this.methodEditor.setPrintMarginColumn(false);
 		this.methodEditor.setFontSize('15px');
-		this.eventEditor.setPrintMarginColumn(false);
-		this.eventEditor.setFontSize('15px');
-
-		this.propertyEditor = ace.edit("propertytext");
-		this.propertyEditor.setTheme("ace/theme/monokai");
-		this.propertyEditor.getSession().setMode("ace/mode/javascript");
-		this.propertyEditor.setPrintMarginColumn(false);
-		this.propertyEditor.setFontSize('15px');
-
-		//route change events to check for autocomplete
-		this.propertyEditor.getSession().on('change', function(e) {
-			self.PropertyChange();
-			self.triggerAutoComplete(self.propertyEditor);
-		});
-
 		this.methodEditor.keyBinding.origOnCommandKey = this.methodEditor.keyBinding.onCommandKey;
-		this.eventEditor.keyBinding.origOnCommandKey = this.eventEditor.keyBinding.onCommandKey;
 
 
 		//hide or show the function top based on the inputs
@@ -1044,33 +1121,6 @@ var oldDefine = function() {
 
 			var cur = self.methodEditor.getCursorPosition();
 			var session = self.methodEditor.getSession();
-			var line = session.getLine(cur.row);
-			var chr1 = line[cur.column - 1];
-			var chr2 = line[cur.column];
-
-			if (chr2 == ')')
-				$('#FunctionTip').hide();
-
-		});
-
-		//hide or show the function top based on the inputs
-		this.eventEditor.on('change', function(e) {
-
-			//hide if removing an open paren
-			if (e.data.action == "removeText") {
-				if (e.data.text.indexOf('(') != -1)
-					$('#FunctionTip').hide();
-
-			}
-			//hide if inserting a close paren
-			if (e.data.action == "insertText") {
-				if (e.data.text.indexOf(')') != -1)
-					$('#FunctionTip').hide();
-
-			}
-
-			var cur = self.eventEditor.getCursorPosition();
-			var session = self.eventEditor.getSession();
 			var line = session.getLine(cur.row);
 			var chr1 = line[cur.column - 1];
 			var chr2 = line[cur.column];
@@ -1105,94 +1155,6 @@ var oldDefine = function() {
 				this.origOnCommandKey(e, hashId, keyCode);
 
 			}
-			//hide or show the function top based on the inputs
-		this.eventEditor.keyBinding.onCommandKey = function(e, hashId, keyCode) {
-
-
-			var cur = self.eventEditor.getCursorPosition();
-			var session = self.eventEditor.getSession();
-			var line = session.getLine(cur.row);
-			var chr1 = line[cur.column - 1];
-			var chr2 = line[cur.column];
-
-			//hide on up or down arrow	
-			if (keyCode == 38 || keyCode == 40)
-				$('#FunctionTip').hide();
-			//hide when moving cursor beyond start of (
-			if (keyCode == 37) {
-				if (chr1 == '(')
-					$('#FunctionTip').hide();
-			}
-			//hide when moving cursor beyond end of )
-			if (keyCode == 39) {
-				if (chr2 == ')')
-					$('#FunctionTip').hide();
-			}
-
-
-			this.origOnCommandKey(e, hashId, keyCode);
-
-		}
-
-		$('#eventtext textarea.ace_text-input').keydown(function(e) {
-			if (e.which == 83 && e.ctrlKey == true) {
-				e.preventDefault();
-				self.SaveEventClicked();
-			}
-			if (e.which == 32 && e.ctrlKey == true) {
-				e.preventDefault();
-
-				var cur = self.eventEditor.getCursorPosition();
-				var session = self.eventEditor.getSession();
-				var line = session.getLine(cur.row);
-
-
-
-				line = self.filterLine(line);
-
-				var triggerkeyloc = Math.max(line.lastIndexOf('.'), line.lastIndexOf('['));
-				var triggerkey = line[triggerkeyloc];
-				var filter = line.substr(triggerkeyloc + 1);
-				line = line.substring(0, triggerkeyloc);
-				line = line || 'window';
-				triggerkey = triggerkey || '.';
-				//Don't show for lines that have ( or ) (other than the one that triggered the autocomplete) because function calls
-				//might have side effects
-				if (line.indexOf('(') == -1 && line.indexOf('=') == -1) {
-					self.beginAutoComplete(self.eventEditor, triggerkey, line, filter);
-				}
-			}
-		})
-		$('#methodtext textarea.ace_text-input').keydown(function(e) {
-			if (e.which == 83 && e.ctrlKey == true) {
-				e.preventDefault();
-				self.SaveMethodClicked();
-			}
-			if (e.which == 32 && e.ctrlKey == true) {
-				e.preventDefault();
-
-				var cur = self.methodEditor.getCursorPosition();
-				var session = self.methodEditor.getSession();
-				var line = session.getLine(cur.row);
-
-
-
-				line = self.filterLine(line);
-
-				var triggerkeyloc = Math.max(line.lastIndexOf('.'), line.lastIndexOf('['));
-				var triggerkey = line[triggerkeyloc];
-				var filter = line.substr(triggerkeyloc + 1);
-				line = line.substring(0, triggerkeyloc);
-				line = line || 'window';
-				triggerkey = triggerkey || '.';
-				//Don't show for lines that have ( or ) (other than the one that triggered the autocomplete) because function calls
-				//might have side effects
-				if (line.indexOf('(') == -1 && line.indexOf('=') == -1) {
-					self.beginAutoComplete(self.methodEditor, triggerkey, line, filter);
-				}
-			}
-
-		})
 
 		this.filterLine = function(line) {
 
@@ -1227,9 +1189,6 @@ var oldDefine = function() {
 			$('#FunctionTip').hide();
 		});
 
-
-		$('#ScriptEditor').hide();
-		$('#ScriptEditor').css('height', '405px');
 		self.methodEditor.setBehavioursEnabled(false);
 		self.eventEditor.setBehavioursEnabled(false);
 		self.propertyEditor.setBehavioursEnabled(false);

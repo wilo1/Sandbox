@@ -420,15 +420,23 @@
     flex-grow: 1; }
   #ScriptEditor.minimized {
     height: 0; }
-  #ScriptEditor #scripteditortitle .icon {
-    float: right;
-    text-align: center;
-    line-height: 20px;
-    margin-left: 3px;
-    padding: 3px;
-    cursor: pointer; }
-    #ScriptEditor #scripteditortitle .icon:hover {
-      background-color: lightblue; }
+  #ScriptEditor #scripteditortitle {
+    padding: 3px 4px;
+    font: 1.5em sans-serif;
+    font-weight: bold;
+    -moz-flex-shrink: 0;
+    -ms-flex-shrink: 0;
+    -webkit-flex-shrink: 0;
+    flex-shrink: 0; }
+    #ScriptEditor #scripteditortitle .icon {
+      float: right;
+      text-align: center;
+      line-height: 20px;
+      margin-left: 3px;
+      padding: 3px;
+      cursor: pointer; }
+      #ScriptEditor #scripteditortitle .icon:hover {
+        background-color: lightblue; }
   #ScriptEditor #ScriptEditorTabs {
     -moz-flex-grow: 1;
     -ms-flex: 1 1;
@@ -464,11 +472,6 @@
     -ms-flex: 1 1;
     -webkit-flex-grow: 1;
     flex-grow: 1;
-    display: -webkit-box;
-    display: -moz-flex;
-    display: -ms-flexbox;
-    display: -webkit-flex;
-    display: flex;
     padding: 4px 0 0 0; }
   #ScriptEditor .list {
     width: 190px;
@@ -526,19 +529,26 @@
       width: 100%;
       height: 100%;
       position: absolute; }
-    #ScriptEditor .textinner .buttonPanel input[type=button] {
-      background: #222222 50% 50% repeat-x;
-      border: 1px solid #444444;
-      border-radius: 2px;
+    #ScriptEditor .textinner .buttonPanel {
+      -webkit-box-align: center;
+      -moz-align-items: center;
+      -ms-flex-align: center;
+      -webkit-align-items: center;
+      align-items: center;
       font-size: 11px;
       font-weight: bold;
       font-family: "Open Sans", Verdana, Arial, sans-serif;
-      color: #eee;
-      margin: 4px; }
-      #ScriptEditor .textinner .buttonPanel input[type=button]:hover {
-        color: #82b8ff; }
-      #ScriptEditor .textinner .buttonPanel input[type=button]:disabled, #ScriptEditor .textinner .buttonPanel input[type=button]:disabled:hover {
-        color: grey; }
+      color: #eee; }
+      #ScriptEditor .textinner .buttonPanel input[type=button] {
+        background: #222222 50% 50% repeat-x;
+        border: 1px solid #444444;
+        border-radius: 2px;
+        font-size: inherit;
+        margin: 4px; }
+        #ScriptEditor .textinner .buttonPanel input[type=button]:hover {
+          color: #82b8ff; }
+        #ScriptEditor .textinner .buttonPanel input[type=button]:disabled, #ScriptEditor .textinner .buttonPanel input[type=button]:disabled:hover {
+          color: grey; }
   #ScriptEditor #options.tabs-panel {
     -webkit-box-align: flex-start;
     -moz-align-items: flex-start;
