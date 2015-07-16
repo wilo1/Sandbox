@@ -37,32 +37,32 @@ mixin menus_body
 			a#MenuEdit Edit
 			ul
 				li: a#MenuUndo(ng-click='lookUpHandler($event)')
-					.glyphicon.glyphicon-share-alt
+					.glyphicon.glyphicon-share-alt(style='transform: rotateY(180deg);')
 					| Undo (ctrl-z)
 				li: a#MenuRedo(ng-click='lookUpHandler($event)')
 					.glyphicon.glyphicon-share-alt
 					| Redo (ctrl-y)
-				li(style='border-bottom: 3px solid gray')
+				li.divider
 
 				li(ng-class='{"disabled": !selection}')
 					a#MenuCopy(title="Copy the currently selected object(s) to the internal clipboard", ng-click='lookUpHandler($event)')
-						.glyphicon.glyphicon-share-copy
+						.glyphicon.glyphicon-copy
 						| Copy (ctrl-c)
 				li: a#MenuPaste(title="Paste previously copied object(s) from the internal clipboard", ng-click='lookUpHandler($event)')
-					.glyphicon.glyphicon-share-paste
+					.glyphicon.glyphicon-paste
 					| Paste (ctrl-v)
 				li(ng-class='{"disabled": !selection}')
 					a#MenuDuplicate(title="Duplicate currently selected object(s)", ng-click='lookUpHandler($event)')
-						.glyphicon.glyphicon-share-duplicate
+						.glyphicon.glyphicon-duplicate
 						| Duplicate (ctrl-s)
 				li(ng-class='{"disabled": !selection}')
 					a#MenuDelete(title="Delete currently selected object(s)", ng-click='lookUpHandler($event)')
-						.glyphicon.glyphicon-share-trash
+						.glyphicon.glyphicon-trash
 						| Delete (del)
-				li(style='border-bottom: 3px solid gray')
+				li.divider
 
 				li: a#MenuShare(title="Specify which users are authorized to modify the world", ng-click='lookUpHandler($event)')
-					.glyphicon.glyphicon-share-share
+					.glyphicon.glyphicon-share
 					| Set Permissions
 				li
 					a#MenuSelect Select
@@ -95,13 +95,13 @@ mixin menus_body
 						li: a#MenuMulti(title="Enable all transform tools on the currently selected object(s)", ng-click='lookUpHandler($event)')
 							.glyphicon.glyphicon-screenshot
 							| Multi (t)
-						li(style='border-bottom: 3px solid gray')
+						li.divider
 
 						li: a#MenuLocal(title="Present transform tools with respect to selected object's local transform", ng-click='lookUpHandler($event)')
 							| Local Coords
 						li: a#MenuWorld(title="Present transform tools with respect to world (global) coordinates", ng-click='lookUpHandler($event)')
 							| World Coords
-						li(style='border-bottom: 3px solid gray')
+						li.divider
 
 						li
 							a#MenuSnaps Snaps
@@ -110,7 +110,8 @@ mixin menus_body
 								li: a#MenuSnapMedium(title="Transform changes snap in medium increments", ng-click='lookUpHandler($event)') Medium
 								li: a#MenuSnapSmall(title="Transform changes snap in small increments", ng-click='lookUpHandler($event)') Small
 								li: a#MenuSnapOff(title="Turns off transform snapping", ng-click='lookUpHandler($event)') Off
-						li(style='border-bottom: 3px solid gray')
+						li.divider
+
 						li
 							a#ResetTransforms(title="Reset selected object(s) back to the default position, rotation, and scale", ng-click='lookUpHandler($event)')
 								| Reset Transforms
@@ -318,7 +319,7 @@ mixin menus_body
 				li: a#MenuManageAssets(title="Open the Manage Assets dialog", ng-click='lookUpHandler($event)')
 					.glyphicon.glyphicon-cloud
 					| Manage Your Assets
-				li(style='border-bottom: 3px solid gray')
+				li.divider
 
 				li: a#MenuCreateLoadMeshURL(title="Import a mesh hosted on a remote server", ng-click='lookUpHandler($event)')
 					.glyphicon.glyphicon-cloud-download

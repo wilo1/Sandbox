@@ -247,7 +247,7 @@ buildsubheaders: function($, $headers, setting, method, prevobjs){
 	//setting.$mainparent.data('$headers').add($headers);
 	$headers.each(function(){ //loop through each LI header
 		var smoothmenu = ddsmoothmenu;
-		var $curobj=$(this).css({zIndex: $(this).parent('ul').css('z-index')}); //reference current LI header
+		var $curobj=$(this) //.css({zIndex: $(this).parent('ul').css('z-index')}); //reference current LI header
 		var $subul=$curobj.children('ul:eq(0)').css({display:'block'}).data('timers', {}), $parentshadow;
 		method === 'toggle' && $subul.click(smoothmenu.subulpreventemptyclose);
 		var $link = $curobj.children("a:eq(0)").append( //add arrow images
