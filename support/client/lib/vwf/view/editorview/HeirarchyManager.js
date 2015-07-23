@@ -412,7 +412,7 @@ define(function() {
 			var classname = 'glyphicon-triangle-right hierarchyicon';
 			if(node.children.length == 0)
 				classname = " glyphicon-ban-circle hierarchyicondisable";
-			$('#' + parentDiv).append('<div id="' + thisid + 'container' + '" class="hierarchyentry" style="height:1em"><span class="hierarchytoggle glyphicon '+classname+'" id="' + thisid + 'toggle' + '"></span><span class="hierarchyItem" style="" id="' + thisid + '" /><span>');
+			$('#' + parentDiv).append('<div id="' + thisid + 'container' + '" class="hierarchyentry" style="height:1em"><span class="hierarchytoggle glyphicon '+classname+'" id="' + thisid + 'toggle' + '"></span><span class="hierarchyItem" style="" id="' + thisid + '" ></span>');
 			$('#' + thisid + 'toggle').css('cursor', 'pointer');
 			$('#' + thisid + 'toggle').click(function() {
 
