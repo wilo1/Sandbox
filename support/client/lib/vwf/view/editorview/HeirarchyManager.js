@@ -400,7 +400,11 @@ define(function() {
 
 			}
 
-			if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
+			if ($('#sidepanel').data('jsp'))
+			{
+				$('#sidepanel').data('jsp').scrollTo(0,0);
+				$('#sidepanel').data('jsp').reinitialise();
+			}
 		}
 		this.BuildGUI = this.BuildGUI.bind(this);
 		this.BuildGUI = debounce(this.BuildGUI, 250);
