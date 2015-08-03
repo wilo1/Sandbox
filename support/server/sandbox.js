@@ -240,7 +240,7 @@ function startVWF() {
 					{
 						global.configuration.assetAppPath = '/sas';
 
-						var assetServer = require('SandboxAssetServer');
+						var assetServer = require('sandbox-asset-server');
 						app.use(global.configuration.assetAppPath, assetServer({
 							dataDir: datadir,
 							sessionCookieName: 'session',
