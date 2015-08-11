@@ -85,7 +85,7 @@ function promptTest(boot)
 		var noRender = window.location.search && window.location.search.indexOf("norender=true") > -1;
         var settings = localStorage['sandboxPreferences'] && JSON.parse(window.localStorage['sandboxPreferences'])
 		
-        if((!settings || !settings.compatability.satisfied) && !noRender)
+        if((!settings || !settings.compatability || !settings.compatability.satisfied) && !noRender)
         {
             alertify.confirm("It looks like you haven't been here before. It's best if you take the compatability test first. Would you like to test your browser now?",
                 function(ok)
