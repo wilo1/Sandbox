@@ -18,7 +18,7 @@ Features
 Requirements (Server)
 ---------------------
 
-* Node.js v0.12.4 or newer
+* Node.js (v0.12.x)
 * Minimal CPU and memory resources
 
 Requirements (Client)
@@ -50,15 +50,13 @@ Installation (Server)
 
 1. Clone this repository from Github (https://github.com/adlnet/Sandbox)
 
-2. Install [Node.js](https://nodejs.org/) (if not already installed)
-
-	Note: A Node.js v0.8.3 Windows binary is included with the repository, and it is verified to work.
-	Feel free to use this binary instead of installing all of Node.js.
+2. Install [Node.js](http://nodejs.org/dist/latest-v0.12.x/) (if not already installed)
 
 3. Run "npm install" in the project directory
 
 4. (Optional) Download the assets packet found at http://3dr.adlnet.gov/dev/VWFSupportFiles.zip,
 	and extract it to \<datadir\>/, making sure paths are preserved.
+
 5. Run the server: > node app.js
 
 
