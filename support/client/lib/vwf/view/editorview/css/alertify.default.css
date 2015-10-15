@@ -22,7 +22,7 @@
 	}
 	.alertify-button {
 		border-radius: 4px;
-		color: #FFF;
+		color: #20B2AA;
 		font-weight: bold;
 		padding: 6px 15px;
 		text-decoration: none;
@@ -59,7 +59,7 @@
 		.alertify-button-ok,
 		.alertify-button-ok:hover,
 		.alertify-button-ok:focus {
-			background-color: #5CB811;
+			background-color: #20B2AA;
 			border: 1px solid #3B7808;
 		}
 

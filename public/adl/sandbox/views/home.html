@@ -16,10 +16,10 @@
 		body{
 
 			overflow: hidden;
-			background-image: url(./img/background.png);
+			background-image: url(./img/outposts.jpg);
 			background-size: 2220px;
 			background-position-x: 0px;
-			opacity: 0;
+			opacity: 20;
 			font-family: 'Open Sans',sans-serif;
 		}
 		.ActionButtonsmalllabel
@@ -164,6 +164,12 @@ function center()
 <body style="overflow:hidden">
 
 <div id='content' class='bodypanel'>
+<div id="logo1">
+		<a href="/outposts">
+			<div style="display:inline">
+				<img src="/adl/sandbox/img/vwc.png">
+			</div>
+			<div style=" margin-left:10px;margin-top:10px;display:inline;">
 <div id="logo" style="width:100%">
 						{{{branding.logo}}}
 					</div>
@@ -176,16 +182,16 @@ function center()
 		<a class="ActionButton" style="" href="{{root}}/features"><div class="ActionButtonlabel">Features</div><div class="ActionButtonsmalllabel">Learn about system capabilities</div></a>
 		</div>
 		<div class="buttonContainer">
-		<a class="ActionButton" style="" href="{{root}}/demos"><div class="ActionButtonlabel">Demos</div><div class="ActionButtonsmalllabel">See example content</div></a>
+		<a class="ActionButton" style="" href="{{root}}/about"><div class="ActionButtonlabel">About Virtual World Creator </div><div class="ActionButtonsmalllabel">Platform Information</div></a>
 		</div>
 		{{#sessionData}}
 		<div class="buttonContainer">
-		<a class="ActionButton" style="" href="./createNew2/noTemplate"><div class="ActionButtonlabel">Try it!</div><div class="ActionButtonsmalllabel">Build a world</div></a>
+		<a class="ActionButton" style="" href="http://www.wilostar3d.com/contact"><div class="ActionButtonlabel">Enroll Now!</div><div class="ActionButtonsmalllabel">Immersive learning courses and projects for schools and students</div></a>
 		</div>
 		{{/sessionData}}
 		{{^sessionData}}
 		<div class="buttonContainer">
-		<a class="ActionButton" style="" href="./createNotLoggedIn"><div class="ActionButtonlabel">Try it!</div><div class="ActionButtonsmalllabel">Build a world</div></a>
+		<a class="ActionButton" style="" href="http://www.wilostar3d.com/contact"><div class="ActionButtonlabel">Enroll Now!</div><div class="ActionButtonsmalllabel">Immersive learning courses and projects for schools and students</div></a>
 		</div>
 		{{/sessionData}}
 	</div>
@@ -194,14 +200,10 @@ function center()
 	<div class='thinheader'>
 		
 		
-		<a class='thinheaderlink' href='https://github.com/adlnet/sandbox/wiki'>
-			{{#translate}}Docs{{/translate}}
-		</a>
+		
 		
 
-		<a class='thinheaderlink' href='{{root}}/search'>
-			{{#translate}}Worlds{{/translate}} 
-		</a>
+		
 		
 		
 		
@@ -235,17 +237,17 @@ function center()
 	</div>
 
 	<div style="margin-top: 2em;">
-	  <div style="font-size: 11px;
+	  <div style="font-size: 14px;
 margin: auto;
 font-weight: bold;
-color: darkgray;
+color: black;
 background: rgba(5,5,5,.05);
 margin-left: auto;
 width: 56%;
 border-radius: 12px;
 padding: 1em;
-border: 3px solid lightblue;">
-		<div>System Requirements</div>
+border: 6px solid lightblue;">
+		<div>Virtual World Creator System Requirements</div>
 
 		<div><div style='display: inline-block;width: 50px;'>GPU</div><div  style='display: inline-block'>512 MB AMD Radeon HD 3870 / NVIDIA GeForce 8800 GT or better</div></div>
 		<div><div  style='display: inline-block;width: 50px;'>RAM</div><div style='display: inline-block'>4 GB</div></div>

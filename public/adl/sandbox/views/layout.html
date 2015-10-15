@@ -33,7 +33,7 @@
 		#wrapper {display:table;height:100%}
 	</style>
 	<![endif]-->
-    <title>Virtual World Sandbox - Virtual Worlds in your browser</title>
+    <title>Educational Virtual Worlds for K-12</title>
 
 	<script type="text/javascript" src="{{root}}/js/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="{{root}}/js/knockout-2.3.0.js"></script>
@@ -170,7 +170,7 @@
 		
 		{{^sessionData}}
 		<a class='headerA' href='{{root}}/signup'>
-			{{#translate}}Sign up{{/translate}}
+			{{#translate}}Enroll Now{{/translate}}
 		</a>
 		{{/sessionData}}
 		
@@ -200,11 +200,11 @@
 					<div id="logo">
 						<a href="{{root}}">
 							<div style=" float:left;">
-								<img src="{{root}}/img/VWS_Logo.png" />
+								<img src="{{root}}/img/VWS_Logo.jpg" />
 							</div>
 							<div style=" margin-left:10px;margin-top:50px;float:left;">
 								<img src="{{root}}/img/VW_text.png" />
-								<img src="{{root}}/img/Sandbox_text.png" />
+								<img src="{{root}}/img/learnstar.png" />
 							</div>
 						</a>
 					</div>
@@ -218,7 +218,7 @@
 							<a href="{{doc}}">{{#translate}}Docs{{/translate}}</a>
 						{{/doc}}
 						{{^blog}}
-							<a href="http://www.youtube.com/watch?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2&v=aWRQJJnBi5c">{{#translate}}Videos{{/translate}}</a> 			
+							<a href=""">{{#translate}}Videos{{/translate}}</a> 			
 						{{/blog}}
 						{{^doc}}
 							<a href="{{root}}/help">{{#translate}}Help{{/translate}}</a>
@@ -230,14 +230,14 @@
 			{{#home}}
 			<div class="container sliderContainer">
 				<div class="sliderWrapper">
-					<div style="background-image:url('{{root}}/img/huge_terrain.jpg');" class="slide-item slide-item0">
+					<div style="background-image:url('{{root}}/img/image259.jpg');" class="slide-item slide-item0">
 						<div class="pContainer">
 							<p>{{#translate}}No extra plugins needed - just click and go{{/translate}}</p>	
 						</div>
 					</div>
 					<div style="background-image:url('{{root}}/img/huge_town.jpg');" class="slide-item slide-item1">
 						<div class="pContainer">
-							<p>{{#translate}}Advanced scripting controls every aspect of your scenario{{/translate}}</p>
+							<p>{{#translate}}Advanced scripting controls every aspect of your world{{/translate}}</p>
 						</div>	
 					</div>
 					<div style="background-image:url('{{root}}/img/huge_office.jpg');" class="slide-item slide-item2">
@@ -261,16 +261,15 @@
 
 			</div>
 			<div id="footer" class="container">
-				<br/><p>The views expressed on this website in the form of documentation, blog articles, or tutorials do not necessarily represent the views or policies of ADL or the U.S. Government.</p>
+				<br/><p></p>
 
-				<p>Sponsored by the Office of the Under Secretary of Defense for Personnel and Readiness (OUSD P&amp;R).
-				This is an official website of the U.S. Government (c)2014 Advanced Distributed Learning (ADL).</p>
+				<p></p>
 				<a href="{{root}}/test">{{#translate}}Test Browser Support{{/translate}}</a> 
 			</div>
 
 		</div>
 	</div>
-	<a href="https://github.com/adlnet/Sandbox" id="gitBanner"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+	</a>
 	<script type="text/javascript" src="{{root}}/vwf/view/editorview/lib/alertify.min.js"></script>
 </body>
 </html>

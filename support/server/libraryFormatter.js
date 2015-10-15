@@ -41,92 +41,87 @@ function entitiesToLibrary(user, type, res)
 		'permissions!hasPerms': '004',
 		'type!like': mimetype
 	};
+	if( user )
+		qs.user_name = user;
 	if( type === 'texture' )
 		qs.isTexture = 'true';
-	if( !user ){
-		res.json([]);
-	}
-	else
+
+	request({
+		uri: baseUrl+'/assets/by-meta/all-of',
+		qs: qs,
+		json: true
+	}, handleIndex);
+
+	function handleIndex(err, xhr, indexData)
 	{
-		qs.user_name = user;
+		if(err){
+			console.error(err);
+			res.json([]);
+		}
+		else if( !indexData.matches ){
+			console.error('How did we even get here? Cannot populate library');
+			res.json([]);
+		}
+		else
+		{	
+			var metaToGet = Object.keys(indexData.matches || {}).length;
+			var lib = [];
 
-		request({
-			uri: baseUrl+'/assets/by-meta/all-of',
-			qs: qs,
-			json: true
-		}, handleIndex);
-
-		function handleIndex(err, xhr, indexData)
-		{
-			if(err){
-				console.error(err);
-				res.json([]);
+			if(!metaToGet){
+				res.json(lib);
 			}
-			else if( !indexData.matches ){
-				console.error('How did we even get here? Cannot populate library');
-				res.json([]);
-			}
-			else
-			{	
-				var metaToGet = Object.keys(indexData.matches || {}).length;
-				var lib = [];
 
-				if(!metaToGet){
-					res.json(lib);
-				}
+			for(var i in indexData.matches)
+			{
+				fetchMeta(i);
 
-				for(var i in indexData.matches)
+				function fetchMeta(id)
 				{
-					fetchMeta(i);
-
-					function fetchMeta(id)
+					request({
+						uri: baseUrl+'/assets/'+id+'/meta/name+thumbnail',
+						json: true
+					}, populateLib);
+					
+					function populateLib(err,xhr,data)
 					{
-						request({
-							uri: baseUrl+'/assets/'+id+'/meta/name+thumbnail',
-							json: true
-						}, populateLib);
-						
-						function populateLib(err,xhr,data)
+						if(err){
+							console.error('Failed to query asset', id, 'metadata:', err);
+						}
+						else
 						{
-							if(err){
-								console.error('Failed to query asset', id, 'metadata:', err);
-							}
-							else
-							{
-								data.type = indexData.matches[id].type;
+							data.type = indexData.matches[id].type;
 
-								var libitem = {
-									name: data.name || id,
-									url: clientBaseUrl+'/assets/'+id,
-									preview: data.thumbnail ?
-										clientBaseUrl+'/assets/'+id+'/meta/thumbnail'
-										: "./img/VWS_Logo.png",
-									type: type,
-									sourceAssetId: id
+							var libitem = {
+								name: data.name || id,
+								url: clientBaseUrl+'/assets/'+id,
+								preview: data.thumbnail ?
+									clientBaseUrl+'/assets/'+id+'/meta/thumbnail'
+									: "./img/VWS_Logo.png",
+								type: type,
+								sourceAssetId: id
+							};
+
+							var modelType = /^model\/(.+)$/.exec(data.type);
+							if( modelType ){
+								libitem.modelType = 'subDriver/threejs/asset/'+modelType[1];
+								libitem.dropPreview = {
+									'url': libitem.url,
+									'type': libitem.modelType,
+									'transform': [
+										1,0,0,0,
+										0,1,0,0,
+										0,0,1,0,
+										0,0,0,1
+									]
 								};
-
-								var modelType = /^model\/(.+)$/.exec(data.type);
-								if( modelType ){
-									libitem.modelType = 'subDriver/threejs/asset/'+modelType[1];
-									libitem.dropPreview = {
-										'url': libitem.url,
-										'type': libitem.modelType,
-										'transform': [
-											1,0,0,0,
-											0,1,0,0,
-											0,0,1,0,
-											0,0,0,1
-										]
-									};
-								}
-
-								lib.push(libitem);
 							}
 
-							metaToGet--;
-							if(!metaToGet){
-								res.json(lib);
-							}
+							lib.push(libitem);
+						}
+
+						metaToGet--;
+						if(!metaToGet){
+							res.json(lib);
 						}
 					}
 				}

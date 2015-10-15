@@ -60,7 +60,7 @@ function getRoot() {
 
 }
 
-exports.acceptedRoutes = ['about', 'features', 'demos', 'createNotLoggedIn', 'home', 'tools', 'performancetestJavascript', 'performancetestGraphics', 'examples', 'settings', 'restore', 'createNew', 'welcome', 'search', 'forgotPassword', 'editProfile', 'updatePassword', 'test', 'avatar', 'sandbox', 'index', 'create', 'signup', 'login', 'logout', 'edit', 'remove', 'history', 'user', 'worlds', 'admin', 'admin/users', 'admin/worlds', 'admin/edit', 'publish'];
+exports.acceptedRoutes = ['about', 'features', 'demos', 'createNotLoggedIn', 'home', 'tools', 'performancetestJavascript', 'performancetestGraphics', 'examples', 'settings', 'restore', 'createNew', 'welcome', 'search', 'forgotPassword', 'editProfile', 'updatePassword', 'test', 'avatar', 'moreavatar', 'sandbox', 'index', 'create', 'signup', 'login', 'logout', 'edit', 'remove', 'history', 'user', 'worlds', 'admin', 'admin/users', 'admin/worlds', 'admin/edit', 'publish'];
 routesMap = {
     'sandbox': {
         template: 'index'
@@ -141,6 +141,11 @@ routesMap = {
         home: true
     },
     'avatar': {
+        avatar: true,
+        requiresLogin: true,
+		layout: 'plain'
+	},
+		'moreavatar': {
         avatar: true,
         requiresLogin: true,
 		layout: 'plain'

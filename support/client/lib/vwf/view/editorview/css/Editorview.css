@@ -254,7 +254,7 @@ margin-bottom: -4px;
 	
 	#alertify
 	{
-		font-size: 1.7em;
+		font-size: 2.7em;
 		top: 38%;
 	}
 	#alertify-logs
@@ -271,7 +271,7 @@ margin-bottom: -4px;
 	.playerlabel
 	{
 		cursor: pointer;
-  font-size: 1.3em;
+  font-size: 0.625em;
   margin: 1px 5px;
   padding: 3px;
   
@@ -366,7 +366,7 @@ margin-bottom: -4px;
 		max-width: 244px;
 		display: block;
 		background: #404040;
-		font-size: 1.5em;
+		font-size: 2em;
 		color: white;
 		font-family: 'Open Sans',sans-serif;
 		
@@ -377,7 +377,7 @@ margin-bottom: -4px;
 	#ContextMenuName
 	{
 		border-bottom: 1px solid gray;
-		height: 1em;
+		height: 3em;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -432,7 +432,7 @@ margin-bottom: -4px;
 		display: inline-block;
 		margin-bottom: 3px;
 		margin-top: 3px;
-		font-size: 1.2em;
+		font-size: 4em;
 		text-shadow: 1px 1px 3px #AAA;
 	}
 	.nametagname {
@@ -456,7 +456,7 @@ padding: 0px 18px 0px 18px;
 box-sizing: border-box;
 border-radius: 13px;
 
-font-size: 1.5em;
+font-size: 2em;
 font-family: 'Open Sans',sans-serif;
 opacity: .8;
 transition: background 1s, opacity 1s;
@@ -464,7 +464,7 @@ transition: background 1s, opacity 1s;
 .nametag:hover
 {
 	opacity: 1;
-	background: rgb(130, 184, 255);
+	background: rgb(76, 166, 166);
 	box-shadow: 3px 3px 3px rgba(52,52,52,.9) , -3px -3px 3px #77C inset;
 }
 	.glyph
@@ -475,7 +475,7 @@ transition: background 1s, opacity 1s;
 	}
 	.textureChoice:hover
 	{
-		background: #4040A0;
+		background: #4CA6A6;
 		border: 1px inset blue;
 		width: 48px;
 		height: 48px;
@@ -548,14 +548,14 @@ transition: background 1s, opacity 1s;
 		margin-left: 1px;
 		margin-right: 2px;
 		margin-bottom: 2px;
-		background-color:lightblue;
+		background-color:cyan;
 	}
 	.icon:active {
-		background-color: #7B7B7B;
+		background-color: #0d98ba;
 	}
 	.iconselected
 	{
-		background-color: rgb(58, 143, 255);
+		background-color: rgb(13, 152, 186);
 		padding: 2px;
 		
 
@@ -1635,7 +1635,7 @@ top: 62px;
 
 #EntityLibrarySideTab:hover
 {
-	color:rgb(130, 184, 255);
+	color:rgb(17,155,189);
 }
 #EntityLibrarySideTab
 {
@@ -1733,12 +1733,12 @@ margin-bottom: -19px;
 ::-webkit-scrollbar-thumb {
     /* -webkit-border-radius: 5px; */
     /* border-radius: 5px; */
-    background: rgba(82, 132, 199, 1);
+    background: rgba(17, 155, 189, 1);
     /* -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); */ 
     width: 8px;
 }
 ::-webkit-scrollbar-thumb:window-inactive {
-	background: rgba(130, 184, 255,1);
+	background: rgba(17, 155, 189,1);
 }
 
 
@@ -1882,7 +1882,7 @@ width: 5em;
 }
 .playerlabel .glyphicon:hover
 {
-	color:rgb(132, 185, 255);
+	color:rgb(17, 155, 189);
 }
 .playerlabelname
 {
@@ -1978,7 +1978,7 @@ margin: 2px;
 #entitylibrarytray
 {
 	  margin-left: 1em;
-  font-size: 22.2px;
+  font-size: 20.2px;
   vertical-align: middle;
   margin-bottom: 6px;
   cursor: pointer;
@@ -1986,7 +1986,7 @@ margin: 2px;
 
 #entitylibrarytray:hover
 {
-	color:rgb(132, 185, 255);
+	color:rgb(17, 155, 189);
 }
 
 ul li a .glyphicon {
@@ -2012,7 +2012,7 @@ ul li a .glyphicon {
 
 .sidetab-editor-title
 {
-	background: #3a8fff  50% 50% repeat-x;
+	background:#119bbd 50% 50% repeat-x;
 	cursor: pointer
 
 ;
@@ -2026,7 +2026,7 @@ ul li a .glyphicon {
 
 .sidetab-editor-title-active
 {
-background: #3a8fff  50% 50% repeat-x;}
+background: #119bbd  50% 50% repeat-x;}
 
 .sidetab-editor-title-active:hover
 {

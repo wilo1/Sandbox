@@ -258,7 +258,7 @@ define([], function() {
             this.addPropertyEditorDialog(nodeid, propertyName, $('#' + propertyName + nodeid), 'check');
         }
         this.createNodeID = function(parentdiv, nodeid, propertyName, displayName) {
-            $(parentdiv).append('<div style="margin-top: 5px;margin-bottom: 5px;"><div >' + displayName + '</div><input type="text" style="  background-color: black; color: white; display: inline;width: 50%;padding: 2px;border-radius: 5px;font-weight: bold;" id="' + nodeid + propertyName + '" nodename="' + nodeid + '" propname="' + propertyName + '"/><div  style="float:right;width:45%;height:2em" id="' + nodeid + propertyName + 'button" nodename="' + nodeid + '" propname="' + propertyName + '"/></div><div style="clear:both" />');
+            $(parentdiv).append('<div style="margin-top: 3px;margin-bottom: 3px;"><div >' + displayName + '</div><input type="text" style="  background-color: black; color: white; display: inline;width: 50%;padding: 2px;border-radius: 3px;font-weight: bold;" id="' + nodeid + propertyName + '" nodename="' + nodeid + '" propname="' + propertyName + '"/><div  style="float:right;width:45%;height:1.5em" id="' + nodeid + propertyName + 'button" nodename="' + nodeid + '" propname="' + propertyName + '"/></div><div style="clear:both" />');
             $('#' + nodeid + propertyName).attr('disabled', 'disabled');
             $('#' + nodeid + propertyName + 'button').button({
                 label: 'Choose Node'
@@ -631,10 +631,10 @@ define([], function() {
                 lastTab = $("#physicsaccordion").accordion('option', 'active');
             } catch (e) {}
             $("#"+this.contentID).empty();
-           // $("#"+this.contentID).append("<div id='PhysicsEditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='sidetab-editor-title-active sidetab-editor-title ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Physics</span></div>");
+           // $("#"+this.contentID).append("<div id='PhysicsEditortitle' style = 'padding:3px 4px 3px 4px;font:,1.5em sans-serif;font-weight: bold;' class='sidetab-editor-title-active sidetab-editor-title ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Physics</span></div>");
 
             //$('#PhysicsEditortitle').prepend('<div class="headericon material" />');
-            $("#"+this.contentID).append('<div id="physicsaccordion" style="height:100%;overflow:hidden"><h3><a href="#">Physics Basics</a>   </h3>   <div id="PhysicsBasicSettings"> </div></div>');
+            $("#"+this.contentID).append('<div id="physicsaccordion" style="height:100%;overflow:hidden"><h3><a href="#">Physics Info</a>   </h3>   <div id="PhysicsBasicSettings"> </div></div>');
            
 
             this.inSetup = true;

@@ -39,7 +39,8 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
 			.toggleClass('disabled', loggedIn);
 		$('#MenuLogOut').parent()
 			.toggleClass('disabled', !loggedIn);
-		$('#MenuShareWorld').parent()
+		
+$('#MenuShareWorld').parent()
 			.toggleClass('disabled', isExample);
 		$('#SetThumbnail').parent()
 			.toggleClass('disabled', isExample || !userIsOwner);
@@ -114,7 +115,7 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
                 mainmenuid: "smoothmenu1", //menu DIV id
                 orientation: 'h', //Horizontal or vertical menu: Set to "h" or "v"
                 classname: 'ddsmoothmenu', //class added to menu's outer DIV
-                //customtheme: ["#1c5a80", "#18374a"],
+                //customtheme: ["#7BD0DC", "#18374a"],
                 contentsource: "markup", //"markup" or ["container_id", "path_to_menu_file"]
                 method: 'hover'
             });
@@ -587,7 +588,9 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
     
     
             $('#MenuHelpBrowse').click(function(e) {
-                window.open('http://sandboxdocs.readthedocs.org/en/latest/', '_blank');
+               
+				window.open ('https://wilostar3d.adobeconnect.com/is', "mywindow","location=1,status=1,scrollbars=1, width=100,height=600");
+
             });
             $('#MenuHelpAbout').click(function(e) {
                 $('#NotifierAlertMessage').dialog('open');

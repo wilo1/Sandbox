@@ -56,7 +56,7 @@ define(function() {
         $(document.body).append("<div id='EntityLibrary'></div>")
         $('#EntityLibrary').append("<div id='EntityLibrarySideTab'>Library</div>");
         $('#EntityLibrary').append("<div id='EntityLibraryMain'></div>");
-        $('#EntityLibraryMain').append("<div id='entitylibrarytitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span id='entitylibrarytitletext' class='ui-dialog-title' id='ui-dialog-title-Players'>Content Libraries</span></div>");
+        $('#EntityLibraryMain').append("<div id='entitylibrarytitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span id='entitylibrarytitletext' class='ui-dialog-title' id='ui-dialog-title-Players'>VW Creator Libraries</span></div>");
 
         $('#entitylibrarytitle').append('<div id="entitylibrarytray" class="glyphicon glyphicon-align-justify" />');
         $('#entitylibrarytitle').append('<a id="entitylibraryclose" href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button" style="display: inline-block;float: right;"><span class="ui-icon ui-icon-closethick">close</span></a>');
@@ -68,11 +68,7 @@ define(function() {
         $('#entitylibrarytray').click(function() {
                 
                
-                alertify.prompt('Enter the URL for an asset library',function(ok,val)
-                {
-                    if(ok)
-                        self.addLibrary(val,val);
-                });
+                
         })
         $('#entitylibraryclose').click(function(){
             EntityLibrary.hide();
@@ -94,16 +90,16 @@ define(function() {
                         //for every asset in every library, setup the gui
                         for (var curAsset in libs[i].library)
                         {
-                            var j = (libs[i].library[curAsset].name || curAsset) + GUID();
+                            var j = libs[i].library[curAsset].name || curAsset;
 
                             $('#library' + ToSafeID(i)).append('<div  class = "libraryAsset">' +
                                 '<img id = "asset' + ToSafeID(i) + ToSafeID(j) + '" src="' + libs[i].library[curAsset].preview + '" draggable=true></img>' +
-                                '<div>' + libs[i].library[curAsset].name || curAsset + '</div>' +
+                                '<div>' + j + '</div>' +
                                 '</div>'
                             );
                             (function(i1, j1,k) {
 
-                                $("#asset" + ToSafeID(i1) + ToSafeID(k)).on('click',function(evt)
+                                $("#asset" + ToSafeID(i1) + ToSafeID(j1.name ||k)).on('click',function(evt)
                                 {
 
                                     
@@ -111,7 +107,7 @@ define(function() {
 
                                 });
 
-                                $("#asset" + ToSafeID(i1) + ToSafeID(k)).on('dragstart', function(evt) {
+                                $("#asset" + ToSafeID(i1) + ToSafeID(j1.name || k)).on('dragstart', function(evt) {
 
 
                                     var dragIcon = document.createElement('img');

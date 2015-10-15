@@ -3,7 +3,7 @@ html, body{
 	background-color:#f4f4f4;
 	height: 100%;
 	color: #555;
-	background-image: url('../img/back.png')
+	background-image: url('http://www.immersivek12.com:3000/outposts/img/outposts.jpg')
 }
 
 .worldSmallSearch{
@@ -79,7 +79,7 @@ ul{
 }
 
 .avatarchoice:hover {
-	border-color: green;
+	border-color: teal;
 }
 
 .avatarchoice {
@@ -158,7 +158,7 @@ height:315px;
 
 #header{
 	width: 100%;
-	background-color: #4F89AA;
+	background-color: #10a6a6;
 	border-bottom: 1px solid #3784B9;
 	height: 25px;
 	clear:both;
@@ -214,7 +214,7 @@ height:315px;
 	height:100px;
 	width:100%;
 	overflow:visible;
-	background-image: url('../img/grid.png');
+	background-image: url('../img/grid2.png');
 }
 #pageLogo h1, #pageLogo h2{
 
@@ -238,7 +238,7 @@ text-align:left;
 	border-bottom:1px solid #EBEBEB;
 	position:relative;
 	padding: 0;
-	border-top: 1px solid #84A0C4;
+	border-top: 1px solid #EBEBEB;
 	box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.25);
 	padding-bottom: 30.7%;
 	
@@ -277,7 +277,7 @@ text-align:left;
 }
 
 .slide-item p{
-	font-size: 30px;
+	font-size: 18px;
 	color: #eee;
 	text-shadow: 0 1px 1px #5C5D5F;
 	text-align: right;

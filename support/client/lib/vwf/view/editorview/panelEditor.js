@@ -27,7 +27,7 @@ define([],
                 $('#' + this.iconID).addClass('headericon');
                 $('#' + this.iconID).addClass(this.icon);
                 $('#' + this.rootID).append("<div id='" + this.contentID + "''></div");
-                $('#' + this.contentID).attr('style', '  color: white;background: url(vwf/view/editorview/css//images/ui-bg_hexagon_5_111111_12x10.png) 50% 50% repeat rgb(36, 32, 32);');
+                $('#' + this.contentID).attr('style', '  color: white;background: url(vwf/view/editorview/css//images/ui-bg_hexagon_5_111111_12x10.png) 50% 50% repeat rgb(17,155,189);');
                 var self = this;
                 $('#' + this.titleID).click(function() {
                     if (self.isOpen())

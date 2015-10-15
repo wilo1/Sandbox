@@ -436,8 +436,7 @@ face.prototype.intersect1 = function(p, d, opts) {
     crossProduct(h, d, this.e2);
     a = innerProduct(this.e1, h);
 
-    //looks like this number needs tuning.... what is minimum Javascript eplison?
-    if (a > -0.00000001 && a < 0.00000001) {
+    if (a > -0.00001 && a < 0.00001) {
 
         return null;
     }
@@ -1441,8 +1440,8 @@ THREE.Geometry.prototype.BuildRayTraceAccelerationStructure = function() {
 
     var denPerCm3 = this.faces.length / volCm3;
 
-    if (denPerCm3 > .1 && this.faces.length > OCTMaxFaces) {
-        console.warn('Mesh density is greater than one poly per cubic centimeter. This is insane. Bailing out of octree generation');
+    if (denPerCm3 > .001 && this.faces.length > OCTMaxFaces) {
+        //console.warn('Mesh density is greater than one poly per cubic centimeter. This is insane. Bailing out of octree generation');
         this.RayTraceAccelerationStructure = buildFaceListFromBounds(bounds);
         return;
     }

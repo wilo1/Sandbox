@@ -308,9 +308,9 @@ define(["vwf/view/editorview/Editor"], function(Editor) {
         }
 
         $('#ModelLibrary').dialog({
-            title: 'Search 3DR',
+            title: 'Search VWC Model Library',
             autoOpen: false,
-            maxHeight: 400,
+            maxHeight: 600,
             maxWidth: 750,
             width: 750,
             height: 'auto',
@@ -332,9 +332,9 @@ define(["vwf/view/editorview/Editor"], function(Editor) {
         $('#ModelDetails').dialog({
             title: 'Model Details',
             autoOpen: false,
-            maxHeight: 400,
-            maxWidth: 400,
-            width: 400,
+            maxHeight: 600,
+            maxWidth: 600,
+            width: 600,
             height: 'auto',
             resizable: false,
             position: 'center',
@@ -359,7 +359,7 @@ define(["vwf/view/editorview/Editor"], function(Editor) {
                 }
             }
         });
-        $('#ModelLibrary').append("<div style='margin-top: 2em;color: grey;font-size: 0.8em;'>This interface allows you to load 3D models from a library of content. This content will be created at the center of your viewport. Type a search term in the box above. Click on thumbnails to display additional data about the objects. If you wish to upload content, please visit the <a target='new' href='http://3dr.adlnet.gov'>ADL 3D Repository</a>. Here, you can upload assets to be included in this virtual world. Be careful to mark your content as publically accessable, as this system can only load public content at this time.</div>");
+        $('#ModelLibrary').append("<div style='margin-top: 3em;color: white;font-size: 2em;'>Search for models to use in your virtual world! Refer to the search keywords in your course to search for related themed models to use in your project.</div>");
         this.currentPage = 0;
         this.pageLength = 42;
         this.Results = [];

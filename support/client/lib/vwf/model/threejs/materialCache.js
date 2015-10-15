@@ -605,7 +605,7 @@ function MaterialCache() {
                 }
 
             }
-            if (currentmat.reflectivity && window.vwf_view) {
+            if (currentmat.reflectivity) {
                 var sky = vwf_view.kernel.kernel.callMethod(vwf.application(), 'getSkyMat')
                 if (sky) {
                     currentmat.envMap = sky.uniforms.texture.value;
@@ -738,7 +738,7 @@ function MaterialCache() {
                 }
 
             }
-            if (currentmat.reflectivity && window.vwf_view) {
+            if (currentmat.reflectivity) {
                 var sky = vwf_view.kernel.kernel.callMethod(vwf.application(), 'getSkyMat')
                 if (sky) {
                     currentmat.envMap = sky.uniforms.texture.value;
@@ -878,7 +878,7 @@ function MaterialCache() {
                 }
 
             }
-            if (currentmat.reflectivity && window.vwf_view) {
+            if (currentmat.reflectivity) {
                 var sky = vwf_view.kernel.kernel.callMethod(vwf.application(), 'getSkyMat')
                 if (sky) {
                     currentmat.envMap = sky.uniforms.texture.value;
@@ -1138,18 +1138,6 @@ function MaterialCache() {
         }
         this.getDefForMaterial = function(currentmat) {
             try {
-
-
-                if(currentmat instanceof THREE.MeshFaceMaterial)
-                {
-                    var def = [];
-                    for(var i in currentmat.materials)
-                    {
-                        def[i] = this.getDefForMaterial(currentmat.materials[i]);
-                    }
-                    return def;
-                }
-
 
                 var value = {};
                 value.color = {}

@@ -1,5 +1,5 @@
 .ddsmoothmenu{
-font: 12px 'Open Sans';
+font: 18px 'Open Sans';
 background: #424242; /*background of menu bar (default state)*/
 width: 100%;
 
@@ -51,18 +51,18 @@ color: white;
 }
 
 .ddsmoothmenu ul li a.selected{ /*CSS class that's dynamically added to the currently active menu items' LI A element*/
-background: rgb(113, 157, 221); 
+background: rgb(17,155,189); 
 color: white;
 }
 
 .ddsmoothmenu ul li a:hover{
-background: rgb(113, 157, 221); /*background of menu items during onmouseover (hover state)*/
+background: rgb(17,155,189); /*background of menu items during onmouseover (hover state)*/
 color: white;
 }
 
 
 .ddsmoothmenu ul li a:active{
-background-color: #7B7B7B; /*background of menu items during active (mouse down state)*/
+background-color: #119BBD; /*background of menu items during active (mouse down state)*/
 }
 	
 /*1st sub level menu*/
@@ -87,8 +87,8 @@ top: 0;
 
 /* Sub level menu links style */
 .ddsmoothmenu ul li ul li a{
-font: normal 13px 'Open Sans';
-width: 160px; /*width of sub menus*/
+font: normal 16px 'Open Sans';
+width: 180px; /*width of sub menus*/
 padding: 5px 6px 2px 9px;
 margin: 0;
 border-top-width: 0;

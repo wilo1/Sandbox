@@ -118,8 +118,7 @@ define({
         function createSeperator() {
             $('#toolbar').append('<div class="seperator" />');
         }
-        createIcon('logout', 'MenuLogIn', 'Log In');
-        createIcon('login', 'MenuLogOut', 'Log Out');
+       
         createSeperator();
         createIcon('undo', 'MenuUndo', 'Undo (ctrl-z)');
         createIcon('redo', 'MenuRedo', 'Redo (ctrl-y)');
@@ -160,7 +159,7 @@ define({
 
         createIcon('script', 'MenuScriptEditor', 'Show Script Editor Window', true);
 
-        createIcon('models', 'MenuModels', 'Show Model Library Window');
+        
 
         for (var i in toolbarButtons) {
             if (toolbarButtons[i].requiresSelection)
