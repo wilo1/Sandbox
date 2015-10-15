@@ -21,3 +21,4 @@ config.json
 *.orig
 .sass-cache
 configserver.json
+assets/database.sqlite
